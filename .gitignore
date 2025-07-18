@@ -1,0 +1,18 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.env
+.vscode/launch.json
+.vscode/settings.json
+
+# Project specific file 
+example.py
+work*
+

@@ -1,0 +1,29 @@
+[project]
+name = "brightcove_async"
+version = "0.1.0"
+description = "An asynchronous client for the Brightcove API."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.12.14",
+    "aiolimiter>=1.2.1",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "tenacity>=9.1.2",
+]
+
+
+[dependency-groups]
+dev = [
+    "datamodel-code-generator>=0.31.2",
+    "mypy>=1.17.0",
+    "pre-commit>=4.2.0",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+]
+
+[tool.mypy]
+plugins = [
+  "pydantic.mypy"
+]
+
