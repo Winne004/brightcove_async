@@ -11,7 +11,6 @@ jobs:
 
     environment: pypi
     permissions:
-      # IMPORTANT: this permission is mandatory for Trusted Publishing
       id-token: write
 
     steps:
