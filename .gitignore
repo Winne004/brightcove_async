@@ -14,5 +14,5 @@ wheels/
 
 # Project specific file 
 example.py
-work*
+work*.py
 
