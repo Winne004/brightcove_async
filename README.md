@@ -47,33 +47,17 @@ if __name__ == "__main__":
 
 ### Authentication
 
-`brightcove_async` handles OAuth2 token management automatically. Pass your Brightcove client credentials and account ID when creating the client instance.
-
-### Examples
-
-#### Get Video by ID
-
-```python
-video = await client.videos.get(video_id="12345")
-print(video)
-```
-
-#### Upload a Video
-
-```python
-upload_url = await client.videos.create_upload_url()
-# ... use upload_url to upload video file
-```
-
-#### List Playlists
-
-```python
-playlists = await client.playlists.list()
+`brightcove_async` handles OAuth2 token management automatically. The easiest way to do this is to set the following environmental variables: 
+```bash
+export CLIENT_ID="your_client_id"
+export CLIENT_SECRET="your_client_secret"
 ```
 
 ## API Coverage
 
 - [x] Videos - In progress 
+- [x] Analytics - In progress 
+- [x] Syndication - In progress 
 
 ## Documentation
 
