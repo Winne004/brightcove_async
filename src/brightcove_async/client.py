@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import ClassVar, Self, cast
 
 import aiohttp
@@ -63,19 +65,17 @@ class BrightcoveClient:
 
     @property
     def cms(self) -> CMS:
-        return cast("CMS", self._get_service("cms", self._cms_base_url))
+        return cast(CMS, self._get_service("cms", self._cms_base_url))
 
     @property
     def syndication(self) -> Syndication:
         return cast(
-            "Syndication", self._get_service("syndication", self._syndication_base_url)
+            Syndication, self._get_service("syndication", self._syndication_base_url)
         )
 
     @property
     def analytics(self) -> Analytics:
-        return cast(
-            "Analytics", self._get_service("analytics", self._analytics_base_url)
-        )
+        return cast(Analytics, self._get_service("analytics", self._analytics_base_url))
 
     async def __aenter__(self) -> Self:
         if self._session is None:
