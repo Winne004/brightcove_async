@@ -9,6 +9,8 @@ jobs:
     name: python
     runs-on: ubuntu-latest
 
+    if: github.event.release.target_commitish == 'main'
+
     environment: pypi
     permissions:
       id-token: write
