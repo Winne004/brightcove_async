@@ -9,7 +9,7 @@ jobs:
     name: python
     runs-on: ubuntu-latest
 
-    if: github.event.release.target_commitish == 'main'
+    if: github.ref == 'refs/heads/main'
 
     environment: pypi
     permissions:
