@@ -9,6 +9,8 @@ jobs:
     name: python
     runs-on: ubuntu-latest
 
+    if: github.ref == 'refs/heads/main'
+
     environment: pypi
     permissions:
       id-token: write
