@@ -27,3 +27,5 @@ plugins = [
   "pydantic.mypy"
 ]
 
+[tool.uv]
+package = true
