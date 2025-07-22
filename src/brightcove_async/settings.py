@@ -1,4 +1,4 @@
-from attr import dataclass
+from dataclasses import dataclass
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings
 
