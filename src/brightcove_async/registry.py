@@ -5,17 +5,7 @@ from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
 from brightcove_async.services.syndication import Syndication
-from brightcove_async.settings import BrightcoveBaseAPIConfig
-
-
-@dataclass
-class ServiceConfig:
-    cls: type[Base]
-    base_url: str
-    requests_per_second: int = 10
-    kwargs: dict | None = None
-
-
+from brightcove_async.settings import BrightcoveBaseAPIConfig, ServiceConfig
 def build_service_registry(config: BrightcoveBaseAPIConfig) -> dict[str, ServiceConfig]:
     return {
         "cms": ServiceConfig(
