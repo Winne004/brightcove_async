@@ -22,10 +22,11 @@ class DynamicIngest(Base):
     async def ingest_videos_and_assets(
         self,
         account_id: str,
+        video_id: str,
         video_or_asset_data: IngestMediaAssetbody,
     ) -> IngestMediaAssetResponse:
         return await self.fetch_data(
-            endpoint=f"{self.base_url}{account_id}/videos",
+            endpoint=f"{self.base_url}{account_id}/videos/{video_id}/ingest-requests",
             model=IngestMediaAssetResponse,
             method="POST",
             json=video_or_asset_data,
