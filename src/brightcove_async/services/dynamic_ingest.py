@@ -2,6 +2,7 @@ import aiohttp
 
 from brightcove_async.protocols import OAuthClientProtocol
 from brightcove_async.schemas.dynamic_ingest_model import (
+    GetS3UrlsResponse,
     IngestMediaAssetbody,
     IngestMediaAssetResponse,
 )
@@ -28,4 +29,16 @@ class DynamicIngest(Base):
             model=IngestMediaAssetResponse,
             method="POST",
             json=video_or_asset_data,
+        )
+
+    async def get_temporary_s3_urls(
+        self,
+        account_id: str,
+        source_name: str,
+    ) -> GetS3UrlsResponse:
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}{account_id}/videos/{{video_id}}/upload-urls/{source_name}",
+            model=GetS3UrlsResponse,
+            method="GET",
+            params={"source_name": source_name},
         )
