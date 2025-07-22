@@ -16,13 +16,13 @@ class Variant(Enum):
 
 class Masters(BaseModel):
     url: Optional[str] = Field(
-        None, description="URL for the audio file **Dynamic Delivery only**"
+        default=None, description="URL for the audio file **Dynamic Delivery only**"
     )
     language: Optional[str] = Field(
-        None,
+        default=None,
         description="Language code for the audio track from the subtags in https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry (default can be set for the account by contacting Brightcove Support) **Dynamic Delivery only**",
     )
     variant: Optional[Variant] = Field(
-        None,
+        default=None,
         description="the type of audio track (default can be set for the account by contacting Brightcove Support) **Dynamic Delivery only**",
     )

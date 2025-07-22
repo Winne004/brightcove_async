@@ -4,37 +4,43 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 from pydantic import BaseModel, Field
 
 
 class CustomField(BaseModel):
-    description: Optional[str] = Field(
-        None, description="description (instruction for user)"
+    description: str | None = Field(
+        default=None,
+        description="description (instruction for user)",
     )
-    display_name: Optional[str] = Field(None, description="display name")
-    enum_values: Optional[List[str]] = Field(
-        None, description="array of string values for select type fields"
+    display_name: str | None = Field(default=None, description="display name")
+    enum_values: list[str] | None = Field(
+        default=None,
+        description="array of string values for select type fields",
     )
-    id: Optional[str] = Field(
-        None,
+    id: str | None = Field(
+        default=None,
         description="data name for the field (used to access it in searches, etc.)",
     )
-    required: Optional[bool] = Field(
-        False, description="whether field must have a value before video can be active"
+    required: bool | None = Field(
+        default=False,
+        description="whether field must have a value before video can be active",
     )
-    type: Optional[str] = Field(None, description="custom field type (enum or string)")
+    type: str | None = Field(
+        default=None,
+        description="custom field type (enum or string)",
+    )
 
 
 class StandardField(BaseModel):
-    description: Optional[str] = Field(
-        None, description="description (instruction for user)"
+    description: str | None = Field(
+        default=None,
+        description="description (instruction for user)",
     )
-    id: Optional[str] = Field(
-        None,
+    id: str | None = Field(
+        default=None,
         description="data name for the field (used to access it in searches, etc.)",
     )
-    required: Optional[bool] = Field(
-        None, description="whether field must have a value before video can be active"
+    required: bool | None = Field(
+        default=None,
+        description="whether field must have a value before video can be active",
     )

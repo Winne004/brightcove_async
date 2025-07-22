@@ -50,43 +50,43 @@ class IngestMediaAssetResponse(BaseModel):
 class IngestMediaAssetbody(BaseModel):
     master: Optional[Master] = None
     forensic_watermarking: Optional[bool] = Field(
-        False,
+        default=False,
         description="Whether forensic watermarks should be added to video renditions - if you set it to `true` the account must be enabled for forensic watermarking, or the field will be ignored - see **[Overview: Forensic Watermarking](/general/overview-forensic-watermarking.html) for more details**",
         examples=[True],
     )
     forensic_watermarking_stub_mode: Optional[bool] = Field(
-        False,
+        default=False,
         description="Whether **visible** forensic watermarks should be added to video renditions - if you set it to `true` the account must be enabled for forensic watermarking, and the `forensic_watermarking` field must also be set to `true` - see **[Overview: Forensic Watermarking](/general/overview-forensic-watermarking.html) for more details**\n\nVisible watermarks should be used only for testing integrations, to ensure that forensic watermarks have been successfully added to the video (use a video at least 10 minutes long). Once verification is complete, they must be removed by submitting a new ingest request to retranscode the video - `forensic_watermarking_stub_mode` must be set to `false` on the retranscode request.",
         examples=[True],
     )
     profile: Optional[str] = Field(
-        None,
+        default=None,
         description="ingest profile to use for transcoding; if absent, account default profile will be used",
         examples=["multi-platform-standard-static"],
     )
     priority: Optional[Priority] = Field(
-        None,
+        default=None,
         description="Priority queueing allows the user to add a `priority` flag to an ingest request. The allowable values for `priority` are `low` and `normal` . Any other value will cause the request to be rejected with a 422 error code. When the user doesn't specify any priority, the default value of `normal` is used. Priority queuing is available for Dynamic Delivery ingest only. Here is a brief description of how Priority Queueing changes how jobs are processed from the queue:\n\n1. If there are no queued jobs and there is capacity to run a job, then the job is run immediately. This applies to both low and normal priority jobs.\n2. If there is is no capacity for another job to run, the job is queued.\n3. If there are jobs in the queue, then any new jobs are also queued. This means that a new job can't start before queued jobs.\n4. When there is capacity to run another job and there are queued jobs, a job is taken from the queue:\n  - If there are ANY normal priority jobs in the queue, the oldest normal priority job will be picked.\n  - If there are NO normal priority jobs in the queue, then the oldest low priority job will be picked.\n5. Normal and Low priority jobs are treated the same for how many running jobs there can be. The total number of jobs processing, whatever their priority, is limited to 100 per account.\n6. There are separate quotas for how many normal and low priority jobs can be queued.",
     )
     text_tracks: Optional[List[TextTracks]] = Field(
-        None, description="array of text_track maps"
+        default=None, description="array of text_track maps"
     )
     transcriptions: Optional[List[Transcripts]] = Field(
-        None, description="array of auto captions to be generated"
+        default=None, description="array of auto captions to be generated"
     )
     audio_tracks: Optional[AudioTracks] = None
     images: Optional[List[Image]] = Field(
-        None, description="array of images (Dynamic Delivery Only)"
+        default=None, description="array of images (Dynamic Delivery Only)"
     )
     poster: Optional[Poster] = None
     thumbnail: Optional[Thumbnail] = None
     capture_images: Optional[bool] = Field(
-        None,
+        default=None,
         alias="capture-images",
         description="whether poster and thumbnail should be captured during transcoding; defaults to `true` if the the profile has image renditions, `false` if it does not",
     )
     callbacks: Optional[List[str]] = Field(
-        None,
+        default=None,
         description="array of URLs that notifications should be sent to",
         examples=[["https://solutions.brightcove.com/bcls/di-api/di-callbacks.php"]],
     )
@@ -102,33 +102,33 @@ class Variant(Enum):
 
 class AudioTrack(BaseModel):
     language: str | None = Field(
-        None,
+        default=None,
         description="Language code for the muxed in audio from the subtags in (https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) (default can be set for the account by contacting Brightcove Support) **Dynamic Delivery only**",
     )
     variant: Variant | None = Field(
-        None,
+        default=None,
         description="the type of audio track for the muxed in audio - generally `main` **Dynamic Delivery only**",
     )
 
 
 class Master(BaseModel):
     url: str | None = Field(
-        None,
+        default=None,
         description="URL for the video source; required except for re-transcoding where a digital master has been archived, or you are adding images or text tracks to an existing video",
         examples=[
             "https://support.brightcove.com/test-assets/audio/celtic_lullaby.m4a",
         ],
     )
     use_archived_master: bool | None = Field(
-        False,
+        default=False,
         description="For retranscode requests, will use the archived master if set to true; if set to false, you must also include the url for the source video",
     )
     late_binding_type: str | None = Field(
-        None,
+        default=None,
         description="The process of associating progressive MP4 renditions with a video after it has been ingested, Late binding allows you to add or modify MP4 renditions to a video without having to entirely retranscode the video (https://apis.support.brightcove.com/dynamic-ingest/ingest-guides/requesting-late-binding.html#use_cases)",
     )
     audio_tracks: list[AudioTrack] | None = Field(
-        None,
+        default=None,
         description="Language code for the **muxed in** audio from the subtags in (https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) (default can be set for the account by contacting Brightcove Support) **Dynamic Delivery only**",
         examples=[[{"language": "en", "variant": "main"}]],
     )
@@ -157,17 +157,17 @@ class TextTracks(BaseModel):
         Kind.captions,
         description="how the vtt file is meant to be used",
     )
-    label: str | None = Field(None, description="user-readable title")
+    label: str | None = Field(default=None, description="user-readable title")
     default: bool | None = Field(
-        False,
+        default=False,
         description="sets the default language for captions/subtitles",
     )
     status: Status | None = Field(
-        None,
+        default=None,
         description="The status of the text tracks - `published` or `draft` (use `draft` if you want the text tracks added but not yet available to users - `status` can be updated using the CMS API if you need to)",
     )
     embed_closed_caption: bool | None = Field(
-        False,
+        default=False,
         description="whether to embed the text tracks in MP4 renditions as 608 embedded captions",
     )
 
@@ -225,11 +225,11 @@ class VariantModel(Enum):
 
 class InputAudioTrack(BaseModel):
     language: Language | None = Field(
-        None,
+        default=None,
         description="BCP-47 style language code for the text tracks (en-US, fr-FR, es-ES, etc.)",
     )
     variant: VariantModel | None = Field(
-        None,
+        default=None,
         description="Specifies the variant to use.",
     )
 
@@ -280,15 +280,15 @@ class Srclang(Enum):
 
 class Transcript(BaseModel):
     autodetect: bool | None = Field(
-        None,
+        default=None,
         description="`true` to auto-detect language from audio source.\n`false`  to use srclang specifying the audio language.\n\n**Note:**\n  - If `autodetect` is set to `true`, `srclang` must **not** be present\n  - If `autodetect` is set to `false`, and `srclang` is not present, the request will fail",
     )
     default: bool | None = Field(
-        False,
+        default=False,
         description="If true, srclang should be ignored and we will get captions for main audio, and the language will be determined from audio.",
     )
     input_audio_track: InputAudioTrack | None = Field(
-        None,
+        default=None,
         description="Defines the audio to extract the captions. Composed by language and variant (both required).",
     )
     kind: KindModel | None = Field(
@@ -296,19 +296,19 @@ class Transcript(BaseModel):
         description="The kind of output to generate - for auto captions requests, if `kind` is `transcripts`, both captions and a transcript will be generated. For ingestion requests (including a `url`) the transcript will be ingested.",
     )
     label: str | None = Field(
-        None,
+        default=None,
         description="user-readable title - defaults to the BCP-47 style language code",
     )
     srclang: Srclang | None = Field(
-        None,
+        default=None,
         description="BCP-47 style language code for the text tracks (en-US, fr-FR, es-ES, etc.)",
     )
     status: Status | None = Field(
-        None,
+        default=None,
         description="The status of the text tracks - `published` or `draft` (use `draft` if you want the text tracks added but not yet available to users - `status` can be updated using the CMS API if you need to)",
     )
     url: str | None = Field(
-        None,
+        default=None,
         description="The URL where a transcript file is located. Must be included in the `kind` is `transcripts`. Must <strong>not</strong> be included if the `kind` is `captions`.",
     )
 
@@ -334,14 +334,14 @@ class Transcripts(RootModel[list[Transcript]]):
 
 class Poster(BaseModel):
     url: str = Field(..., description="URL for the video poster image")
-    height: float | None = Field(None, description="pixel height of the image")
-    width: float | None = Field(None, description="pixel width of the image")
+    height: float | None = Field(default=None, description="pixel height of the image")
+    width: float | None = Field(default=None, description="pixel width of the image")
 
 
 class Thumbnail(BaseModel):
     url: str = Field(..., description="URL for the video thumbnail image")
-    height: float | None = Field(None, description="pixel height of the image")
-    width: float | None = Field(None, description="pixel width of the image")
+    height: float | None = Field(default=None, description="pixel height of the image")
+    width: float | None = Field(default=None, description="pixel width of the image")
 
 
 class VariantModel1(Enum):
@@ -361,13 +361,13 @@ class Label(Enum):
 class Image(BaseModel):
     url: str = Field(..., description="URL for the image")
     language: str | None = Field(
-        None,
+        default=None,
         description="Language code for the image from the subtags in https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry (default can be set for the account by contacting Brightcove Support)",
     )
     variant: VariantModel1 = Field(..., description="the type of image")
     label: Label | None = None
-    height: float | None = Field(None, description="pixel height of the image")
-    width: float | None = Field(None, description="pixel width of the image")
+    height: float | None = Field(default=None, description="pixel height of the image")
+    width: float | None = Field(default=None, description="pixel width of the image")
 
 
 class AudioTracks(BaseModel):
@@ -376,6 +376,6 @@ class AudioTracks(BaseModel):
         description="whether to replace existing audio tracks or add the new ones",
     )
     masters: list[audioTracks.Masters] | None = Field(
-        None,
+        default=None,
         description="array of audio track objects **Dynamic Delivery only**",
     )
