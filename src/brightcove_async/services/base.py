@@ -1,9 +1,7 @@
-from __future__ import annotations
-
+import logging
 from abc import ABC
 from http import HTTPStatus
-import logging
-from typing import TYPE_CHECKING, TypeVar
+from typing import TypeVar
 
 import aiohttp
 from aiolimiter import AsyncLimiter
@@ -15,8 +13,8 @@ from tenacity import (
     wait_exponential,
 )
 
-if TYPE_CHECKING:
-    from brightcove_async.protocols import OAuthClientProtocol
+from brightcove_async.exceptions import BrightcoveAuthError
+from brightcove_async.protocols import OAuthClientProtocol
 
 T = TypeVar("T", bound=BaseModel)
 logger = logging.getLogger(__name__)
@@ -67,10 +65,10 @@ class Base(ABC):
 
     @retry(
         retry=retry_if_exception_type(
-            (aiohttp.ClientConnectionError),
+            (aiohttp.ClientConnectionError, BrightcoveAuthError),
         ),
-        wait=wait_exponential(multiplier=1, min=1, max=3),  # exponential backoff
-        stop=stop_after_attempt(5),  # up to 5 retries
+        wait=wait_exponential(multiplier=1, min=1, max=3),
+        stop=stop_after_attempt(5),
     )
     async def fetch_data(
         self,
@@ -80,14 +78,15 @@ class Base(ABC):
         params: dict | None = None,
         headers: dict | None = None,
         json: BaseModel | None = None,
-        _retried: bool = False,
     ) -> T:
         if headers is None:
             headers = await self._oauth.headers
 
         body = (
             json.model_dump(
-                exclude_none=True, exclude_unset=True, exclude_defaults=True
+                exclude_none=True,
+                exclude_unset=True,
+                exclude_defaults=True,
             )
             if json
             else None
@@ -106,21 +105,10 @@ class Base(ABC):
             try:
                 response.raise_for_status()
             except aiohttp.ClientResponseError as e:
-                if HTTPStatus(e.status) == HTTPStatus.UNAUTHORIZED and not _retried:
-                    headers = await self._oauth.headers
-                    return await self.fetch_data(
-                        endpoint,
-                        model,
-                        method,
-                        params,
-                        headers,
-                        json,
-                        _retried=True,
-                    )
-                logger.error(
-                    f"Error fetching data from {endpoint}: {HTTPStatus(e.status)} - {e.message}"
-                )
-                raise
+                if HTTPStatus(e.status) == HTTPStatus.UNAUTHORIZED:
+                    raise BrightcoveAuthError(
+                        "Authentication failed. Please check your credentials.",
+                    ) from e
 
             json_data = await response.json()
             return model.model_validate(json_data, strict=False)
