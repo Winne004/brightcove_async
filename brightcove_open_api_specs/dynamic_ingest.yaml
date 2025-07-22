@@ -1,0 +1,763 @@
+openapi: 3.0.3
+x-bc-implicit-head: true
+x-bc-implicit-options: true
+x-bc-upstream: 'https://backend_server'
+info:
+  title: Dynamic Ingest API Reference
+  description: |-
+    Reference for the Brightcove Dynamic Ingest API, used to add videos, images, and captions to your media library, and to replace existing media assets.
+
+    **NOTE THAT BEFORE YOU INGEST A NEW VIDEO, YOU MUST FIRST MAKE A [CREATE VIDEO REQUEST](/cms/references/reference.html#operation/CreateVideo).**
+
+
+    To test API requests, you can use our <a href="/getting-started/concepts-testing-tools-brightcove-apis.html" target="_blank">API Testing Tools</a>
+
+    For additional in-depth guides to features of the API, see the **[general documentation](/dynamic-ingest/)**.
+
+    **Base URL**: https://ingest.api.brightcove.com
+  version: 1.0.0
+  x-bc-access: public
+servers:
+  - url: 'https://ingest.api.brightcove.com'
+    variables: {}
+paths:
+  '/v1/accounts/{{account_id}}/videos/{{video_id}}/ingest-requests':
+    post:
+      tags:
+        - Ingest
+      summary: Ingest Videos and Assets
+      description: >-
+        Ingests a video, images, and/or text track (WebVTT files) and adds them
+        to your media library. NOTE that before you ingest a new video, you must
+        first make a Create Video request.
+      operationId: AccountsVideosIngestRequestsByAccountIdAndVideoIdPost
+      security:
+        - BC_OAuth2:
+          - video-cloud/video/all
+          - video-cloud/ingest-profiles/profile/read
+          - video-cloud/ingest-profiles/account/read
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/video_id'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        description: >-
+          Uploads a video, images, and/or text track (WebVTT files) and adds them to your media library. NOTE that before you ingest a new video, you must first make a Create Video request.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestMediaAssetbody'
+        required: true
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                description: '200'
+                $ref: '#/components/schemas/IngestMediaAssetResponse'
+        '400':
+          description: |-
+            PROFILE: Unable to find profile by name
+            NOT_SUBMITTED: Unable to submit job, please try again later
+            NO_SUCH_VIDEO: Unable to find the referenced video
+            NO_SOURCE: Unable to find a source to use
+            CDN_CREDENTIALS: Unable to fetch CDN credentials
+            BAD_CALLBACKS: Callbacks were not in expected format
+            BAD_REQUEST: Unable to parse request body.
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials were correct for the access token
+        '403':
+          description: >-
+            DYNAMIC_DELIVERY_NOT_ALLOWED: This account is not enabled for
+            Dynamic Delivery, but a Dynamic Delivery profile was specified.
+
+            CONTEXT_AWARE_ENCODING_NOT_ALLOWED: This account is not enabled for
+            Context Aware Encoding, but a Context Aware Encoding profile was
+            specified.
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '422':
+          description: |-
+            [One of the following:]
+            * MALFORMED_SOURCE_URL: source url is malformed.
+
+            * BAD_PROTOCOL_SOURCE_URL: source url uses a unsupported protocol.
+
+            * EXCEED_MAXIMUM_VTT_SOURCES: vtt sources exceed the maximum size.
+
+            * INVALID_VTT_KIND: vtt kind is invalid.
+
+            * CONSTRAINT_VIOLATION: capture-image is not allowed if an image
+            source is provided.
+
+            * UNPROCESSABLE_ENTITY: request data contains some unprocessable
+            entity.
+
+            * INPUT_SIZE_EXCEEDED: Unprocessable content.
+        '429':
+          description: >-
+            RATE_LIMIT_EXCEEDED: Dynamic Ingest job not created. Reduce the number of concurrent jobs for this account before trying again. This error has been logged
+        '500':
+          description: |-
+            [One of the following:]
+            * SUBMISSION_FAILURE: Unable to submit job please try again later.
+            * INTERNAL_ERROR: Internal error, please try again later
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  '/v1/accounts/{{account_id}}/videos/{{video_id}}/upload-urls/{source_name}':
+    get:
+      tags:
+        - Ingest
+      summary: Get Temporary S3 URLs to Upload Videos
+      description: >-
+        Get temporary S3 URLs to upload source files for ingestion into Video Cloud. See Source File Upload for more information. NOTE that before you ingest a new video, you must first make a Create Video request.
+      operationId: AccountsVideosUploadUrlsSourceNameByAccountIdAndVideoIdGet
+      security:
+        - BC_OAuth2:
+          - video-cloud/upload-urls/read
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/video_id'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/source_name'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                description: '200'
+                $ref: '#/components/schemas/GetS3UrlsResponse'
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials were correct for the access token
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '429':
+          description: >-
+            RATE_LIMIT_EXCEEDED: Dynamic Ingest job not created. Reduce the number of concurrent jobs for this account before trying again. This error has been logged
+        '500':
+          description: 'INTERNAL_ERROR: Internal error, please try again later '
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+components:
+  parameters:
+    account_id:
+      name: account_id
+      in: path
+      description: Video Cloud account ID.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    video_id:
+      name: video_id
+      in: path
+      description: >-
+        Video Cloud video ID; if this is a new video ingest, the ID will be the one returned by the Create Video request
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: number
+    source_name:
+      name: source_name
+      in: path
+      description: >-
+        the video source filename - the name should not contain any URL-reserved characters such as ?, &amp;, # or spaces
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Content-Type:
+      name: Content-Type
+      in: header
+      description: 'Content-Type: application/json'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Authorization:
+      name: Authorization
+      in: header
+      description: >-
+        'Authorization: Bearer access_token (see [Getting Access Tokens](/oauth/guides/getting-access-tokens.html))'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+  schemas:
+    GetS3UrlsResponse:
+      title: Get S3 URLs Response
+      required:
+        - bucket
+        - object_key
+        - access_key_id
+        - secret_access_key
+        - session_token
+        - SignedUrl
+        - ApiRequestUrl
+      type: object
+      properties:
+        bucket:
+          type: string
+          description: the S3 bucket name
+        object_key:
+          type: string
+          description: >-
+            the access key used for authenticating the upload request (used for multipart uploads)
+        access_key_id:
+          type: string
+          description: >-
+            the access key used for authenticating the upload request (used for multipart uploads)
+        secret_access_key:
+          type: string
+          description: >-
+            the secret access key used for authenticating the upload request (used for multipart uploads)
+        session_token:
+          type: string
+          description: >-
+            the secret access key used for authenticating the upload request (used for multipart uploads)
+        SignedUrl:
+          type: string
+          description: >-
+            this is a shorthand S3 url that you can PUT your source file(s) to if you have relatively small videos and are not implementing multipart upload
+        ApiRequestUrl:
+          type: string
+          description: >-
+            this is the URL you will include in your Dynamic Ingest POST request for the Master url or url for the image/text_tracks assets
+      example: {
+          "bucket": "ingestion-upload-production",
+          "object_key": "57838016001/67909129001/c7e6f28b-9057-4616-a7aa-66a0eb836236/greatblueheron.mp4",
+          "access_key_id": "ASIA25ESRNXKNDUXGJ",
+          "secret_access_key": "lV1OPGGND6UCVWuv8SUT4/ZS1S+L2Z6BczCpN",
+          "session_token": "FQoGZXIvYXdzED0aDOnOYmTbUrX3yXd0myKMA3IZ9c7JcbytrkUohtpgI79977txHHgVME4YQKvdUQ895uQu9JEHqU8QXGu+2b9QUx6C2X34t5Jg9n0E0OMVPDJDHy3wj7rARVM7Uc1ha/W8ikYFErZdqrxAh/dEpNqcAM/ZZ682cCXjfzNBZLq55cD/nHDKxWBPJquq1w1mDoech83y1jE1Sb2PparQT7kjc6w/unnqcIfW6nX3bCUW6STOsvvDkxYuyPliQnI+PiuPq3TCuiVS1giRK0sc80/VPn4dJLFNA2xopUoY86zhM/PCUPp3/MtKaWVeTVhk3/lsPoNdBPUAOLdRVO+JtUyxW8x/4vZd1DrXtdByGXdt6pBoMmLm6jFOOMl6HGjhSjl8t8vwPckvr+6z/kSaqw/NzvXz7yAMF5OKkZsa1KUQN9+SSTwHhy6Zm9AZED4mBNXPxwnxJDaeFp51idwiyo3KGZT0TpZdKGm5xrUPcpmWnoOd/G8tKAERO8j7BhkOPP3zOpDrmGW6u3xXmLn3KWBzhjs07oLaluBQkZaUVijrjrbcBQ==",
+          "signed_url": "https://ingestion-upload-production.s3.amazonaws.com/57838016001/67909129001/c7e6f28b-9057-4616-a7aa-66a0eb836236/greatblueheron.mp4?AWSAccessKeyId=AKIAJZKRHWBFMCPPA&Expires=1536088299&Signature=GD2g7CTz2wLFYnaw33KbocDiXmA%3D",
+          "api_request_url": "https://ingestion-upload-production.s3.amazonaws.com/57838016001/67909129001/c7e6f28b-9057-4616-a7aa-66a0eb836236/greatblueheron.mp4"
+        }
+    IngestMediaAssetbody:
+      title: Ingest Media Asset Body
+      type: object
+      properties:
+        master:
+          $ref: '#/components/schemas/IngestMediaAssetbody.master'
+        forensic_watermarking:
+          type: boolean
+          description: >-
+           Whether forensic watermarks should be added to video renditions - if you set it to `true` the account must be enabled for forensic watermarking, or the field will be ignored - see **[Overview: Forensic Watermarking](/general/overview-forensic-watermarking.html) for more details**
+          default: false
+          example: true
+        forensic_watermarking_stub_mode:
+          type: boolean
+          description: |-
+            Whether **visible** forensic watermarks should be added to video renditions - if you set it to `true` the account must be enabled for forensic watermarking, and the `forensic_watermarking` field must also be set to `true` - see **[Overview: Forensic Watermarking](/general/overview-forensic-watermarking.html) for more details**
+
+            Visible watermarks should be used only for testing integrations, to ensure that forensic watermarks have been successfully added to the video (use a video at least 10 minutes long). Once verification is complete, they must be removed by submitting a new ingest request to retranscode the video - `forensic_watermarking_stub_mode` must be set to `false` on the retranscode request.
+          default: false
+          example: true
+        profile:
+          type: string
+          description: >-
+            ingest profile to use for transcoding; if absent, account default
+            profile will be used
+          example: multi-platform-standard-static
+        priority:
+          type: string
+          description: |-
+            Priority queueing allows the user to add a `priority` flag to an ingest request. The allowable values for `priority` are `low` and `normal` . Any other value will cause the request to be rejected with a 422 error code. When the user doesn't specify any priority, the default value of `normal` is used. Priority queuing is available for Dynamic Delivery ingest only. Here is a brief description of how Priority Queueing changes how jobs are processed from the queue:
+
+            1. If there are no queued jobs and there is capacity to run a job, then the job is run immediately. This applies to both low and normal priority jobs.
+            2. If there is is no capacity for another job to run, the job is queued.
+            3. If there are jobs in the queue, then any new jobs are also queued. This means that a new job can't start before queued jobs.
+            4. When there is capacity to run another job and there are queued jobs, a job is taken from the queue:
+              - If there are ANY normal priority jobs in the queue, the oldest normal priority job will be picked.
+              - If there are NO normal priority jobs in the queue, then the oldest low priority job will be picked.
+            5. Normal and Low priority jobs are treated the same for how many running jobs there can be. The total number of jobs processing, whatever their priority, is limited to 100 per account.
+            6. There are separate quotas for how many normal and low priority jobs can be queued.
+          enum:
+            - low
+            - normal
+        text_tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestMediaAssetbody.textTracks'
+          description: array of text_track maps
+        transcriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestMediaAssetbody.transcripts'
+          description: array of auto captions to be generated
+        audio_tracks:
+          $ref: '#/components/schemas/IngestMediaAssetbody.audioTracks'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestMediaAssetbody.image'
+          description: array of images (Dynamic Delivery Only)
+        poster:
+          $ref: '#/components/schemas/IngestMediaAssetbody.poster'
+        thumbnail:
+          $ref: '#/components/schemas/IngestMediaAssetbody.thumbnail'
+        capture-images:
+          type: boolean
+          description: >-
+            whether poster and thumbnail should be captured during transcoding;
+            defaults to `true` if the the profile has image renditions, `false`
+            if it does not
+        callbacks:
+          type: array
+          items:
+            type: string
+          description: array of URLs that notifications should be sent to
+          example: [
+              "https://solutions.brightcove.com/bcls/di-api/di-callbacks.php"
+            ]
+    IngestMediaAssetbody.master:
+      title: Ingest Media Asset Body.master
+      type: object
+      description: >-
+        Specification of master for media asset(s) to be ingested
+      example: {
+          "url": "https://support.brightcove.com/test-assets/videos/Great_Blue_Heron.mp4",
+          "audio_tracks": [
+            {
+              "language": "en",
+              "variant": "main"
+            }
+          ]
+        }
+      properties:
+        url:
+          type: string
+          description: >-
+            URL for the video source; required except for re-transcoding where a
+            digital master has been archived, or you are adding images or text
+            tracks to an existing video
+          example: https://support.brightcove.com/test-assets/audio/celtic_lullaby.m4a
+        use_archived_master:
+          type: boolean
+          description: >-
+            For retranscode requests, will use the archived master if set to true; if set to false, you must also include the url for the source video
+          default: false
+        late_binding_type:
+          type: string
+          description: >-
+            The process of associating progressive MP4 renditions with a video after it has been ingested, Late binding allows you to add or modify MP4 renditions to a video without having to entirely retranscode the video
+            (https://apis.support.brightcove.com/dynamic-ingest/ingest-guides/requesting-late-binding.html#use_cases)
+        audio_tracks:
+          type: array
+          description: >-
+            Language code for the **muxed in** audio from the subtags in
+            (https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry)
+            (default can be set for the account by contacting Brightcove Support) **Dynamic Delivery only**
+          example: [
+              {
+                "language": "en",
+                "variant": "main"
+              }
+            ]
+          items:
+            type: object
+            properties:
+              language:
+                type: string
+                description: >-
+                  Language code for the muxed in audio from the subtags in
+                  (https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry)
+                  (default can be set for the account by contacting Brightcove Support) **Dynamic Delivery only**
+              variant:
+                type: string
+                description: >-
+                  the type of audio track for the muxed in audio - generally `main` **Dynamic Delivery only**
+                enum:
+                  - main
+                  - alternate
+                  - commentary
+                  - dub
+                  - descriptive
+    IngestMediaAssetbody.textTracks:
+      title: Ingest Media Asset Body.text_tracks
+      description: >-
+        array of text_tracks objects - see [Ingesting WebVTT Files (Text
+        Tracks)](/dynamic-ingest/ingest-guides/ingesting-webvtt-files-text-trackscaptions.html)
+      required:
+        - url
+        - srclang
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL for a WebVTT file
+        srclang:
+          type: string
+          description: >-
+            BCP 47 language code for the text tracks. Both two letter language codes like `es` (Spanish) and language+region codes like `es-MX` (Mexican Spanish) are valid
+        kind:
+          type: string
+          description: how the vtt file is meant to be used
+          default: captions
+          enum:
+            - captions
+            - subtitles
+            - chapters
+            - metadata
+            - transcripts
+        label:
+          type: string
+          description: user-readable title
+        default:
+          type: boolean
+          description: sets the default language for captions/subtitles
+          default: false
+        status:
+          type: string
+          description: The status of the text tracks - `published` or `draft` (use `draft` if you want the text tracks added but not yet available to users - `status` can be updated using the CMS API if you need to)
+          enum:
+            - published
+            - draft
+          default: null
+        embed_closed_caption:
+          type: boolean
+          description: whether to embed the text tracks in MP4 renditions as 608 embedded captions
+          default: false
+      example: [
+          {
+            "url": "https://support.brightcove.com/test-assets/captions/herons.vtt",
+            "srclang": "en-US",
+            "kind": "captions",
+            "label": "EN",
+            "default": true,
+            "status" : "published",
+            "embed_closed_caption": true
+          }
+        ]
+    IngestMediaAssetbody.transcripts:
+      title: Ingest Media Asset Body.transcripts
+      description: >-
+        array of auto captions/transcripts to be generated - see [Requesting Auto Captions](/dynamic-ingest/ingest-guides/requesting-auto-captions.html), or an array of transcript files to be ingested - see [Ingesting Transcript Files](/dynamic-ingest/ingest-guides/ingesting-transcriptions.html)
+      type: array
+      items:
+        type: object
+        properties:
+          autodetect:
+            type: boolean
+            description: |-
+              `true` to auto-detect language from audio source.
+              `false`  to use srclang specifying the audio language.
+
+              **Note:**
+                - If `autodetect` is set to `true`, `srclang` must **not** be present
+                - If `autodetect` is set to `false`, and `srclang` is not present, the request will fail
+          default:
+            type: boolean
+            description: If true, srclang should be ignored and we will get captions for main audio, and the language will be determined from audio.
+            default: false
+          input_audio_track:
+            type: object
+            description: Defines the audio to extract the captions. Composed by language and variant (both required).
+            properties:
+              language:
+                type: string
+                description: BCP-47 style language code for the text tracks (en-US, fr-FR, es-ES, etc.)
+                enum:
+                  - af-ZA
+                  - ar-AE
+                  - ar-SA
+                  - cy-GB
+                  - da-DK
+                  - de-CH
+                  - de-DE
+                  - en-AB
+                  - en-AU
+                  - en-GB
+                  - en-IE
+                  - en-IN
+                  - en-NZ
+                  - en-US
+                  - en-WL
+                  - en-ZA
+                  - es-ES
+                  - es-US
+                  - fa-IR
+                  - fr-CA
+                  - fr-FR
+                  - ga-IE
+                  - gd-GB
+                  - he-IL
+                  - hi-IN
+                  - id-ID
+                  - it-IT
+                  - ja-JP
+                  - ko-KR
+                  - ms-MY
+                  - nl-NL
+                  - pt-BR
+                  - pt-PT
+                  - ru-RU
+                  - ta-IN
+                  - te-IN
+                  - th-TH
+                  - tr-TR
+                  - zh-CN
+                  - zh-TW
+              variant:
+                type: string
+                description: Specifies the variant to use.
+                enum:
+                  - main
+                  - alternate
+                  - dub
+                  - commentary
+                  - descriptive
+          kind:
+            type: string
+            description: >-
+              The kind of output to generate - for auto captions requests, if `kind` is `transcripts`, both captions and a transcript will be generated. For ingestion requests (including a `url`) the transcript will be ingested.
+            default: captions
+            enum:
+              - captions
+              - transcripts
+          label:
+            type: string
+            description: user-readable title - defaults to the BCP-47 style language code
+          srclang:
+            type: string
+            description: BCP-47 style language code for the text tracks (en-US, fr-FR, es-ES, etc.)
+            enum:
+              - af-ZA
+              - ar-AE
+              - ar-SA
+              - cy-GB
+              - da-DK
+              - de-CH
+              - de-DE
+              - en-AB
+              - en-AU
+              - en-GB
+              - en-IE
+              - en-IN
+              - en-US
+              - en-WL
+              - es-ES
+              - es-US
+              - fa-IR
+              - fr-CA
+              - fr-FR
+              - ga-IE
+              - gd-GB
+              - he-IL
+              - hi-IN
+              - id-ID
+              - it-IT
+              - ja-JP
+              - ko-KR
+              - ms-MY
+              - nl-NL
+              - pt-BR
+              - pt-PT
+              - ru-RU
+              - ta-IN
+              - te-IN
+              - tr-TR
+              - zh-CN
+          status:
+            type: string
+            description: The status of the text tracks - `published` or `draft` (use `draft` if you want the text tracks added but not yet available to users - `status` can be updated using the CMS API if you need to)
+            enum:
+              - published
+              - draft
+            default: null
+          url:
+            type: string
+            description: >-
+              The URL where a transcript file is located. Must be included in the `kind` is `transcripts`. Must <strong>not</strong> be included if the `kind` is `captions`.
+      example: [
+                  {
+                    "srclang": "en-US",
+                    "kind": "transcripts",
+                    "label": "en-US",
+                    "status": "published",
+                    "default": true
+                  }
+                ]
+    IngestMediaAssetbody.audioTracks:
+      title: Ingest Media Asset Body.audio_tracks
+      type: object
+      properties:
+        merge_with_existing:
+          type: boolean
+          description: >-
+            whether to replace existing audio tracks or add the new ones
+          default: true
+        masters:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestMediaAssetbody.audioTracks.masters'
+          description: array of audio track objects **Dynamic Delivery only**
+      example: {
+                "merge_with_existing": true,
+                "masters": [
+                      {
+                        "url": "https://support.brightcove.com/test-assets/audio/celtic_lullaby.m4a",
+                        "language": "en",
+                        "variant": "alternate"
+                      },
+                      {
+                        "url": "https://support.brightcove.com/test-assets/audio/audio1.m4a",
+                        "language": "en",
+                        "variant": "commentary"
+                      }
+                    ]
+                  }
+    IngestMediaAssetbody.audioTracks.masters:
+      title: Ingest Media Asset Body.audio_tracks.masters
+      description: >-
+        Additional audio tracks for the video - see [Implementing Multiple Audio Tracks Using the APIs](/dynamic-ingest/ingest-guides/implementing-multiple-audio-tracks-using-apis.html) for more information **Dynamic Delivery only**
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL for the audio file **Dynamic Delivery only**
+        language:
+          type: string
+          description: >-
+            Language code for the audio track from the subtags in
+            https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+            (default can be set for the account by contacting Brightcove
+            Support) **Dynamic Delivery only**
+        variant:
+          type: string
+          description: >-
+            the type of audio track (default can be set for the account by
+            contacting Brightcove Support) **Dynamic Delivery only**
+          enum:
+            - main
+            - alternate
+            - commentary
+            - dub
+            - descriptive
+    IngestMediaAssetbody.poster:
+      title: Ingest Media Asset Body.poster
+      required:
+        - url
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL for the video poster image
+        height:
+          type: number
+          description: pixel height of the image
+        width:
+          type: number
+          description: pixel width of the image
+      example: {
+          "url": "https://support.brightcove.com/test-assets/images/celtic-lullaby-large.png",
+          "width": 1400,
+          "height": 1400
+        }
+    IngestMediaAssetbody.thumbnail:
+      title: Ingest Media Asset Body.thumbnail
+      required:
+        - url
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL for the video thumbnail image
+        height:
+          type: number
+          description: pixel height of the image
+        width:
+          type: number
+          description: pixel width of the image
+      example: {
+          "url": "https://support.brightcove.com/test-assets/images/celtic-lullaby-large.png",
+          "width": 160,
+          "height": 90
+        }
+    IngestMediaAssetbody.image:
+      title: Ingest Media Asset Body.image
+      required:
+        - url
+        - variant
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL for the image
+        language:
+          type: string
+          description: Language code for the image from the subtags in https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry (default can be set for the account by contacting Brightcove Support)
+        variant:
+          type: string
+          description: the type of image
+          enum:
+            - poster
+            - thumbnail
+            - portrait
+            - square
+            - wide
+            - ultra-wide
+        label:
+          type: string
+          enum:
+            - poster
+            - thumbnail
+        height:
+          type: number
+          description: pixel height of the image
+        width:
+          type: number
+          description: pixel width of the image
+      example: {
+                  "media_type": "image",
+                  "language": "es",
+                  "format": "jpg",
+                  "label": "poster",
+                  "width": 1280,
+                  "height": 720
+                }
+    IngestMediaAssetResponse:
+      title: Ingest Media Asset Response
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: job id for the request
+      example: {
+          "id": "1242d634-0447-45c0-a79d-2199df409b4f"
+        }
+  securitySchemes:
+    BC_OAuth2:
+      type: oauth2
+      description: >-
+        Brightcove OAuth API. See the [support documentation](/oauth/index.html) or [Getting Access Tokens](/oauth/code-samples/oauth-api-sample-get-access-token.html) to learn more
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://oauth.brightcove.com/v4/access_token'
+          scopes:
+            video-cloud/video/all: All video operations
+            video-cloud/ingest-profiles/profile/read: Read ingest profiles
+            video-cloud/ingest-profiles/account/read: Read account default ingest profile
+            video-cloud/upload-urls/read: Read upload URLs
