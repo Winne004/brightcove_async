@@ -19,3 +19,4 @@ class BrightcoveBaseAPIConfig(BaseSettings):
     cms_base_url: str = "https://cms.api.brightcove.com/v1/accounts/"
     syndication_base_url: str = "https://edge.social.api.brightcove.com/v1/accounts/"
     analytics_base_url: str = "https://analytics.api.brightcove.com/v1"
+    dynamic_ingest_base_url: str = "https://ingest.api.brightcove.com/v1/accounts/"

@@ -23,4 +23,5 @@ def initialise_brightcove_client(
         cms_base_url=client_config.cms_base_url,
         syndication_base_url=client_config.syndication_base_url,
         analytics_base_url=client_config.analytics_base_url,
+        dynamic_ingest_base_url=client_config.dynamic_ingest_base_url,
     )

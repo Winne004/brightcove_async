@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import ClassVar, Self, cast
 
 import aiohttp
@@ -9,6 +7,7 @@ from brightcove_async.services.analytics import Analytics
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.syndication import Syndication
+from brightcove_async.services.dynamic_ingest import DynamicIngest
 
 
 class BrightcoveClient:
@@ -16,6 +15,7 @@ class BrightcoveClient:
         "cms": CMS,
         "syndication": Syndication,
         "analytics": Analytics,
+        "dynamic_ingest": DynamicIngest,
     }
 
     def __init__(
@@ -23,6 +23,7 @@ class BrightcoveClient:
         cms_base_url: str,
         syndication_base_url: str,
         analytics_base_url: str,
+        dynamic_ingest_base_url: str,
         client_id: str,
         client_secret: str,
         oauth_cls: type[OAuthClientProtocol],
@@ -32,6 +33,7 @@ class BrightcoveClient:
         self._cms_base_url = cms_base_url
         self._syndication_base_url = syndication_base_url
         self._analytics_base_url = analytics_base_url
+        self._dynamic_ingest_base_url = dynamic_ingest_base_url
         self._session: aiohttp.ClientSession | None = session
         self._external_session = session
         self._oauth: OAuthClientProtocol | None = None
@@ -76,6 +78,12 @@ class BrightcoveClient:
     @property
     def analytics(self) -> Analytics:
         return cast(Analytics, self._get_service("analytics", self._analytics_base_url))
+
+    @property
+    def dynamic_ingest(self) -> DynamicIngest:
+        return cast(
+            DynamicIngest, self._get_service("dynamic_ingest", self._cms_base_url)
+        )
 
     async def __aenter__(self) -> Self:
         if self._session is None:
