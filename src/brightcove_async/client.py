@@ -7,8 +7,8 @@ from brightcove_async.registry import ServiceConfig
 from brightcove_async.services.analytics import Analytics
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
-from brightcove_async.services.syndication import Syndication
 from brightcove_async.services.dynamic_ingest import DynamicIngest
+from brightcove_async.services.syndication import Syndication
 
 
 class BrightcoveClient:
@@ -33,7 +33,7 @@ class BrightcoveClient:
     def oauth(self) -> OAuthClientProtocol:
         if self._session is None:
             raise RuntimeError(
-                "Client session not initialized. Use as an async context manager."
+                "Client session not initialized. Use as an async context manager.",
             )
         if self._oauth is None:
             self._oauth = self._oauth_cls(
@@ -48,7 +48,7 @@ class BrightcoveClient:
             service_cls = self._service_classes[name]
             if self._session is None:
                 raise RuntimeError(
-                    "Client session not initialized. Use as an async context manager."
+                    "Client session not initialized. Use as an async context manager.",
                 )
             self._services[name] = service_cls.cls(
                 self._session,
@@ -75,7 +75,7 @@ class BrightcoveClient:
     async def __aenter__(self) -> Self:
         if self._session is None:
             self._session = aiohttp.ClientSession(
-                connector=aiohttp.TCPConnector(limit=100)
+                connector=aiohttp.TCPConnector(limit=100),
             )
         return self
 
