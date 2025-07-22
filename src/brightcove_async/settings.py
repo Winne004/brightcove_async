@@ -1,5 +1,16 @@
+from attr import dataclass
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings
+
+from brightcove_async.services.base import Base
+
+
+@dataclass
+class ServiceConfig:
+    cls: type[Base]
+    base_url: str
+    requests_per_second: int = 10
+    kwargs: dict | None = None
 
 
 class BrightcoveOAuthCreds(BaseSettings):

@@ -1,8 +1,9 @@
-from typing import ClassVar, Self, cast
+from typing import Literal, Self, overload
 
 import aiohttp
 
 from brightcove_async.protocols import OAuthClientProtocol
+from brightcove_async.registry import ServiceConfig
 from brightcove_async.services.analytics import Analytics
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
@@ -11,29 +12,16 @@ from brightcove_async.services.dynamic_ingest import DynamicIngest
 
 
 class BrightcoveClient:
-    _service_classes: ClassVar[dict[str, type[Base]]] = {
-        "cms": CMS,
-        "syndication": Syndication,
-        "analytics": Analytics,
-        "dynamic_ingest": DynamicIngest,
-    }
-
     def __init__(
         self,
-        cms_base_url: str,
-        syndication_base_url: str,
-        analytics_base_url: str,
-        dynamic_ingest_base_url: str,
+        services_registry: dict[str, ServiceConfig],
         client_id: str,
         client_secret: str,
         oauth_cls: type[OAuthClientProtocol],
         session: aiohttp.ClientSession | None = None,
     ) -> None:
         self._oauth_cls = oauth_cls
-        self._cms_base_url = cms_base_url
-        self._syndication_base_url = syndication_base_url
-        self._analytics_base_url = analytics_base_url
-        self._dynamic_ingest_base_url = dynamic_ingest_base_url
+        self._service_classes = services_registry
         self._session: aiohttp.ClientSession | None = session
         self._external_session = session
         self._oauth: OAuthClientProtocol | None = None
@@ -55,35 +43,34 @@ class BrightcoveClient:
             )
         return self._oauth
 
-    def _get_service(self, name: str, base_url: str) -> Base:
+    def _get_service(self, name) -> Base:
         if name not in self._services:
             service_cls = self._service_classes[name]
             if self._session is None:
                 raise RuntimeError(
                     "Client session not initialized. Use as an async context manager."
                 )
-            self._services[name] = service_cls(self._session, self.oauth, base_url)
+            self._services[name] = service_cls.cls(
+                self._session,
+                self.oauth,
+                service_cls.base_url,
+                limit=service_cls.requests_per_second,
+            )
         return self._services[name]
 
-    @property
-    def cms(self) -> CMS:
-        return cast(CMS, self._get_service("cms", self._cms_base_url))
+    @overload  # type: ignore[misc]
+    def __getattr__(self, name: Literal["cms"]) -> CMS: ...
+    @overload  # type: ignore[misc]
+    def __getattr__(self, name: Literal["syndication"]) -> Syndication: ...
+    @overload  # type: ignore[misc]
+    def __getattr__(self, name: Literal["analytics"]) -> Analytics: ...
+    @overload  # type: ignore[misc]
+    def __getattr__(self, name: Literal["dynamic_ingest"]) -> DynamicIngest: ...
+    @overload  # type: ignore[misc]
+    def __getattr__(self, name: str) -> Base: ...
 
-    @property
-    def syndication(self) -> Syndication:
-        return cast(
-            Syndication, self._get_service("syndication", self._syndication_base_url)
-        )
-
-    @property
-    def analytics(self) -> Analytics:
-        return cast(Analytics, self._get_service("analytics", self._analytics_base_url))
-
-    @property
-    def dynamic_ingest(self) -> DynamicIngest:
-        return cast(
-            DynamicIngest, self._get_service("dynamic_ingest", self._cms_base_url)
-        )
+    def __getattr__(self, name: str) -> Base:
+        return self._get_service(name)
 
     async def __aenter__(self) -> Self:
         if self._session is None:
