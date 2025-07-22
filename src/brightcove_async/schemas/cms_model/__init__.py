@@ -162,6 +162,7 @@ class Tag(RootModel[str]):
 class Type(Enum):
     AD = "AD"
     DATA = "DATA"
+    CODE = "CODE"
 
 
 class CuePoint(BaseModel):
@@ -850,6 +851,7 @@ class UserType(Enum):
     user = "user"
     api_key = "api_key"
     internal = "internal"
+    unknown = "unknown"
 
 
 class User(BaseModel):
@@ -1253,7 +1255,7 @@ class Video(BaseModel):
         default=None,
         description="video short description",
         examples=["Herring gull on a wharf in Boston"],
-        max_length=248,
+        max_length=500,
     )
     digital_master_id: str | None = Field(
         default=None,
