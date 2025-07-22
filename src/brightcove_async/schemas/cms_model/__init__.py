@@ -15,7 +15,7 @@ from . import Videofields
 
 
 class AddAffiliate(BaseModel):
-    account_id: str | None = Field(None, description="affiliate account id")
+    account_id: str | None = Field(default=None, description="affiliate account id")
 
 
 class Variant(Enum):
@@ -28,32 +28,32 @@ class Variant(Enum):
 
 class AudioTrack(BaseModel):
     duration: int | None = Field(
-        None,
+        default=None,
         description="URL the duration of the audio track in milliseconds",
         examples=[86053],
     )
     encoding_rates: list[int] | None = Field(
-        None,
+        default=None,
         description="array of encoding rates for the audio track renditions in KBPS",
         examples=[[64000, 96000, 127000, 192000]],
     )
     id: str | None = Field(
-        None,
+        default=None,
         description="ID for the audio track formed as language_variant",
         examples=["en_alternate"],
     )
     is_default: bool | None = Field(
-        None,
+        default=None,
         description="Whether this is the default audio track",
         examples=[True],
     )
     language: str | None = Field(
-        None,
+        default=None,
         description="language code for the audio track",
         examples=["en-US"],
     )
     variant: str | None = Field(
-        None,
+        default=None,
         description="the type of audio track (default can be set for the account by contacting Brightcove Support)",
         examples=["main"],
     )
@@ -68,20 +68,22 @@ class AudioTracks(RootModel[list[AudioTrack]]):
 
 
 class Channel(BaseModel):
-    account_id: str | None = Field(None, description="master account id")
-    account_name: str | None = Field(None, description="master account name")
-    created_at: str | None = Field(None, description="when the channel was created")
+    account_id: str | None = Field(default=None, description="master account id")
+    account_name: str | None = Field(default=None, description="master account name")
+    created_at: str | None = Field(
+        default=None, description="when the channel was created"
+    )
     enforce_custom_fields: bool | None = Field(
-        None,
+        default=None,
         description="if true, will allow sharing only if the affiliate account has all custom fields that have values for the video to be shared",
     )
     enforce_geo: bool | None = Field(
-        None,
+        default=None,
         description="if true, and master account is enabled for geo-filtering",
     )
-    name: str | None = Field(None, description="channel name")
+    name: str | None = Field(default=None, description="channel name")
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="when the channel was last updated",
     )
 
@@ -112,23 +114,25 @@ class ChannelAffiliateList(RootModel[list[ChannelAffiliate]]):
 
 
 class Contract(BaseModel):
-    account_id: str | None = Field(None, description="affiliate account id")
+    account_id: str | None = Field(default=None, description="affiliate account id")
     approved: bool | None = Field(
-        None,
+        default=None,
         description="whether the contract is approved",
     )
     approved_at: str | None = Field(
-        None,
+        default=None,
         description="when the contract was approved",
     )
     auto_accept: bool | None = Field(
-        None,
+        default=None,
         description="whether shared videos will be automatically accepted",
     )
     channel: Channel | None = None
-    created_at: str | None = Field(None, description="when the contract was created")
+    created_at: str | None = Field(
+        default=None, description="when the contract was created"
+    )
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="when the contract was last updated",
     )
 
@@ -162,15 +166,15 @@ class Type(Enum):
 
 class CuePoint(BaseModel):
     force_stop: bool | None = Field(
-        None,
+        default=None,
         description="Whether playback should be stopped when the cuepoint is reached",
     )
     metadata: str | None = Field(
-        None,
+        default=None,
         description="optional metadata string (512 single-byte characters maximum)",
         max_length=512,
     )
-    name: str | None = Field(None, description="cue point name")
+    name: str | None = Field(default=None, description="cue point name")
     time: float = Field(
         ...,
         description="time of the cue point in seconds",
@@ -181,42 +185,42 @@ class CuePoint(BaseModel):
 
 class DigitalMaster(BaseModel):
     created_at: str | None = Field(
-        None,
+        default=None,
         description="date/time created",
         examples=["2019-04-30T10:09:12.548Z"],
     )
     duration: int | None = Field(
-        None,
+        default=None,
         description="duration in milliseconds",
         examples=[31431],
     )
     encoding_rate: int | None = Field(
-        None,
+        default=None,
         description="encoding rate in bps",
         examples=[23152000],
     )
     height: int | None = Field(
-        None,
+        default=None,
         description="frame height in pixels",
         examples=[1080],
     )
     id: str | None = Field(
-        None,
+        default=None,
         description="the system id for the digital master",
         examples=["a0a2e032-4de4-4495-a59e-a806d52989"],
     )
     size: int | None = Field(
-        None,
+        default=None,
         description="file size in bytes",
         examples=[90990884],
     )
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="date/time last modified",
         examples=["2019-04-30T10:09:12.548Z"],
     )
     width: int | None = Field(
-        None,
+        default=None,
         description="frame width in pixels",
         examples=[1920],
     )
@@ -242,63 +246,65 @@ class Variant1(Enum):
 
 class DynamicRendition(BaseModel):
     audio_configuration: str | None = Field(
-        None,
+        default=None,
         description="The audio configuration of the audio track",
     )
-    duration: int | None = Field(None, description="duration in milliseconds")
+    duration: int | None = Field(default=None, description="duration in milliseconds")
     encoding_rate: int | None = Field(
-        None,
+        default=None,
         description="average encoding rate in kbps",
     )
-    frame_height: int | None = Field(None, description="frame height in pixels")
-    frame_width: int | None = Field(None, description="frame width in pixels")
+    frame_height: int | None = Field(default=None, description="frame height in pixels")
+    frame_width: int | None = Field(default=None, description="frame width in pixels")
     media_type: MediaType | None = Field(
-        None,
+        default=None,
         description="media type for the rendition (audio or video)",
     )
-    rendition_id: str | None = Field(None, description="the rendition id")
+    rendition_id: str | None = Field(default=None, description="the rendition id")
     size: int | None = Field(
-        None,
+        default=None,
         description="the size of the asset in bytes (integer)",
     )
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="when the video was last modified",
     )
     uploaded_at: str | None = Field(
-        None,
+        default=None,
         description="when the asset was added to the video in Video Cloud",
     )
     variant: Variant1 | None = Field(
-        None,
+        default=None,
         description="The variant of the HLS profile (baseline, main, or high)",
     )
 
 
 class Folder(BaseModel):
     account_id: str | None = Field(
-        None,
+        default=None,
         description="Video Cloud account id",
         examples=[57838016001],
     )
     created_at: str | None = Field(
-        None,
+        default=None,
         description="date/time folder created",
         examples=["2017-11-23T19:53:59.687Z"],
     )
     id: str | None = Field(
-        None,
+        default=None,
         description="system id for the folder",
         examples=["5a17275782aca45b631295f9"],
     )
-    name: str | None = Field(None, description="folder name", examples=["birds"])
+    name: str | None = Field(
+        default=None, description="folder name", examples=["birds"]
+    )
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="date/time folder last modified",
         examples=["2017-11-23T20:06:24.537Z"],
     )
     video_count: str | None = Field(
-        None,
+        default=None,
         description="number of videos in the folder",
         examples=[5],
     )
@@ -321,53 +327,55 @@ class Geo(BaseModel):
 
 
 class ImageAsset(BaseModel):
-    audio_only: bool | None = Field(None, description="not applicable to posters")
+    audio_only: bool | None = Field(
+        default=None, description="not applicable to posters"
+    )
     cdn_origin_id: str | None = Field(
-        None,
+        default=None,
         description="an internally used id (not applicable to remote assets)",
     )
     complete: bool | None = Field(
-        None,
+        default=None,
         description="whether processing is complete for the asset (will be true for remote assets if a remote_url is supplied)",
     )
     controller_type: str | None = Field(
-        None,
+        default=None,
         description="the controller type for ingested renditions (not applicable to remote renditions or other types of assets)",
     )
     current_filename: str | None = Field(
-        None,
+        default=None,
         description="the filename for an ingested asset in the Video Cloud system (not applicable to remote assets)",
     )
-    id: str | None = Field(None, description="the asset id")
-    name: str | None = Field(None, description="asset name")
+    id: str | None = Field(default=None, description="the asset id")
+    name: str | None = Field(default=None, description="asset name")
     progressive_download: bool | None = Field(
-        None,
+        default=None,
         description="whether ingested rendition is available by progressive download (not applicable to other asset types or remote renditions)",
     )
     reference_id: str | None = Field(
-        None,
+        default=None,
         description="the asset reference id (must be unique within the account); this is **not** the same as the video reference id",
     )
     remote_stream_name: str | None = Field(
-        None,
+        default=None,
         description="name for remote streams (not applicable to asset types other than rendition)",
     )
     remote_url: str | None = Field(
-        None,
+        default=None,
         description="the url for a remote asset (not applicable to ingested assets); **`remote_url` is required when adding an asset (POST)**",
         max_length=250,
     )
     size: int | None = Field(
-        None,
+        default=None,
         description="the size of the asset in bytes (integer)",
     )
-    type: str | None = Field(None, description="the type of the asset")
+    type: str | None = Field(default=None, description="the type of the asset")
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="when the video was last modified",
     )
     uploaded_at: str | None = Field(
-        None,
+        default=None,
         description="when the asset was added to the video in Video Cloud",
     )
 
@@ -382,54 +390,54 @@ class State1(Enum):
 
 class IngestJobStatus(BaseModel):
     account_id: str | None = Field(
-        None,
+        default=None,
         description="the Video Cloud account id",
         examples=[57838016001],
     )
     error_code: str | None = Field(
-        None,
+        default=None,
         description="the error code if the job failed",
         examples=["UnableToResolveHostError"],
     )
     error_message: str | None = Field(
-        None,
+        default=None,
         description="the error message if the job failed",
         examples=[
             "There was a problem resolving the host at https://some.site.comm/videos/mp4/IMG_0544.MOV. Please check that it is correct.",
         ],
     )
     id: str | None = Field(
-        None,
+        default=None,
         description="the ingest job id returned when you submit the Dynamic Ingest API request",
         examples=["879a3301-5c1a-4b1b-a368-58e200a6e64b"],
     )
     priority: str | None = Field(
-        None,
+        default=None,
         description="priority of the job (normal or low)",
         examples=["normal"],
     )
     started_at: str | None = Field(
-        None,
+        default=None,
         description="when processing started",
         examples=["2018-11-14T19:30:36.265Z"],
     )
     state: State1 | None = Field(
-        None,
+        default=None,
         description="the current state of the ingest job - status:\n  - `processing` - video processing in progress - the video is not currently playable\n  - `publishing` - video processing in progress - publishing a playable rendition\n  - `published` - that at least one playable rendition is available for the video\n  - `finished` - that all processing is complete\n  - `failed` - video processing failed to complete",
         examples=["failed"],
     )
     submitted_at: str | None = Field(
-        None,
+        default=None,
         description="when the job was submitted",
         examples=["2018-11-14T19:30:36.196Z"],
     )
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="when the status was last updated",
         examples=["2018-11-14T19:43:08.641Z"],
     )
     video_id: str | None = Field(
-        None,
+        default=None,
         description="the video id",
         examples=[5966995221001],
     )
@@ -445,12 +453,12 @@ class IngestJobs(RootModel[list[IngestJobStatus]]):
 
 class LabelsList(BaseModel):
     account_id: str | None = Field(
-        None,
+        default=None,
         description="The Video Cloud account id",
         examples=["57838016001"],
     )
     labels: list[str] | None = Field(
-        None,
+        default=None,
         description="Array of labels that exist for the account",
         examples=[
             [
@@ -461,7 +469,7 @@ class LabelsList(BaseModel):
             ],
         ],
     )
-    version: int | None = Field(None, description="An internal version tracker")
+    version: int | None = Field(default=None, description="An internal version tracker")
 
 
 class LabelPath(BaseModel):
@@ -470,71 +478,75 @@ class LabelPath(BaseModel):
 
 class LabelUpdate(BaseModel):
     new_label: str | None = Field(
-        None,
+        default=None,
         description="The new label which will replace **the last item in the label path**",
     )
 
 
 class Link(BaseModel):
-    text: str | None = Field(None, description="text for the link", max_length=255)
-    url: str | None = Field(None, description="URL for the link", max_length=255)
+    text: str | None = Field(
+        default=None, description="text for the link", max_length=255
+    )
+    url: str | None = Field(
+        default=None, description="URL for the link", max_length=255
+    )
 
 
 class Manifest(BaseModel):
     audio_only: bool | None = Field(
-        None,
+        default=None,
         description="not applicable to ism_manifests",
     )
     cdn_origin_id: str | None = Field(
-        None,
+        default=None,
         description="an internally used id (not applicable to remote assets)",
     )
     complete: bool | None = Field(
-        None,
+        default=None,
         description="whether processing is complete for the asset (will be true for remote assets if a remote_url is supplied)",
     )
     controller_type: str | None = Field(
-        None,
+        default=None,
         description="the controller type for ingested renditions (not applicable to remote renditions or other types of assets)",
     )
     current_filename: str | None = Field(
-        None,
+        default=None,
         description="the filename for an ingested asset in the Video Cloud system (not applicable to remote assets)",
     )
-    id: str | None = Field(None, description="the asset id")
-    name: str | None = Field(None, description="asset name")
+    id: str | None = Field(default=None, description="the asset id")
+    name: str | None = Field(default=None, description="asset name")
     progressive_download: bool | None = Field(
-        None,
+        default=None,
         description="whether ingested rendition is available by progressive download (not applicable to other asset types or remote renditions)",
     )
     reference_id: str | None = Field(
-        None,
+        default=None,
         description="the asset reference id (must be unique within the account); this is **not** the same as the video reference id",
     )
     remote_stream_name: str | None = Field(
-        None,
+        default=None,
         description="name for remote streams (not applicable to asset types other than rendition)",
     )
     remote_url: str | None = Field(
-        None,
+        default=None,
         description="the url for a remote asset (not applicable to ingested assets); **`remote_url` is required when adding an asset (POST)**",
         max_length=250,
     )
     size: int | None = Field(
-        None,
+        default=None,
         description="the size of the asset in bytes (integer)",
     )
-    type: str | None = Field(None, description="the type of the asset")
+    type: str | None = Field(default=None, description="the type of the asset")
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="when the video was last modified",
     )
     uploaded_at: str | None = Field(
-        None,
+        default=None,
         description="when the asset was added to the video in Video Cloud",
     )
     video_duration: int | None = Field(
-        None,
+        default=None,
         description="video duration in seconds (present if you included it when you created the asset)",
     )
 
@@ -557,63 +569,63 @@ class PlaylistType(Enum):
 
 class Playlist(BaseModel):
     account_id: str | None = Field(
-        None,
+        default=None,
         description="Video Cloud account id",
         examples=[57838016001],
     )
     created_at: datetime | None = Field(
-        None,
+        default=None,
         description="date/time created",
         examples=["2018-11-14T19:30:36.196Z"],
     )
     description: str | None = Field(
-        None,
+        default=None,
         description="playlist description",
         examples=["Sea bird playlist"],
         max_length=255,
     )
     favorite: bool | None = Field(
-        False,
+        default=False,
         description="whether playlist is in favorites list",
         examples=[False],
     )
     id: str | None = Field(
-        None,
+        default=None,
         description="the playlist id",
         examples=[1403635561001],
     )
     name: str | None = Field(
-        None,
+        default=None,
         description="the playlist name",
         examples=["Sea Birds"],
         max_length=255,
     )
     reference_id: str | None = Field(
-        None,
+        default=None,
         description="the playlist reference id (must be unique within the account)",
         examples=["sea_birds_playlist"],
     )
     search: str | None = Field(
-        None,
+        default=None,
         description="search string to retrieve the videos (smart playlists only)",
         examples=["+tags:captions,training"],
     )
     state: State2 | None = Field(
-        None,
+        default=None,
         description="Applies to EXPLICIT (manual) playlists only; `UPDATING` means the list is updating its video members and `READY` means that all videos have been added",
     )
     type: PlaylistType | None = Field(
-        None,
+        default=None,
         description="the playlist type: EXPLICIT or smart playlist type",
         examples=["ACTIVATED_NEWEST_TO_OLDEST"],
     )
     updated_at: datetime | None = Field(
-        None,
+        default=None,
         description="date/time last modified",
         examples=["2018-11-14T19:30:36.196Z"],
     )
     video_ids: list[str] | None = Field(
-        None,
+        default=None,
         description="array of video ids (EXPLICIT playlists only)",
         examples=[
             [
@@ -631,7 +643,7 @@ class Playlist(BaseModel):
 
 
 class PlaylistCount(BaseModel):
-    count: int | None = Field(None, description="count of videos")
+    count: int | None = Field(default=None, description="count of videos")
 
 
 class SearchSyntax(Enum):
@@ -641,29 +653,29 @@ class SearchSyntax(Enum):
 
 class PlaylistInputFields(BaseModel):
     description: str | None = Field(
-        None,
+        default=None,
         description="playlist description",
         examples=["Playlist of Birds that Live by the Sea"],
         max_length=255,
     )
     favorite: bool | None = Field(
-        False,
+        default=False,
         description="whether playlist is in favorites list",
         examples=[True],
     )
     name: str | None = Field(
-        None,
+        default=None,
         description="the playlist name",
         examples=["Sea Bird Playlist"],
         max_length=255,
     )
     reference_id: str | None = Field(
-        None,
+        default=None,
         description="the playlist reference id (must be unique within the account)",
         examples=["sea_bird_playlist"],
     )
     search: str | None = Field(
-        None,
+        default=None,
         description="search string to retrieve the videos (smart playlists only)",
         examples=["+tags:birds,sea"],
     )
@@ -672,12 +684,12 @@ class PlaylistInputFields(BaseModel):
         description="the search syntax used for the search string; see [Managing Playlists](/cms/managing-videos/managing-playlists-using-cms-api.html)",
     )
     type: PlaylistType | None = Field(
-        None,
+        default=None,
         description="the playlist type: EXPLICIT or smart playlist type",
         examples=["START_DATE_NEWEST_TO_OLDEST"],
     )
     video_ids: list[str] | None = Field(
-        None,
+        default=None,
         description="array of video ids (EXPLICIT playlists only) - maximum length: 1000",
         examples=[
             [
@@ -696,7 +708,7 @@ class PlaylistInputFields(BaseModel):
 
 class PlaylistReferences(BaseModel):
     playlists: list[str] | None = Field(
-        None,
+        default=None,
         description="array of EXPLICIT playlist ids that contain the video",
         examples=[749117323001],
     )
@@ -704,12 +716,12 @@ class PlaylistReferences(BaseModel):
 
 class Schedule(BaseModel):
     ends_at: str | None = Field(
-        None,
+        default=None,
         description="'End date-time of availability in ISO-8601(https://www.ecma-international.org/ecma-262/5.1/#sec-15.9.1.15) format. Note that you can input a date-time stamp with a time zone, such as `2021-05-01T18:00:00.000+08`, but it will be converted to and stored as a UTC data-time stamp: `2021-05-01T10:00:00.000Z`'",
         examples=["2020-05-20T20:41:07.689Z"],
     )
     starts_at: str | None = Field(
-        None,
+        default=None,
         description="'Start date-time of availability in ISO-8601(https://www.ecma-international.org/ecma-262/5.1/#sec-15.9.1.15) format. Note that you can input a date-time stamp with a time zone, such as `2021-05-01T18:00:00.000+08`, but it will be converted to and stored as a UTC data-time stamp: `2021-05-01T10:00:00.000Z`'",
         examples=["2019-05-20T20:41:07.689Z"],
     )
@@ -721,27 +733,27 @@ class ShareVideoRequest(BaseModel):
 
 class Sharing(BaseModel):
     by_external_acct: bool | None = Field(
-        None,
+        default=None,
         description="whether the video was shared from another account",
         examples=[True],
     )
     by_id: str | None = Field(
-        None,
+        default=None,
         description="id of the account that shared the video; note that this field is populated only for the shared copy, not for the original video",
         examples=[57838016001],
     )
     by_reference: bool | None = Field(
-        None,
+        default=None,
         description="whether the video is shared by reference",
         examples=[True],
     )
     source_id: str | None = Field(
-        None,
+        default=None,
         description="id of the video in its original account; note that this field is populated only for the shared copy, not for the original video",
         examples=[239487239487],
     )
     to_external_acct: bool | None = Field(
-        None,
+        default=None,
         description="whether the video is shared to another account",
         examples=[True],
     )
@@ -753,22 +765,22 @@ class Event(Enum):
 
 class Subscription(BaseModel):
     endpoint: str | None = Field(
-        None,
+        default=None,
         description="the notifications endpoint",
         examples=["https://solutions.brightcove.com/bcls/di-api/cms-callbacks.php"],
     )
     events: list[Event] | None = Field(
-        None,
+        default=None,
         description="list of events subscribed to",
         examples=[["video-change"]],
     )
     id: str | None = Field(
-        None,
+        default=None,
         description="system id for the subscription",
         examples=["a0847083-79f4-4315-8a2c-403465a3d9bc"],
     )
     service_account: str | None = Field(
-        None,
+        default=None,
         description="the Video Cloud account id",
         examples=["57838016001"],
     )
@@ -785,23 +797,23 @@ class Kind(Enum):
 
 class TextTrack(BaseModel):
     default: bool | None = Field(
-        False,
+        default=False,
         description="whether this is the default track - should only be true for one text track",
     )
-    id: str | None = Field(None, description="System id for the text track")
+    id: str | None = Field(default=None, description="System id for the text track")
     kind: Kind | None = Field(
         Kind.captions,
         description="How the track is meant to be used: `subtitles`, `captions`, `descriptions`, `chapters`, `metadata`.",
     )
-    label: str | None = Field(None, description="label for the track")
-    mime_type: str | None = Field(None, description="mime-type for the track")
-    src: str | None = Field(None, description="URL for the .vtt file")
+    label: str | None = Field(default=None, description="label for the track")
+    mime_type: str | None = Field(default=None, description="mime-type for the track")
+    src: str | None = Field(default=None, description="URL for the .vtt file")
     srclang: str | None = Field(
-        None,
+        default=None,
         description='2-letter language code, such as "en" or "ko"',
     )
     status: Any | None = Field(
-        None,
+        default=None,
         description="Indicates the actual situation of the track, if it is `published`, `draft`, or `null` for pre-existing text tracks. Draft tracks will not be displayed in the player.",
     )
 
@@ -812,15 +824,15 @@ class Status(Enum):
 
 
 class Transcript(BaseModel):
-    id: str | None = Field(None, description="System id for the text track")
-    account_id: str | None = Field(None, description="The account id")
+    id: str | None = Field(default=None, description="System id for the text track")
+    account_id: str | None = Field(default=None, description="The account id")
     default: bool | None = Field(
-        None,
+        default=None,
         description="Whether the transcript is the default - note that if there are multi-language transcripts, there can be a default per language",
     )
-    label: str | None = Field(None, description="label for the track")
+    label: str | None = Field(default=None, description="label for the track")
     sources: list[str] | None = Field(
-        None,
+        default=None,
         description="sources for a client to retrieve the transcription",
     )
     src: str = Field(..., description="URL for the transcription file")
@@ -829,7 +841,7 @@ class Transcript(BaseModel):
         description="2-letter or 4-letter language code, such as `es` or `es-MX`",
     )
     status: Status | None = Field(
-        None,
+        default=None,
         description="Either `draft` (unavailable to viewers) or `published`",
     )
 
@@ -842,36 +854,38 @@ class UserType(Enum):
 
 class User(BaseModel):
     email: str | None = Field(
-        None,
+        default=None,
         description="the user's email address in Video Cloud",
     )
-    id: str | None = Field(None, description="Video Cloud system id of the user")
+    id: str | None = Field(
+        default=None, description="Video Cloud system id of the user"
+    )
     type: UserType | None = Field(
-        None,
+        default=None,
         description="The type of the updater, either:\n  - `user` a user in Studio\n  - `api-key` a user via the APIs\n  - `internal` a Brightcove system or user",
     )
 
 
 class VideoVariant(BaseModel):
     language: str | None = Field(
-        None,
+        default=None,
         description="The language for this variant in the language-country code format (examples: en-US, es-ES) **Note that `language` is only included when you create a variant - you must NOT include it when updating the variant**",
         examples=["es-ES"],
     )
     name: str | None = Field(
-        None,
+        default=None,
         description="The title of the video in this language",
     )
     description: str | None = Field(
-        None,
+        default=None,
         description="The video short description in this language",
     )
     long_description: str | None = Field(
-        None,
+        default=None,
         description="The video long description in this language",
     )
     custom_fields: dict[str, Any] | None = Field(
-        None,
+        default=None,
         description="map of `fieldname: value` pairs, where values are for this language; values have a maximum length of 1024 single-byte characters. Note: be sure to use the **internal** name for the field, not the display name",
     )
 
@@ -907,79 +921,83 @@ class State3(Enum):
 
 
 class VideoAsset(BaseModel):
-    account_id: str | None = Field(None, description="the Video Cloud account id")
+    account_id: str | None = Field(
+        default=None, description="the Video Cloud account id"
+    )
     audio_only: bool | None = Field(
-        None,
+        default=None,
         description="this rendition contains only an audio track, no video track (a rendition for low bandwidth devices)",
     )
     cdn_origin_id: str | None = Field(
-        None,
+        default=None,
         description="an internally used id (not applicable to remote assets)",
     )
     complete: bool | None = Field(
-        None,
+        default=None,
         description="whether processing is complete for the asset (will be true for remote assets if a remote_url is supplied)",
     )
     controller_type: str | None = Field(
-        None,
+        default=None,
         description="the controller type for ingested renditions (not applicable to remote renditions or other types of assets)",
     )
     current_filename: str | None = Field(
-        None,
+        default=None,
         description="the filename for an ingested asset in the Video Cloud system (not applicable to remote assets)",
     )
     drm: Drm | None = None
     encoding_rate: int | None = Field(
-        None,
+        default=None,
         description="average encoding rate in kbps",
     )
-    frame_height: int | None = Field(None, description="frame height in pixels")
-    frame_width: int | None = Field(None, description="frame width in pixels")
-    id: str | None = Field(None, description="the asset id")
+    frame_height: int | None = Field(default=None, description="frame height in pixels")
+    frame_width: int | None = Field(default=None, description="frame width in pixels")
+    id: str | None = Field(default=None, description="the asset id")
     key_systems: list[str] | None = Field(
-        None,
+        default=None,
         description="array of strings that denote the kind of encryption used for DRM packaged renditions",
     )
-    name: str | None = Field(None, description="asset name")
+    name: str | None = Field(default=None, description="asset name")
     progressive_download: bool | None = Field(
-        None,
+        default=None,
         description="whether ingested rendition is available by progressive download (not applicable to other asset types or remote renditions)",
     )
     reference_id: str | None = Field(
-        None,
+        default=None,
         description="the media asset reference id (must be unique within the account) - this is **not** the same as the video reference id",
     )
     remote_stream_name: str | None = Field(
-        None,
+        default=None,
         description="name for remote streams (not applicable to asset types other than rendition)",
     )
     remote_url: str | None = Field(
-        None,
+        default=None,
         description="the url for a remote asset (not applicable to ingested assets); **`remote_url` is required when adding an asset (POST)**",
         max_length=250,
     )
     size: int | None = Field(
-        None,
+        default=None,
         description="the size of the asset in bytes (integer)",
     )
-    type: str | None = Field(None, description="the type of the asset")
+    type: str | None = Field(default=None, description="the type of the asset")
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="when the video was last modified",
     )
     uploaded_at: str | None = Field(
-        None,
+        default=None,
         description="when the asset was added to the video in Video Cloud",
     )
     video_codec: str | None = Field(
-        None,
+        default=None,
         description="not applicable to remote assets",
     )
     video_container: str | None = Field(
-        None,
+        default=None,
         description="not applicable to remote assets",
     )
-    video_duration: int | None = Field(None, description="duration in milliseconds")
+    video_duration: int | None = Field(
+        default=None, description="duration in milliseconds"
+    )
 
 
 class VideoAssets(RootModel[list[VideoAsset] | VideoAsset]):
@@ -990,11 +1008,11 @@ class VideoAssets(RootModel[list[VideoAsset] | VideoAsset]):
 
 
 class VideoCount(BaseModel):
-    count: int | None = Field(None, description="count of videos")
+    count: int | None = Field(default=None, description="count of videos")
 
 
 class VideoCountInPlaylist(BaseModel):
-    count: int | None = Field(None, description="count of videos")
+    count: int | None = Field(default=None, description="count of videos")
 
 
 class EnumValue(RootModel[str]):
@@ -1003,44 +1021,48 @@ class EnumValue(RootModel[str]):
 
 class CustomField(BaseModel):
     description: str | None = Field(
-        None,
+        default=None,
         description="description (instruction for user)",
     )
-    display_name: str | None = Field(None, description="display name")
+    display_name: str | None = Field(default=None, description="display name")
     enum_values: list[EnumValue] | None = Field(
-        None,
+        default=None,
         description="Array of string values for select type fields (by default the maximum is 100 values; this can be increased up to 1000 by submitting a [request to Support](https://supportportal.brightcove.com/)).\n\nThis field is **required** for `enum` types, and **not allowed** for `string` types.",
     )
     id: str | None = Field(
-        None,
+        default=None,
         description="Data name for the field (used to access it in searches, etc.)\n\nNote the following **requirements** for the custom field `id`:\n  - all lowercase\n  - no spaces (use underscore [_] instead)\n  - max length: 128 single-byte characters\n  - must be unique among all custom fields for the account\n  - must not be one of the [Reserved names](https://studio.support.brightcove.com/admin/creating-custom-metadata-fields.html#reserved)\n\n  Note that updating it will trigger an internal process to update the `id` in any videos that have the custom field.",
     )
     required: bool | None = Field(
-        False,
+        default=False,
         description="whether field must have a value before video can be active",
     )
-    type: str | None = Field(None, description="custom field type (enum or string)")
+    type: str | None = Field(
+        default=None, description="custom field type (enum or string)"
+    )
 
 
 class CustomFieldUpdate(BaseModel):
     description: str | None = Field(
-        None,
+        default=None,
         description="description (instruction for user)",
     )
-    display_name: str | None = Field(None, description="display name")
+    display_name: str | None = Field(default=None, description="display name")
     enum_values: list[EnumValue] | None = Field(
-        None,
+        default=None,
         description="Array of string values for select type fields (by default the maximum is 100 values; this can be increased up to 1000 by submitting a [request to Support](https://supportportal.brightcove.com/)).\n\nThis field is **required** for `enum` types, and **not allowed** for `string` types.",
     )
     id: str | None = Field(
-        None,
+        default=None,
         description="Data name for the field (used to access it in searches, etc.)\n\nNote the following **requirements** for the custom field `id`:\n  - all lowercase\n  - no spaces (use underscore [_] instead)\n  - max length: 128 single-byte characters\n  - must be unique among all custom fields for the account\n  - must not be one of the [Reserved names](https://studio.support.brightcove.com/admin/creating-custom-metadata-fields.html#reserved)\n\n  Note that updating the `id` will trigger an internal process to update the `id` in any videos that have the custom field.",
     )
     required: bool | None = Field(
-        False,
+        default=False,
         description="whether field must have a value before video can be active",
     )
-    type: str | None = Field(None, description="custom field type (enum or string)")
+    type: str | None = Field(
+        default=None, description="custom field type (enum or string)"
+    )
 
 
 class VideoImages(BaseModel):
@@ -1056,13 +1078,13 @@ class VideoShare(BaseModel):
         ...,
         description="the id of the shared video in the affiliate account",
     )
-    shared_at: str | None = Field(None, description="when the video was shared")
+    shared_at: str | None = Field(default=None, description="when the video was shared")
     status: str | None = Field(
-        None,
+        default=None,
         description="the status of the sharing - either PROCESSING, COMPLETE, or FAILED",
     )
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="the video was last updated in the affiliate account",
     )
     video_id: str = Field(..., description="the video id")
@@ -1076,29 +1098,35 @@ class VideoShareList(RootModel[list[VideoShare]]):
 
 
 class VideoSources(BaseModel):
-    app_name: str | None = Field(None, description="address for RTMP stream")
-    asset_id: str | None = Field(None, description="system id for the rendition")
-    codec: str | None = Field(None, description="the video codec for the rendition")
+    app_name: str | None = Field(default=None, description="address for RTMP stream")
+    asset_id: str | None = Field(
+        default=None, description="system id for the rendition"
+    )
+    codec: str | None = Field(
+        default=None, description="the video codec for the rendition"
+    )
     container: str | None = Field(
-        None,
+        default=None,
         description="the video container for the rendition",
     )
-    duration: int | None = Field(None, description="duration in milliseconds")
-    encoding_rate: int | None = Field(None, description="encoding rate in bps")
-    height: int | None = Field(None, description="frame height in pixels")
+    duration: int | None = Field(default=None, description="duration in milliseconds")
+    encoding_rate: int | None = Field(default=None, description="encoding rate in bps")
+    height: int | None = Field(default=None, description="frame height in pixels")
     remote: bool | None = Field(
-        None,
+        default=None,
         description="whether the source is a remote asset",
     )
-    size: int | None = Field(None, description="file size in bytes")
-    src: str | None = Field(None, description="URL for HTTP rendition")
-    stream_name: str | None = Field(None, description="the stream name on the CDN")
-    type: str | None = Field(None, description="the type for segmented streams")
+    size: int | None = Field(default=None, description="file size in bytes")
+    src: str | None = Field(default=None, description="URL for HTTP rendition")
+    stream_name: str | None = Field(
+        default=None, description="the stream name on the CDN"
+    )
+    type: str | None = Field(default=None, description="the type for segmented streams")
     uploaded_at: str | None = Field(
-        None,
+        default=None,
         description="date/time when the video was uploaded",
     )
-    width: int | None = Field(None, description="frame width in pixels")
+    width: int | None = Field(default=None, description="frame width in pixels")
 
 
 class VideoSourcesList(RootModel[list[VideoSources]]):
@@ -1110,33 +1138,33 @@ class VideoSourcesList(RootModel[list[VideoSources]]):
 
 class CreateVideoRequestBodyFields(BaseModel):
     cue_points: list[CuePoint] | None = Field(
-        None,
+        default=None,
         description="Array of cuepoint objects",
     )
     custom_fields: dict[str, Any] | None = Field(
-        None,
+        default=None,
         description="map of `fieldname: value` pairs; values have a maximum length of 1024 single-byte characters Note: be sure to use the **internal** name for the field, not the display name",
         examples=[{"subject": "birds"}],
     )
     description: str | None = Field(
-        None,
+        default=None,
         description="Video short description",
         examples=["Laughing Gull"],
         max_length=250,
     )
     drm_disabled: bool | None = Field(
-        None,
+        default=None,
         description="Use to disable DRM packaging for this video - applies only to DRM-enabled accounts",
         examples=[True],
     )
     economics: Economics | None = Field(
-        None,
+        default=None,
         description="whether the video supports ads",
         examples=["AD_SUPPORTED"],
     )
     geo: Geo | None = None
     long_description: str | None = Field(
-        None,
+        default=None,
         description="A longer description of the video",
         examples=[
             "Herring Gull near Fort Point Channel in Boston, MA, USA. 2019-04-25.",
@@ -1151,30 +1179,30 @@ class CreateVideoRequestBodyFields(BaseModel):
         min_length=1,
     )
     offline_enabled: bool | None = Field(
-        False,
+        default=False,
         description="whether video is enabled for offline viewing",
         examples=[True],
     )
     reference_id: str | None = Field(
-        None,
+        default=None,
         description="Reference id for the clip - must be unique within the account",
         examples=["laughing_gull_2019_04_25"],
     )
     schedule: Schedule | None = None
     state: State | None = Field(
-        None,
+        default=None,
         description="Whether the video should be active or inactive",
         examples=["ACTIVE"],
     )
     tags: list[Tag] | None = Field(
-        None,
+        default=None,
         description="Array of tags for the video - note that  tags are string that may not contain a comma or more than 128 characters",
         examples=[["birds", "sea"]],
     )
 
 
 class Image(BaseModel):
-    asset_id: str | None = Field(None, description="asset id for the image")
+    asset_id: str | None = Field(default=None, description="asset id for the image")
     sources: list[Image_1.Sources] = Field(
         ...,
         description="array of image source maps",
@@ -1191,54 +1219,54 @@ class ImageList(RootModel[dict[str, Image]]):
 
 class Video(BaseModel):
     ad_keys: str | None = Field(
-        None,
+        default=None,
         description="string representing the ad key/value pairs assigned to the video. Key/value pairs are formatted as key=value and are separated by ampersands - can only be added on update, not creation",
         examples=[' "adKeys": "category=sports&live=true"'],
     )
     clip_source_video_id: str | None = Field(
-        None,
+        default=None,
         description="The ID of the source video that was clipped to produce this video or null if this video is not a clip of another video",
         examples=[4723947979],
     )
     complete: bool | None = Field(
-        None,
+        default=None,
         description="whether the video has at least one rendition -Note: when you create a new video, the complete property is automatically set to false. As soon as one rendition exists for the video, the complete property will be automatically set to true. This does **not mean that all renditions are created and images and captions processed**. For the full status of ingestion, see [Dynamic Ingest API Notifications](/dynamic-ingest/general/notifications-dynamic-delivery-video-cloud.html)",
         examples=[True],
     )
     created_at: str | None = Field(
-        None,
+        default=None,
         description="when the video was created",
         examples=["2015-09-17T16:08:37.108Z"],
     )
     created_by: User | None = None
     cue_points: list[CuePoint] | None = Field(
-        None,
+        default=None,
         description="array of cue points - can be added on creation or update",
     )
     custom_fields: dict[str, str] | None = None
     delivery_type: DeliveryType | None = Field(
-        None,
+        default=None,
         description="video delivery type:\n  - `remote`: a remote asset\n  - `dynamic_origin`: processed using the Dynamic Delivery ingest system\n  - `live_origin`: a live stream from Brightcove Live\n  - `unknown`: the delivery type could not be determined (may mean there are no playable renditions)",
         examples=["dynamic_origin"],
     )
     description: str | None = Field(
-        None,
+        default=None,
         description="video short description",
         examples=["Herring gull on a wharf in Boston"],
         max_length=248,
     )
     digital_master_id: str | None = Field(
-        None,
+        default=None,
         description="asset id of the digital master",
         examples=[734462494001],
     )
     drm_disabled: bool | None = Field(
-        None,
+        default=None,
         description="if true, the video is not DRM-packaged - applies to accounts that are enabled for DRM only",
         examples=[True],
     )
     duration: int | None = Field(
-        None,
+        default=None,
         description="video duration in milliseconds",
         examples=[18160],
     )
@@ -1248,30 +1276,32 @@ class Video(BaseModel):
         examples=["AD_SUPPORTED"],
     )
     folder_id: str | None = Field(
-        None,
+        default=None,
         description="id of the folder that contains the video",
         examples=["560039e5e4b0e69e4b01cacd"],
     )
     forensic_watermarking: ForensicWatermarking | None = Field(
-        None,
+        default=None,
         description="Indicates whether the video has forensic watermarking\n\npossible values:\n\n- `ACTIVE` - the video was transcoded with forensic watermarking and should be used during delivery\n- `UNAVAILABLE` - the video was not transcoded with forensic watermarking support and can’t be delivered using it\n- `null` - the value is for forensic watermarking is not available for the account; in this case the field is not returned in API responses\n\nif the video was not ingested with forensic watermarking, this field will be set to `UNAVAILABLE` automatically; if the video was ingested or retranscoded with forensic watermarking, this field will be set to `ACTIVE` automatically",
         examples=["ACTIVE"],
     )
     geo: Geo | None = None
     has_digital_master: bool | None = Field(
-        None,
+        default=None,
         description="whether video has an archived master than can be used for retranscoding",
         examples=[True],
     )
-    id: str | None = Field(None, description="video id", examples=[734462567001])
+    id: str | None = Field(
+        default=None, description="video id", examples=[734462567001]
+    )
     images: VideoImages | None = None
     labels: list[str] | None = Field(
-        None,
+        default=None,
         description="Array of labels assigned to the video. See [Working with Labels](/cms/managing-videos/working-with-labels.html) for more information.",
     )
     link: Link | None = None
     long_description: str | None = Field(
-        None,
+        default=None,
         description="video long description - can only be added on update, not creation",
         examples=[
             "Herring Gull near Fort Point Channel in Boston, MA, USA. 2019-04-25.",
@@ -1279,38 +1309,38 @@ class Video(BaseModel):
         max_length=5000,
     )
     name: str | None = Field(
-        None,
+        default=None,
         description="video title",
         examples=["Laughing Gull"],
         max_length=255,
         min_length=1,
     )
     offline_enabled: bool | None = Field(
-        False,
+        default=False,
         description="whether video is enabled for offline viewing",
         examples=[True],
     )
     original_filename: str | None = Field(
-        None,
+        default=None,
         description="the original file name for the uploaded video",
         examples=["gull-boston.mov"],
     )
     playback_rights_id: str | None = Field(
-        None,
+        default=None,
         description="Associates specified EPA playback rights with video.",
     )
     projection: Projection | None = Field(
-        None,
+        default=None,
         description="used for 360 videos",
         examples=["equirectangular"],
     )
     published_at: str | None = Field(
-        None,
+        default=None,
         description="start date-time of first activation in ISO-8601(https://www.ecma-international.org/ecma-262/5.1/#sec-15.9.1.15) format",
         examples=["2019-04-30T23:27:22.507Z"],
     )
     reference_id: str | None = Field(
-        None,
+        default=None,
         description="video reference-id (must be unique within the account)",
         examples=["laughing_gull_2019_04_25"],
         max_length=150,
@@ -1318,25 +1348,25 @@ class Video(BaseModel):
     schedule: Schedule | None = None
     sharing: Sharing | None = None
     state: State3 | None = Field(
-        None,
+        default=None,
         description="The state of the video:\n  - ACTIVE: the video is playable\n  - INACTIVE: the video is not playable\n  - PENDING: \n  - DELETED: the video has been deleted (within the past 10 days; after that, the API won't return the video)",
         examples=["ACTIVE"],
     )
     tags: list[Tag] | None = Field(
-        None,
+        default=None,
         description="array of tags - maximum characters per tag is 1000",
         examples=[["birds", "sea"]],
     )
     text_tracks: list[TextTrack] | None = Field(
-        None,
+        default=None,
         description="array of text tracks - can only be added on update, not creation",
     )
     transcripts: list[Transcript] | None = Field(
-        None,
+        default=None,
         description="array of transcription objects - can only be added on update, not creation",
     )
     updated_at: str | None = Field(
-        None,
+        default=None,
         description="when the video was last modified",
         examples=["2018-02-27T19:09:20.401Z"],
     )
@@ -1346,15 +1376,15 @@ class Video(BaseModel):
 
 class VideoFields(BaseModel):
     custom_fields: list[Videofields.CustomField] | None = Field(
-        None,
+        default=None,
         description="array of standard field maps",
     )
     max_custom_fields: str | None = Field(
-        None,
+        default=None,
         description="maximum number of custom fields for the account",
     )
     standard_fields: list[Videofields.StandardField] | None = Field(
-        None,
+        default=None,
         description="array of standard field maps",
     )
 
