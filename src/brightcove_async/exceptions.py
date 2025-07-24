@@ -52,7 +52,7 @@ class BrightcoveUnknownError(BrightcoveServerError):
     """Raised when there is an unknown issue with Brightcove."""
 
 
-def map_status_code_to_exception(status_code: int) -> BrightcoveError:
+def map_status_code_to_exception(status_code: int) -> type[Exception]:
     """Map HTTP status codes to Brightcove exception classes using HTTPStatus."""
     mapping = {
         HTTPStatus.UNAUTHORIZED: BrightcoveAuthError,
