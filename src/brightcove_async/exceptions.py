@@ -64,6 +64,6 @@ def map_status_code_to_exception(status_code: int) -> type[Exception]:
         HTTPStatus.INTERNAL_SERVER_ERROR: BrightcoveUnknownError,
     }
 
-    status = HTTPStatus(status_code)
+    status = status_code if isinstance(status_code, HTTPStatus) else HTTPStatus(status_code)
 
     return mapping.get(status, BrightcoveUnknownError)
