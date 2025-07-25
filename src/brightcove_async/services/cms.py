@@ -25,6 +25,10 @@ from brightcove_async.schemas.cms_model import (
     VideoVariant,
     VideoVariants,
 )
+from brightcove_async.schemas.cms_model.params import (
+    GetVideoCountParams,
+    GetVideosQueryParams,
+)
 from brightcove_async.services.base import Base
 
 
@@ -43,12 +47,12 @@ class CMS(Base):
     async def get_videos(
         self,
         account_id: str,
-        params: dict[str, str] | None = None,
+        params: GetVideosQueryParams | None = None,
     ) -> VideoArray:
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/videos",
             model=VideoArray,
-            params=params,
+            params=dict(params) if params else None,
         )
 
     async def create_video(
@@ -66,6 +70,7 @@ class CMS(Base):
         account_id: str,
         page_size: int = 25,
         number_of_pages: int | None = None,
+        params: GetVideosQueryParams | None = None,
     ) -> VideoArray:
         results = VideoArray(root=[])
 
@@ -87,7 +92,7 @@ class CMS(Base):
             self.fetch_data(
                 endpoint=f"{self.base_url}{account_id}/videos",
                 model=VideoArray,
-                params={"limit": page_size, "offset": i * page_size},
+                params={**(params or {}), "limit": page_size, "offset": i * page_size},
             )
             for i in range(total_pages)
         ]
@@ -99,10 +104,13 @@ class CMS(Base):
 
         return results
 
-    async def get_video_count(self, account_id: str) -> VideoCount:
+    async def get_video_count(
+        self, account_id: str, params: GetVideoCountParams | None = None
+    ) -> VideoCount:
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/counts/videos",
             model=VideoCount,
+            params=dict(params) if params else None,
         )
 
     async def get_video_fields(self, account_id: str) -> CustomFields:
