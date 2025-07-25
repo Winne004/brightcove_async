@@ -77,7 +77,7 @@ class CMS(Base):
         if page_size > self._page_limit:
             raise ValueError("page_size must be less than or equal to 100")
 
-        count = await self.get_video_count(account_id)
+        count = await self.get_video_count(account_id, params=params)
 
         if count.count is None or count.count == 0:
             return results
