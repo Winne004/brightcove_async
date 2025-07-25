@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
-class Variant(Enum):
+class Variant(StrEnum):
     main = "main"
     alternate = "alternate"
     commentary = "commentary"
