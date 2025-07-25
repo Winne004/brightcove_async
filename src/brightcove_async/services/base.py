@@ -13,7 +13,10 @@ from tenacity import (
     wait_exponential,
 )
 
-from brightcove_async.exceptions import BrightcoveAuthError
+from brightcove_async.exceptions import (
+    BrightcoveAuthError,
+    map_status_code_to_exception,
+)
 from brightcove_async.protocols import OAuthClientProtocol
 
 T = TypeVar("T", bound=BaseModel)
@@ -105,10 +108,7 @@ class Base(ABC):
             try:
                 response.raise_for_status()
             except aiohttp.ClientResponseError as e:
-                if HTTPStatus(e.status) == HTTPStatus.UNAUTHORIZED:
-                    raise BrightcoveAuthError(
-                        "Authentication failed. Please check your credentials.",
-                    ) from e
+                raise map_status_code_to_exception(HTTPStatus(e.status)) from e
 
             json_data = await response.json()
             return model.model_validate(json_data, strict=False)
