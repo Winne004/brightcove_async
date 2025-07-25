@@ -5,10 +5,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, Field, RootModel, field_validator
 
 from . import Image as Image_1
 from . import Videofields
@@ -18,7 +18,7 @@ class AddAffiliate(BaseModel):
     account_id: str | None = Field(default=None, description="affiliate account id")
 
 
-class Variant(Enum):
+class Variant(StrEnum):
     main = "main"
     alternate = "alternate"
     commentary = "commentary"
@@ -71,7 +71,8 @@ class Channel(BaseModel):
     account_id: str | None = Field(default=None, description="master account id")
     account_name: str | None = Field(default=None, description="master account name")
     created_at: str | None = Field(
-        default=None, description="when the channel was created"
+        default=None,
+        description="when the channel was created",
     )
     enforce_custom_fields: bool | None = Field(
         default=None,
@@ -129,7 +130,8 @@ class Contract(BaseModel):
     )
     channel: Channel | None = None
     created_at: str | None = Field(
-        default=None, description="when the contract was created"
+        default=None,
+        description="when the contract was created",
     )
     updated_at: str | None = Field(
         default=None,
@@ -145,12 +147,12 @@ class ContractList(RootModel[list[Contract]]):
     )
 
 
-class Economics(Enum):
+class Economics(StrEnum):
     AD_SUPPORTED = "AD_SUPPORTED"
     FREE = "FREE"
 
 
-class State(Enum):
+class State(StrEnum):
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
 
@@ -159,7 +161,7 @@ class Tag(RootModel[str]):
     root: str = Field(..., max_length=128)
 
 
-class Type(Enum):
+class Type(StrEnum):
     AD = "AD"
     DATA = "DATA"
     CODE = "CODE"
@@ -234,12 +236,12 @@ class Drm(BaseModel):
     state: str | None = None
 
 
-class MediaType(Enum):
+class MediaType(StrEnum):
     audio = "audio"
     video = "video"
 
 
-class Variant1(Enum):
+class Variant1(StrEnum):
     baseline = "baseline"
     main = "main"
     high = "high"
@@ -297,7 +299,9 @@ class Folder(BaseModel):
         examples=["5a17275782aca45b631295f9"],
     )
     name: str | None = Field(
-        default=None, description="folder name", examples=["birds"]
+        default=None,
+        description="folder name",
+        examples=["birds"],
     )
     updated_at: str | None = Field(
         default=None,
@@ -329,7 +333,8 @@ class Geo(BaseModel):
 
 class ImageAsset(BaseModel):
     audio_only: bool | None = Field(
-        default=None, description="not applicable to posters"
+        default=None,
+        description="not applicable to posters",
     )
     cdn_origin_id: str | None = Field(
         default=None,
@@ -381,7 +386,7 @@ class ImageAsset(BaseModel):
     )
 
 
-class State1(Enum):
+class State1(StrEnum):
     processing = "processing"
     publishing = "publishing"
     published = "published"
@@ -486,10 +491,14 @@ class LabelUpdate(BaseModel):
 
 class Link(BaseModel):
     text: str | None = Field(
-        default=None, description="text for the link", max_length=255
+        default=None,
+        description="text for the link",
+        max_length=255,
     )
     url: str | None = Field(
-        default=None, description="URL for the link", max_length=255
+        default=None,
+        description="URL for the link",
+        max_length=255,
     )
 
 
@@ -552,12 +561,12 @@ class Manifest(BaseModel):
     )
 
 
-class State2(Enum):
+class State2(StrEnum):
     READY = "READY"
     UPDATING = "UPDATING"
 
 
-class PlaylistType(Enum):
+class PlaylistType(StrEnum):
     EXPLICIT = "EXPLICIT"
     ACTIVATED_OLDEST_TO_NEWEST = "ACTIVATED_OLDEST_TO_NEWEST"
     ACTIVATED_NEWEST_TO_OLDEST = "ACTIVATED_NEWEST_TO_OLDEST"
@@ -647,7 +656,7 @@ class PlaylistCount(BaseModel):
     count: int | None = Field(default=None, description="count of videos")
 
 
-class SearchSyntax(Enum):
+class SearchSyntax(StrEnum):
     v1 = "v1"
     v2 = "v2"
 
@@ -760,7 +769,7 @@ class Sharing(BaseModel):
     )
 
 
-class Event(Enum):
+class Event(StrEnum):
     video_change = "video-change"
 
 
@@ -787,7 +796,7 @@ class Subscription(BaseModel):
     )
 
 
-class Kind(Enum):
+class Kind(StrEnum):
     subtitles = "subtitles"
     captions = "captions"
     descriptions = "descriptions"
@@ -819,7 +828,7 @@ class TextTrack(BaseModel):
     )
 
 
-class Status(Enum):
+class Status(StrEnum):
     draft = "draft"
     published = "published"
 
@@ -847,7 +856,7 @@ class Transcript(BaseModel):
     )
 
 
-class UserType(Enum):
+class UserType(StrEnum):
     user = "user"
     api_key = "api_key"
     internal = "internal"
@@ -860,7 +869,8 @@ class User(BaseModel):
         description="the user's email address in Video Cloud",
     )
     id: str | None = Field(
-        default=None, description="Video Cloud system id of the user"
+        default=None,
+        description="Video Cloud system id of the user",
     )
     type: UserType | None = Field(
         default=None,
@@ -899,23 +909,23 @@ class VideoVariants(RootModel[list[VideoVariant]]):
     )
 
 
-class DeliveryType(Enum):
+class DeliveryType(StrEnum):
     remote = "remote"
     dynamic_origin = "dynamic_origin"
     live_origin = "live_origin"
     unknown = "unknown"
 
 
-class ForensicWatermarking(Enum):
+class ForensicWatermarking(StrEnum):
     ACTIVE = "ACTIVE"
     UNAVAILABLE = "UNAVAILABLE"
 
 
-class Projection(Enum):
+class Projection(StrEnum):
     equirectangular = "equirectangular"
 
 
-class State3(Enum):
+class State3(StrEnum):
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
     PENDING = "PENDING"
@@ -924,7 +934,8 @@ class State3(Enum):
 
 class VideoAsset(BaseModel):
     account_id: str | None = Field(
-        default=None, description="the Video Cloud account id"
+        default=None,
+        description="the Video Cloud account id",
     )
     audio_only: bool | None = Field(
         default=None,
@@ -998,12 +1009,13 @@ class VideoAsset(BaseModel):
         description="not applicable to remote assets",
     )
     video_duration: int | None = Field(
-        default=None, description="duration in milliseconds"
+        default=None,
+        description="duration in milliseconds",
     )
 
 
-class VideoAssets(RootModel[list[VideoAsset] | VideoAsset]):
-    root: list[VideoAsset] | VideoAsset = Field(
+class VideoAssets(RootModel[VideoAsset]):
+    root: VideoAsset = Field(
         ...,
         description="Array of video assets for the video",
     )
@@ -1040,7 +1052,8 @@ class CustomField(BaseModel):
         description="whether field must have a value before video can be active",
     )
     type: str | None = Field(
-        default=None, description="custom field type (enum or string)"
+        default=None,
+        description="custom field type (enum or string)",
     )
 
 
@@ -1063,7 +1076,8 @@ class CustomFieldUpdate(BaseModel):
         description="whether field must have a value before video can be active",
     )
     type: str | None = Field(
-        default=None, description="custom field type (enum or string)"
+        default=None,
+        description="custom field type (enum or string)",
     )
 
 
@@ -1102,10 +1116,12 @@ class VideoShareList(RootModel[list[VideoShare]]):
 class VideoSources(BaseModel):
     app_name: str | None = Field(default=None, description="address for RTMP stream")
     asset_id: str | None = Field(
-        default=None, description="system id for the rendition"
+        default=None,
+        description="system id for the rendition",
     )
     codec: str | None = Field(
-        default=None, description="the video codec for the rendition"
+        default=None,
+        description="the video codec for the rendition",
     )
     container: str | None = Field(
         default=None,
@@ -1121,7 +1137,8 @@ class VideoSources(BaseModel):
     size: int | None = Field(default=None, description="file size in bytes")
     src: str | None = Field(default=None, description="URL for HTTP rendition")
     stream_name: str | None = Field(
-        default=None, description="the stream name on the CDN"
+        default=None,
+        description="the stream name on the CDN",
     )
     type: str | None = Field(default=None, description="the type for segmented streams")
     uploaded_at: str | None = Field(
@@ -1294,7 +1311,9 @@ class Video(BaseModel):
         examples=[True],
     )
     id: str | None = Field(
-        default=None, description="video id", examples=[734462567001]
+        default=None,
+        description="video id",
+        examples=[734462567001],
     )
     images: VideoImages | None = None
     labels: list[str] | None = Field(
@@ -1400,3 +1419,8 @@ class VideoArray(RootModel[list[Video]]):
         ...,
         description="Array of video objects",
     )
+
+    @field_validator("root", mode="before")
+    @classmethod
+    def ensure_list(cls, v):
+        return v if isinstance(v, list) else [v]

@@ -19,12 +19,15 @@ from brightcove_async.schemas.cms_model import (
     Playlist,
     Video,
     VideoArray,
-    VideoAssets,
     VideoCount,
     VideoShareList,
     VideoSourcesList,
     VideoVariant,
     VideoVariants,
+)
+from brightcove_async.schemas.cms_model.params import (
+    GetVideoCountParams,
+    GetVideosQueryParams,
 )
 from brightcove_async.services.base import Base
 
@@ -44,12 +47,12 @@ class CMS(Base):
     async def get_videos(
         self,
         account_id: str,
-        params: dict[str, str] | None = None,
+        params: GetVideosQueryParams | None = None,
     ) -> VideoArray:
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/videos",
             model=VideoArray,
-            params=params,
+            params=dict(params) if params else None,
         )
 
     async def create_video(
@@ -67,13 +70,14 @@ class CMS(Base):
         account_id: str,
         page_size: int = 25,
         number_of_pages: int | None = None,
+        params: GetVideosQueryParams | None = None,
     ) -> VideoArray:
         results = VideoArray(root=[])
 
         if page_size > self._page_limit:
             raise ValueError("page_size must be less than or equal to 100")
 
-        count = await self.get_video_count(account_id)
+        count = await self.get_video_count(account_id, params=params)
 
         if count.count is None or count.count == 0:
             return results
@@ -88,7 +92,7 @@ class CMS(Base):
             self.fetch_data(
                 endpoint=f"{self.base_url}{account_id}/videos",
                 model=VideoArray,
-                params={"limit": page_size, "offset": i * page_size},
+                params={**(params or {}), "limit": page_size, "offset": i * page_size},
             )
             for i in range(total_pages)
         ]
@@ -100,10 +104,13 @@ class CMS(Base):
 
         return results
 
-    async def get_video_count(self, account_id: str) -> VideoCount:
+    async def get_video_count(
+        self, account_id: str, params: GetVideoCountParams | None = None
+    ) -> VideoCount:
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/counts/videos",
             model=VideoCount,
+            params=dict(params) if params else None,
         )
 
     async def get_video_fields(self, account_id: str) -> CustomFields:
@@ -116,13 +123,18 @@ class CMS(Base):
         self,
         account_id: str,
         video_ids: list[str],
-    ) -> VideoAssets:
+    ) -> VideoArray:
         if len(video_ids) > 10:
             raise ValueError("video_ids must contain 10 or fewer IDs")
+        if len(video_ids) == 0:
+            raise ValueError("video_ids must contain at least one ID")
+
+        # video_model = Video if len(video_ids) == 1 else VideoArray
         video_ids_str = ",".join(video_ids)
+
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/videos/{video_ids_str}",
-            model=VideoAssets,
+            model=VideoArray,
         )
 
     async def get_video_sources(

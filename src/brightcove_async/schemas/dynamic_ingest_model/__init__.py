@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field, RootModel
@@ -38,7 +38,7 @@ class GetS3UrlsResponse(BaseModel):
     )
 
 
-class Priority(Enum):
+class Priority(StrEnum):
     low = "low"
     normal = "normal"
 
@@ -92,7 +92,7 @@ class IngestMediaAssetbody(BaseModel):
     )
 
 
-class Variant(Enum):
+class Variant(StrEnum):
     main = "main"
     alternate = "alternate"
     commentary = "commentary"
@@ -134,7 +134,7 @@ class Master(BaseModel):
     )
 
 
-class Kind(Enum):
+class Kind(StrEnum):
     captions = "captions"
     subtitles = "subtitles"
     chapters = "chapters"
@@ -142,7 +142,7 @@ class Kind(Enum):
     transcripts = "transcripts"
 
 
-class Status(Enum):
+class Status(StrEnum):
     published = "published"
     draft = "draft"
 
@@ -172,7 +172,7 @@ class TextTracks(BaseModel):
     )
 
 
-class Language(Enum):
+class Language(StrEnum):
     af_ZA = "af-ZA"
     ar_AE = "ar-AE"
     ar_SA = "ar-SA"
@@ -215,7 +215,7 @@ class Language(Enum):
     zh_TW = "zh-TW"
 
 
-class VariantModel(Enum):
+class VariantModel(StrEnum):
     main = "main"
     alternate = "alternate"
     dub = "dub"
@@ -234,12 +234,12 @@ class InputAudioTrack(BaseModel):
     )
 
 
-class KindModel(Enum):
+class KindModel(StrEnum):
     captions = "captions"
     transcripts = "transcripts"
 
 
-class Srclang(Enum):
+class Srclang(StrEnum):
     af_ZA = "af-ZA"
     ar_AE = "ar-AE"
     ar_SA = "ar-SA"
@@ -344,7 +344,7 @@ class Thumbnail(BaseModel):
     width: float | None = Field(default=None, description="pixel width of the image")
 
 
-class VariantModel1(Enum):
+class VariantModel1(StrEnum):
     poster = "poster"
     thumbnail = "thumbnail"
     portrait = "portrait"
@@ -353,7 +353,7 @@ class VariantModel1(Enum):
     ultra_wide = "ultra-wide"
 
 
-class Label(Enum):
+class Label(StrEnum):
     poster = "poster"
     thumbnail = "thumbnail"
 
