@@ -44,7 +44,7 @@ class BrightcoveTooManyRequestsError(BrightcoveClientError):
     """Raised when too many requests are made to the Brightcove API."""
 
 
-class BrightcoveServerError(Exception):
+class BrightcoveServerError(BrightcoveError):
     """Base class for server errors."""
 
 
