@@ -19,7 +19,6 @@ from brightcove_async.schemas.cms_model import (
     Playlist,
     Video,
     VideoArray,
-    VideoAssets,
     VideoCount,
     VideoShareList,
     VideoSourcesList,
@@ -116,13 +115,18 @@ class CMS(Base):
         self,
         account_id: str,
         video_ids: list[str],
-    ) -> VideoAssets:
+    ) -> VideoArray:
         if len(video_ids) > 10:
             raise ValueError("video_ids must contain 10 or fewer IDs")
+        if len(video_ids) == 0:
+            raise ValueError("video_ids must contain at least one ID")
+
+        # video_model = Video if len(video_ids) == 1 else VideoArray
         video_ids_str = ",".join(video_ids)
+
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/videos/{video_ids_str}",
-            model=VideoAssets,
+            model=VideoArray,
         )
 
     async def get_video_sources(
