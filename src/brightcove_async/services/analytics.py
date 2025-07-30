@@ -31,7 +31,19 @@ class Analytics(Base):
         """
         return await self.fetch_data(
             endpoint=f"{self.base_url}/engagement/accounts/{account_id}",
-            model=Timeline,  # Replace with appropriate model if available
+            model=Timeline,
+        )
+
+    async def get_player_engagement(self, account_id: str, player_id: str) -> Timeline:
+        """Fetches player engagement metrics.
+
+        :param account_id: Brightcove account ID.
+        :param player_id: Player ID for which to fetch engagement metrics.
+        :return: Dictionary containing player engagement data.
+        """
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/engagement/accounts/{account_id}/players/{player_id}",
+            model=Timeline,
         )
 
     async def get_video_analytics(
