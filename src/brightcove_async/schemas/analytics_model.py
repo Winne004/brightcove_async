@@ -101,6 +101,10 @@ class Timeline(BaseModel):
     timeline: TimeSeries
 
 
+class TimelineWithDuration(Timeline):
+    video_duration: GetVideoEngagementResponse | None = None
+
+
 class GetTimeSeriesResponse(BaseModel):
     interval: list[int] | None = Field(
         None,

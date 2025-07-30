@@ -4,6 +4,7 @@ from brightcove_async.protocols import OAuthClientProtocol
 from brightcove_async.schemas.analytics_model import (
     GetAlltimeVideoViewsResponse,
     Timeline,
+    TimelineWithDuration,
 )
 
 from brightcove_async.services.base import Base
@@ -44,6 +45,20 @@ class Analytics(Base):
         return await self.fetch_data(
             endpoint=f"{self.base_url}/engagement/accounts/{account_id}/players/{player_id}",
             model=Timeline,
+        )
+
+    async def get_video_engagement(
+        self, account_id: str, video_id: str
+    ) -> TimelineWithDuration:
+        """Fetches video engagement metrics.
+
+        :param account_id: Brightcove account ID.
+        :param video_id: Video ID for which to fetch engagement metrics.
+        :return: Dictionary containing video engagement data.
+        """
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/engagement/accounts/{account_id}/videos/{video_id}",
+            model=TimelineWithDuration,
         )
 
     async def get_video_analytics(
