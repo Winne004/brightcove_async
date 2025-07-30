@@ -89,12 +89,16 @@ class Summary(BaseModel):
     )
 
 
-class Timeline(BaseModel):
+class TimeSeries(BaseModel):
     type: str = Field(..., description="The type of the timeline array")
     values: list[float] = Field(
         ...,
         description="Array of views in each 100th part of video duration",
     )
+
+
+class Timeline(BaseModel):
+    timeline: TimeSeries
 
 
 class GetTimeSeriesResponse(BaseModel):
