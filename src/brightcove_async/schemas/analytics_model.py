@@ -4,86 +4,86 @@
 
 from __future__ import annotations
 
-from enum import Enum
-from typing import Any, Dict, List, Optional
+from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
 class Summary(BaseModel):
-    ad_mode_begin: Optional[int] = Field(
+    ad_mode_begin: int | None = Field(
         None,
         description="Total ad mode begin events received for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    ad_mode_complete: Optional[int] = Field(
+    ad_mode_complete: int | None = Field(
         None,
         description="Total ad mode complete events received for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    active_media: Optional[int] = Field(
+    active_media: int | None = Field(
         None,
         description="Total active videos in account(s) - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    bytes_delivered: Optional[int] = Field(
+    bytes_delivered: int | None = Field(
         None,
         description="Total bytes of data delivered for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    daily_unique_viewers: Optional[int] = Field(
+    daily_unique_viewers: int | None = Field(
         None,
         description="Total daily unique viewers for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    drm_bytes_packaged: Optional[float] = Field(
+    drm_bytes_packaged: float | None = Field(
         None,
         description="Total DRM bytes packaged for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    engagement_score: Optional[float] = Field(
+    engagement_score: float | None = Field(
         None,
         description="Average engagement score for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    licenses_served: Optional[int] = Field(
+    licenses_served: int | None = Field(
         None,
         description="Total DRM licenses serverd for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    live_seconds_streamed: Optional[float] = Field(
+    live_seconds_streamed: float | None = Field(
         None,
         description="Total second of live video streamed for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    play_rate: Optional[float] = Field(
+    play_rate: float | None = Field(
         None,
         description="Average play rate for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    play_request: Optional[int] = Field(
+    play_request: int | None = Field(
         None,
         description="Total play requests for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    player_load: Optional[int] = Field(
+    player_load: int | None = Field(
         None,
         description="Total player loads for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    video_engagement_1: Optional[float] = Field(
+    video_engagement_1: float | None = Field(
         None,
         description="Average views at 1% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    video_engagement_25: Optional[float] = Field(
+    video_engagement_25: float | None = Field(
         None,
         description="Average views at 25% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    video_engagement_50: Optional[float] = Field(
+    video_engagement_50: float | None = Field(
         None,
         description="Average views at 50% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    video_engagement_75: Optional[float] = Field(
+    video_engagement_75: float | None = Field(
         None,
         description="Average views at 75% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    video_engagement_100: Optional[float] = Field(
+    video_engagement_100: float | None = Field(
         None,
         description="Average views at 100% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    video_impression: Optional[int] = Field(
+    video_impression: int | None = Field(
         None,
         description="Total video impressions for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
-    video_view: Optional[int] = Field(
+    video_view: int | None = Field(
         None,
         description="Total video views for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested",
     )
@@ -91,40 +91,42 @@ class Summary(BaseModel):
 
 class Timeline(BaseModel):
     type: str = Field(..., description="The type of the timeline array")
-    values: List[float] = Field(
-        ..., description="Array of views in each 100th part of video duration"
+    values: list[float] = Field(
+        ...,
+        description="Array of views in each 100th part of video duration",
     )
 
 
 class GetTimeSeriesResponse(BaseModel):
-    interval: Optional[List[int]] = Field(
+    interval: list[int] | None = Field(
         None,
         description="array containing the start and end points for the interval in the units specified by the `bucket_duration` parameter",
     )
-    dimensions: Optional[Dict[str, Any]] = Field(
+    dimensions: dict[str, Any] | None = Field(
         None,
         description="A set of dimension/value pairs corresponding to the dimensions specified in the `dimensions` parameter",
     )
-    points: Optional[List[Dict[str, Any]]] = Field(
+    points: list[dict[str, Any]] | None = Field(
         None,
         description="An array of objects containing metrics for the points in the time-series",
     )
 
 
 class Datum(BaseModel):
-    dimensions: Optional[Dict[str, Any]] = Field(
+    dimensions: dict[str, Any] | None = Field(
         None,
         description="Object containing dimension/value that the associated metrics are for",
     )
-    totals: Optional[Dict[str, Any]] = Field(
+    totals: dict[str, Any] | None = Field(
         None,
         description="Object containing metric/value pairs for the associated dimensions",
     )
 
 
 class GetEventsResponse(BaseModel):
-    data: Optional[List[Datum]] = Field(
-        None, description="array containing metrics per dimension(s)"
+    data: list[Datum] | None = Field(
+        None,
+        description="array containing metrics per dimension(s)",
     )
 
 
@@ -133,61 +135,75 @@ class GetVideoEngagementResponse(BaseModel):
 
 
 class Items(BaseModel):
-    ad_mode_begin: Optional[int] = Field(
-        None, description="number of times a player entered ad mode"
+    ad_mode_begin: int | None = Field(
+        None,
+        description="number of times a player entered ad mode",
     )
-    ad_mode_complete: Optional[int] = Field(
-        None, description="number of times a player completed ad mode"
+    ad_mode_complete: int | None = Field(
+        None,
+        description="number of times a player completed ad mode",
     )
-    bytes_delivered: Optional[float] = Field(
+    bytes_delivered: float | None = Field(
         None,
         description="the total bytes of data delivered, including the videos, other assets such as images and captions, and (for player reports) the player code - some of the date is obtained from CDNs and may not be available for up to 3 days",
     )
-    engagement_score: Optional[float] = Field(
-        None, description="the calculated engagement score for the video"
+    engagement_score: float | None = Field(
+        None,
+        description="the calculated engagement score for the video",
     )
-    play_rate: Optional[float] = Field(
-        None, description="video views divided by video impressions"
+    play_rate: float | None = Field(
+        None,
+        description="video views divided by video impressions",
     )
-    play_request: Optional[int] = Field(
-        None, description="number of play requests received for a video"
+    play_request: int | None = Field(
+        None,
+        description="number of play requests received for a video",
     )
-    video: Optional[str] = Field(None, description="the video id")
-    duration: Optional[str] = Field(
+    video: str | None = Field(None, description="the video id")
+    duration: str | None = Field(
         None,
         description="'the duration of the video in seconds (note that the duration is available only if there is at least one `video_view`)'",
     )
-    video_engagement_1: Optional[float] = Field(
-        None, description="number of views at the 1% point of the video duration"
+    video_engagement_1: float | None = Field(
+        None,
+        description="number of views at the 1% point of the video duration",
     )
-    video_engagement_25: Optional[float] = Field(
-        None, description="number of views at the 25% point of the video duration"
+    video_engagement_25: float | None = Field(
+        None,
+        description="number of views at the 25% point of the video duration",
     )
-    video_engagement_50: Optional[float] = Field(
-        None, description="number of views at the 50% point of the video duration"
+    video_engagement_50: float | None = Field(
+        None,
+        description="number of views at the 50% point of the video duration",
     )
-    video_engagement_75: Optional[float] = Field(
-        None, description="number of views at the 75% point of the video duration"
+    video_engagement_75: float | None = Field(
+        None,
+        description="number of views at the 75% point of the video duration",
     )
-    video_engagement_100: Optional[float] = Field(
-        None, description="number of views at the 100% point of the video duration"
+    video_engagement_100: float | None = Field(
+        None,
+        description="number of views at the 100% point of the video duration",
     )
-    video_impression: Optional[int] = Field(
-        None, description="number of times the video was loaded in a player"
+    video_impression: int | None = Field(
+        None,
+        description="number of times the video was loaded in a player",
     )
-    name: Optional[str] = Field(None, description="name of the video")
-    video_percent_viewed: Optional[float] = Field(
-        None, description="average percentage of the video played when viewed"
+    name: str | None = Field(None, description="name of the video")
+    video_percent_viewed: float | None = Field(
+        None,
+        description="average percentage of the video played when viewed",
     )
-    video_seconds_viewed: Optional[float] = Field(
-        None, description="total seconds of the video viewed"
+    video_seconds_viewed: float | None = Field(
+        None,
+        description="total seconds of the video viewed",
     )
-    video_view: Optional[int] = Field(
-        None, description="number of times some portion of the video was viewed"
+    video_view: int | None = Field(
+        None,
+        description="number of times some portion of the video was viewed",
     )
 
 
-class LiveDimensions(Enum):
+class LiveDimensions(StrEnum):
     video = "video"
     video_country = "video,country"
     video__device_type = "video, device_type"
@@ -208,7 +224,7 @@ class GetAlltimeVideoViewsResponse(BaseModel):
     alltime_video_views: int = Field(..., description="all-time video views")
 
 
-class Dimensions(Enum):
+class Dimensions(StrEnum):
     account = "account"
     city = "city"
     country = "country"
@@ -226,7 +242,7 @@ class Dimensions(Enum):
     video = "video"
 
 
-class Where(Enum):
+class Where(StrEnum):
     account = "account"
     city = "city"
     country = "country"
@@ -244,13 +260,13 @@ class Where(Enum):
     video = "video"
 
 
-class LiveWhere(Enum):
+class LiveWhere(StrEnum):
     country = "country"
     device_type = "device_type"
     video = "video"
 
 
-class Format(Enum):
+class Format(StrEnum):
     csv = "csv"
     json = "json"
     xlxs = "xlxs"
@@ -259,10 +275,12 @@ class Format(Enum):
 class GetAnalyticsReportResponse(BaseModel):
     account: str = Field(..., description="the Video Cloud account id")
     item_count: int = Field(
-        ..., description="the total number of items matching the request"
+        ...,
+        description="the total number of items matching the request",
     )
-    items: List[Items] = Field(
-        ..., description="array of analytics objects for the videos returned"
+    items: list[Items] = Field(
+        ...,
+        description="array of analytics objects for the videos returned",
     )
     summary: Summary
     video_engagement_1: float = Field(
