@@ -1,0 +1,1393 @@
+openapi: 3.0.3
+x-bc-implicit-head: true
+x-bc-implicit-options: true
+x-bc-upstream: 'https://backend_server'
+info:
+  title: Brightcove Analytics API Reference
+  description: |-
+    Reference for the Brightcove Analytics API, used to retrieve analytics data for your accounts. To test API requests, you can use our <a href="/getting-started/concepts-testing-tools-brightcove-apis.html" target="_blank">API Testing Tools</a>.
+
+    For additional in-depth guides to features of the API, see the **[general documentation](/analytics/index.html)**.
+
+     **Base URL**: https://analytics.api.brightcove.com
+  x-bc-access: public
+  version: 1.0.0
+servers:
+  - url: 'https://analytics.api.brightcove.com'
+    variables: {}
+tags:
+  - name: Engagement Report
+    description: 'Detailed engagement reports by account, video or player. Detailed engagement is available only for the most recent 32 days.'
+  - name: Analytics Report
+    description: >-
+      Full analytics reports with many options for filtering, date ranges, formats, and more.
+  - name: Video Data
+    description: Low latency endpoints for quickly retrieving a single piece of data.
+  - name: Live Analytics
+    description: Analytics for Live streams
+paths:
+  '/v1/engagement/accounts/{{account_id}}':
+    get:
+      tags:
+        - Engagement Report
+      summary: Get Account Engagement
+      description: >-
+        Get a summary report of engagement for the account. Note:  Engagement reports are only available for periods within the past 32 days. Requests outside that range will return an error The only parameters supported for Engagement reports are from and to Engagement reports are available for single accounts only - reports on multiple accounts will not work
+      operationId: GetAccountEngagement
+      security:
+        - BC_OAuth2:
+          - video-cloud/analytics/read
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Accept-Encoding'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timeline'
+        '400':
+          description: >-
+            BAD_REQUEST: The message fields of the response contains information about what caused the error such as invalid value for sort parameter
+
+            UNSUPPORTED_FIELD_COMBINATION_ERROR: The message fields of the
+            response contains information about what invalid fields were
+            specified
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials are correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '405':
+          description: >-
+            METHOD_NOT_ALLOWED: This error occurs when the api request is made
+            with an HTTP method other than GET
+        '500':
+          description: >-
+            SERVER_ERROR: Issue in Brightcove system; try again later
+
+            PROCESSING: The analytics API may send back this message if it encounters a long running query. Once the query has finished it will be stored in the server’s cache for up to 5 minutes. Therefore we suggest querying the API 4 minutes after receiving this error
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  '/v1/engagement/accounts/{{account_id}}/players/{{player_id}}':
+    get:
+      tags:
+        - Engagement Report
+      summary: Get Player Engagement
+      description: >-
+        Get a summary report of engagement for a player. Note:  Engagement reports are only available for periods within the past 32 days. Requests outside that range will return an error The only parameters supported for Engagement reports are from and to Engagement reports are available for single accounts only - reports on multiple accounts will not work
+      operationId: GetPlayerEngagement
+      security:
+        - BC_OAuth2:
+          - video-cloud/analytics/read
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Accept-Encoding'
+        - $ref: '#/components/parameters/player_id'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timeline'
+        '400':
+          description: >-
+            BAD_REQUEST: The message fields of the response contains information
+            about what caused the error such as invalid value for sort
+            parameter
+
+            UNSUPPORTED_FIELD_COMBINATION_ERROR: The message fields of the
+            response contains information about what invalid fields were
+            specified
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials are correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '405':
+          description: >-
+            METHOD_NOT_ALLOWED: This error occurs when the api request is made with an HTTP method other than GET
+        '500':
+          description: >-
+            SERVER_ERROR: Issue in Brightcove system; try again later
+
+            PROCESSING: The analytics API may send back this message if it encounters a long running query. Once the query has finished it will be stored in the server’s cache for up to 5 minutes. Therefore we suggest querying the API 4 minutes after receiving this error
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  '/v1/engagement/accounts/{{account_id}}/videos/{{video_id}}':
+    get:
+      tags:
+        - Engagement Report
+      summary: Get Video Engagement
+      description: >-
+        Get a summary report of engagement for a video. Note:  Engagement reports are only available for periods within the past 32 days. Requests outside that range will return an error The only parameters supported for Engagement reports are from and to Engagement reports are available for single accounts only - reports on multiple accounts will not work
+      operationId: GetVideoEngagement
+      security:
+        - BC_OAuth2:
+          - video-cloud/analytics/read
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Accept-Encoding'
+        - $ref: '#/components/parameters/video_id'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Get_Video_Engagement_Response'
+        '400':
+          description: >-
+            BAD_REQUEST: The message fields of the response contains information about what caused the error such as invalid value for sort parameter
+
+            UNSUPPORTED_FIELD_COMBINATION_ERROR: The message fields of the response contains information about what invalid fields were specified
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials are correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '405':
+          description: >-
+            METHOD_NOT_ALLOWED: This error occurs when the api request is made with an HTTP method other than GET
+        '500':
+          description: >-
+            SERVER_ERROR: Issue in Brightcove system; try again later
+
+            PROCESSING: The analytics API may send back this message if it encounters a long running query. Once the query has finished it will be stored in the server’s cache for up to 5 minutes. Therefore we suggest querying the API 4 minutes after receiving this error
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  /v1/data:
+    get:
+      tags:
+        - Analytics Report
+      summary: Get Analytics Report
+      description: >-
+        Get an analytics report on one or more dimensions. Note that the fields returned in the response will vary according to the dimension(s) requested and the fields specified in the fields parameter. See [the API Overview](/analytics/getting-started/analytics-api-overview-dimensions-fields-and-parameters.html) and the dimension guides for details.
+      operationId: GetAnalyticsReport
+      security:
+        - BC_OAuth2:
+          - video-cloud/analytics/read
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Accept-Encoding'
+        - $ref: '#/components/parameters/accounts'
+        - $ref: '#/components/parameters/dimensions'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/fields'
+        - $ref: '#/components/parameters/where'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/format'
+        - $ref: '#/components/parameters/reconciled'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Get_Analytics_Report_Response'
+        '400':
+          description: >-
+            BAD_REQUEST: The message fields of the response contains information about what caused the error such as invalid value for sort parameter
+
+            UNSUPPORTED_FIELD_COMBINATION_ERROR: The message fields of the response contains information about what invalid fields were specified
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials are correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '405':
+          description: >-
+            METHOD_NOT_ALLOWED: This error occurs when the api request is made with an HTTP method other than GET
+        '500':
+          description: >-
+            SERVER_ERROR: Issue in Brightcove system; try again later
+
+            PROCESSING: The analytics API may send back this message if it encounters a long running query. Once the query has finished it will be stored in the server’s cache for up to 5 minutes. Therefore we suggest querying the API 4 minutes after receiving this error
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  /v1/data/status:
+    get:
+      tags:
+        - Analytics Report
+      summary: Get Available Date Range
+      description: >-
+        Get the date range for which reconciled data is available for any Analytics API report. All parameters are allowed, but only account, dimensions, and where affect the result - all others are ignored.
+        Note that date range for this request must fall within the available date range for the dimensions requested.
+      operationId: GetAvailableDateRange
+      security:
+        - BC_OAuth2:
+          - video-cloud/analytics/read
+      parameters:
+        - $ref: '#/components/parameters/accounts'
+        - $ref: '#/components/parameters/dimensions'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Accept-Encoding'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/fields'
+        - $ref: '#/components/parameters/where'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/format'
+        - $ref: '#/components/parameters/reconciled'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Get_Available_Date_Range_Response'
+        '400':
+          description: >-
+            BAD_REQUEST: The message fields of the response contains information
+            about what caused the error such as invalid value for sort
+            parameter
+
+            UNSUPPORTED_FIELD_COMBINATION_ERROR: The message fields of the
+            response contains information about what invalid fields were
+            specified
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials are correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '405':
+          description: >-
+            METHOD_NOT_ALLOWED: This error occurs when the api request is made
+            with an HTTP method other than GET
+        '500':
+          description: >-
+            SERVER_ERROR: Issue in Brightcove system; try again later
+
+            PROCESSING: The analytics API may send back this message if it
+            encounters a long running query. Once the query has finished it will
+            be stored in the server’s cache for up to 5 minutes. Therefore we
+            suggest querying the API 4 minutes after receiving this error
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  /v1/timeseries/accounts/{{account_id}}:
+    get:
+      tags:
+        - Live Analytics
+      summary: Get Live Analytics time-series
+      description: >-
+        A time-series is defined as a an list of timestamp-value pairs representing samples of a variable (metric). The time-series API intends to allow the user to return a time-series for the set of metrics requested in the query.
+      operationId: GetLiveTimeSeries
+      security:
+        - BC_OAuth2:
+          - video-cloud/analytics/read
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Accept-Encoding'
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/live_dimensions'
+        - $ref: '#/components/parameters/bucket_limit'
+        - $ref: '#/components/parameters/bucket_duration'
+        - $ref: '#/components/parameters/metrics'
+        - $ref: '#/components/parameters/where'
+        - $ref: '#/components/parameters/live_from'
+        - $ref: '#/components/parameters/to'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Get_Time_Series_Response'
+        '400':
+          description: >-
+            BAD_REQUEST: The message fields of the response contains information about what caused the error such as invalid value for sort parameter
+
+            INVALID_PARAM: The message fields of the response contains information about what invalid params were specified or required params were missing
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials are correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '405':
+          description: >-
+            METHOD_NOT_ALLOWED: This error occurs when the api request is made with an HTTP method other than GET
+        '500':
+          description: >-
+            SERVER_ERROR: Issue in Brightcove system; try again later
+
+            PROCESSING: The analytics API may send back this message if it encounters a long running query. Once the query has finished it will be stored in the server’s cache for up to 5 minutes. Therefore we suggest querying the API 4 minutes after receiving this error
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  /v1/events/accounts/{account_id}:
+    get:
+      tags:
+        - Live Analytics
+      summary: Get Live Analytics event
+      description: >-
+        Provides a summary of analytics data collected for a live stream.
+      operationId: GetLiveEvents
+      security:
+        - BC_OAuth2:
+          - video-cloud/analytics/read
+      parameters:
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Accept-Encoding'
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/live_dimensions'
+        - $ref: '#/components/parameters/metrics'
+        - $ref: '#/components/parameters/live_where'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Get_Events_Response'
+        '400':
+          description: >-
+            BAD_REQUEST: The message fields of the response contains information about what caused the error such as invalid value for sort parameter
+
+            INVALID_PARAM: The message fields of the response contains information about what invalid params were specified or required params were missing
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials are correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '405':
+          description: >-
+            METHOD_NOT_ALLOWED: This error occurs when the api request is made with an HTTP method other than GET
+        '500':
+          description: >-
+            SERVER_ERROR: Issue in Brightcove system; try again later
+
+            PROCESSING: The analytics API may send back this message if it encounters a long running query. Once the query has finished it will be stored in the server’s cache for up to 5 minutes. Therefore we suggest querying the API 4 minutes after receiving this error
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  /v1/alltime/accounts/{{account_id}}/videos/{{video_id}}:
+    get:
+      tags:
+        - Video Data
+      summary: Get Alltime Video Views
+      description: >-
+        'Returns the total alltime video views for a video. This is a low-latency endpoint appropriate for use by client-side apps such as the Brightcove Player.'
+      operationId: GetAlltimeVideoViews
+      security:
+        - BC_OAuth2:
+          - video-cloud/analytics/read
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/video_id'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Accept-Encoding'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Get_Alltime_Video_Views_Response'
+        '400':
+          description: >-
+            BAD_REQUEST: The message fields of the response contains information about what caused the error such as invalid value for sort parameter
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your client credentials are correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '405':
+          description: >-
+            METHOD_NOT_ALLOWED: This error occurs when the api request is made with an HTTP method other than GET
+        '500':
+          description: 'SERVER_ERROR: Issue in Brightcove system; try again later '
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+components:
+  parameters:
+    account_id:
+      name: account_id
+      in: path
+      description: a Video Cloud account ID
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Content-Type:
+      name: Content-Type
+      in: header
+      description: 'Content-Type: application/json'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Authorization:
+      name: Authorization
+      in: header
+      description: 'Authorization: Bearer access_token (see Getting Access Tokens)'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Accept-Encoding:
+      name: Accept-Encoding
+      in: header
+      description: 'Accept-Encoding: gzip (optional)'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    player_id:
+      name: player_id
+      in: path
+      description: a Video Cloud player ID
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    video_id:
+      name: video_id
+      in: path
+      description: a Video Cloud video ID
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    accounts:
+      name: accounts
+      in: query
+      description: 'One or more account ids, separated by commas'
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+    bucket_limit:
+      name: bucket_limit
+      in: query
+      description: >-
+        'Max number of points to be returned for a time-series'
+      required: false
+      example: 10
+      style: form
+      explode: true
+      schema:
+        type: integer
+    bucket_duration:
+      name: bucket_duration
+      in: query
+      description: >-
+        'Intervals duration in the form of an integer plus `m` (minutes), `h` (hours), or `d` (days)'
+      example: 5m
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    dimensions:
+      name: dimensions
+      in: query
+      description: |-
+        One or more dimensions to report on; see [Multiple Dimensions](/analytics/getting-started/analytics-api-overview-dimensions-fields-and-parameters.html) or which combined dimensions are supported
+
+        Dimensions:
+          - account
+          - browser_type
+          - city
+          - country
+          - date
+          - date_hour
+          - destination_domain
+          - destination_path
+          - device_os
+          - device_manufacturer
+          - device_type
+          - live_stream
+          - player
+          - referrer_domain
+          - region
+          - search_terms
+          - social_platform
+          - source_type
+          - video
+      required: true
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/Dimensions'
+    live_dimensions:
+      name: dimensions
+      in: query
+      description: |-
+        One or more dimensions to report on for Live Analytics requests
+        Dimensions:
+          - video
+          - video, country
+          - video, device_type
+      required: true
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/LiveDimensions'
+    live_where:
+      name: where
+      in: query
+      description: |-
+        One or more filters to limit responses for Live Analytics requests
+        Available filters:
+          - video
+          - country
+          - device_type
+      required: true
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/live_where'
+    limit:
+      name: limit
+      in: query
+      description: Number of items to return
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+        default: 10
+        example: 10
+    metrics:
+      name: metrics
+      in: query
+      description: |-
+        Data metrics to return for live analytics requests:
+
+          - `video_impression` - the number of video impressions
+          - `video_view` - the number of video views
+          - `video_seconds_viewed` - seconds of video viewed
+          - `alive_ss_ad_start` - SSAI ad starts
+          - `fingerprint_count` - "fingerprint" (user) count
+          - `ccu` - concurrent viewers
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+        enum:
+          - video_impression
+          - video_view
+          - video_seconds_viewed
+          - alive_ss_ad_start
+          - fingerprint_count
+          - ccu
+        example: video_view,alive_ss_ad_start,ccu
+    offset:
+      name: offset
+      in: query
+      description: Number of items to skip
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        example: 10
+    sort:
+      name: sort
+      in: query
+      description: >-
+        Field to sort results by (prefix with `-` for descending order); you can sort on **any field** that you specifying the `fields` parameter.
+      style: form
+      explode: true
+      schema:
+        type: string
+        default: video_view
+        example: video_view
+    fields:
+      name: fields
+      in: query
+      description: 'Fields to return - available fields varies according to the dimensions - see the [Overview: Analytics API](/analytics/getting-started/analytics-api-overview-dimensions-fields-and-parameters.html) for more details'
+      style: form
+      explode: true
+      schema:
+        type: string
+        default: '`video_view` + others (varies by dimension)'
+        example: video_view, video_impression, video.name
+    where:
+      name: where
+      in: query
+      description: >-
+        one or more 'dimension==value' pairs to filter the results; for live, the only available filters are `country`, `device-type`, and `video`. This is a filter in which the options areL where in the world, in which device or which part of the video. In this case, the property is called where as if to use some DSL that mimics the SQL syntax, and that is why it is called where
+      required: true
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/live_where'
+    from:
+      name: from
+      in: query
+      description: >-
+        'Start time for the period covered by the report — epoch time in milliseconds (`1535654206775`) or a date in the format `yyyy-mm-dd` (such as `2013-09-26`)'
+      style: form
+      explode: true
+      schema:
+        oneOf:
+          - type: string
+          - type: integer
+        default: '32 days before `to` value'
+        example: 2018-01-01
+    live_from:
+      name: "from"
+      in: query
+      description: >-
+        'Start time for the period covered by the report — epoch time in milliseconds (`1535654206775`) or a date in the format `yyyy-mm-dd` (such as `2013-09-26`)'
+      style: form
+      explode: true
+      schema:
+        oneOf:
+          - type: string
+          - type: integer
+        default: '32 days before now'
+        example: 2018-01-01
+    to:
+      name: to
+      in: query
+      description: >-
+        End time for the period covered by the report — `now` or epoch time in milliseconds (`1535654206775`) or a date in the format `yyyy-mm-dd` (such as `2013-09-26`)
+      style: form
+      explode: true
+      schema:
+        oneOf:
+          - type: string
+          - type: integer
+        default: now
+        example: '2018-09-01'
+    format:
+      name: format
+      in: query
+      description: format to return the results in
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/Format'
+    reconciled:
+      name: reconciled
+      in: query
+      description: >-
+        if true, only reconciled data is returned; if false, only realtime data is returned; if not present, both reconciled and realtime data are returned
+      style: form
+      explode: true
+      schema:
+        type: boolean
+        default: true
+        example: true
+  schemas:
+    Summary:
+      title: Summary
+      type: object
+      properties:
+        ad_mode_begin:
+          type: integer
+          description: >-
+            Total ad mode begin events received for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        ad_mode_complete:
+          type: integer
+          description: >-
+            Total ad mode complete events received for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        active_media:
+          type: integer
+          description: >-
+            Total active videos in account(s) - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        bytes_delivered:
+          type: integer
+          description: >-
+            Total bytes of data delivered for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        daily_unique_viewers:
+          type: integer
+          description: >-
+            Total daily unique viewers for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        drm_bytes_packaged:
+          type: number
+          description: >-
+            Total DRM bytes packaged for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        engagement_score:
+          type: number
+          description: >-
+            Average engagement score for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        licenses_served:
+          type: integer
+          description: >-
+            Total DRM licenses serverd for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        live_seconds_streamed:
+          type: number
+          description: >-
+            Total second of live video streamed for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        play_rate:
+          type: number
+          description: >-
+            Average play rate for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        play_request:
+          type: integer
+          description: >-
+            Total play requests for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        player_load:
+          type: integer
+          description: >-
+            Total player loads for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        video_engagement_1:
+          type: number
+          description: >-
+            Average views at 1% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        video_engagement_25:
+          type: number
+          description: >-
+            Average views at 25% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        video_engagement_50:
+          type: number
+          description: >-
+            Average views at 50% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        video_engagement_75:
+          type: number
+          description: >-
+            Average views at 75% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        video_engagement_100:
+          type: number
+          description: >-
+            Average views at 100% point for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+        video_impression:
+          type: integer
+          description: >-
+            Total video impressions for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+        video_view:
+          type: integer
+          description: >-
+            Total video views for all items - note that properties included in the summary vary depending on the dimension(s) and fields requested
+          format: int32
+    Timeline:
+      title: Timeline
+      required:
+        - type
+        - values
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of the timeline array
+        values:
+          type: array
+          items:
+            type: number
+          description: Array of views in each 100th part of video duration
+      example:  {
+          "timeline": {
+            "type": "percentile",
+            "values": [
+              17507.16, 17446.47, 17381.53, 18864.7, 20034.09, 19964.33, 19869.78, 19667.05, 19566.13, 19475.24, 72462.89, 72388.19, 72380.55, 72340.39, 72230.89, 72181.51, 72118.65, 72009.98, 71959.46, 71928.65, 72301.65, 72248.72, 72214.78, 72172.31, 72075.03, 71953.25, 71933.07, 71890.68, 71828.13, 71769.25, 71713.09, 71599.56, 71581.92, 71542.35, 71416.43, 71305.33, 71274.92, 71248.6, 71321.91, 71290.81, 71214.11, 71191.02, 71167.63, 71141.25, 71125.24, 71087.18, 71065.24, 71038.08, 71012.63, 71004.61, 74524.95, 74517.69, 74489.42, 74384.57, 74359.08, 74336.24, 74311.31, 74291.99, 74266.64, 74243.25, 74201.68, 74179.67, 74076.49, 74055.94, 74045.4, 73999.57, 73946.48, 73933.69, 73924.56, 73588.54, 73537.41, 73524.52, 71981.69, 70901.7, 70903.16, 70853.67, 70816.72, 70737.02, 70723.89, 70723.22, 70736.19, 70721.05, 70668.38, 70610.77, 70589, 70587.97, 70580.99, 70581.93, 70574.65, 70558.48, 21197.2, 21192.85, 21202.43, 21205.57, 21200.8, 21200.34, 21199.76, 21201.2, 21202.08, 21203
+            ]
+          }
+        }
+    Get_Time_Series_Response:
+      title: Get Time-Series Response
+      type: object
+      description: >-
+        Get Live time-series success response
+      example: {
+        "video_impression": {
+          "data": [
+            {
+              "dimensions": {
+                "video": "6063969160001",
+                "account": "57838016001"
+              },
+              "points": [
+                {
+                  "timestamp": 1564075800000,
+                  "value": 11.0
+                },
+                {
+                  "timestamp": 1564077600000,
+                  "value": 3.0
+                }
+              ]
+            }
+          ]
+        },
+        "video_view": {
+          "data": [
+            {
+              "dimensions": {
+                "video": "6063969160001",
+                "account": "57838016001"
+              },
+              "points": [
+                {
+                  "timestamp": 1564075800000,
+                  "value": 11.0
+                },
+                {
+                  "timestamp": 1564077600000,
+                  "value": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        "video_seconds_viewed": {
+          "data": [
+            {
+              "dimensions": {
+                "video": "6063969160001",
+                "account": "57838016001"
+              },
+              "points": [
+                {
+                  "timestamp": 1564075800000,
+                  "value": 3185.0
+                },
+                {
+                  "timestamp": 1564077600000,
+                  "value": 514.0
+                }
+              ]
+            }
+          ]
+        },
+        "alive_ss_ad_start": {},
+        "fingerprint_count": {
+          "data": [
+            {
+              "dimensions": {
+                "video": "6063969160001",
+                "account": "57838016001"
+              },
+              "points": [
+                {
+                  "timestamp": 1564075800000,
+                  "value": 9.0
+                },
+                {
+                  "timestamp": 1564077600000,
+                  "value": 6.0
+                },
+                {
+                  "timestamp": 1564079400000,
+                  "value": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        "ccu": {
+          "data": [
+            {
+              "dimensions": {
+                "video": "6063969160001",
+                "account": "57838016001"
+              },
+              "points": [
+                {
+                  "timestamp": 1564075800000,
+                  "value": 9.0
+                },
+                {
+                  "timestamp": 1564077600000,
+                  "value": 6.0
+                },
+                {
+                  "timestamp": 1564079400000,
+                  "value": 1.0
+                }
+              ]
+            }
+          ]
+        }
+      }
+      properties:
+        interval:
+          type: array
+          description: >-
+            array containing the start and end points for the interval in the units specified by the `bucket_duration` parameter
+          items:
+            type: integer
+        dimensions:
+          type: object
+          description: >-
+            A set of dimension/value pairs corresponding to the dimensions specified in the `dimensions` parameter
+        points:
+          type: array
+          description: >-
+            An array of objects containing metrics for the points in the time-series
+          items:
+            type: object
+            description: >-
+              An object containing the `timestamp` value (in the units specified in the `bucket_duration` parameter) and values of the metrics (specified in the `metrics` parameter) at the timestamp
+    Get_Events_Response:
+      title: Get Events Response
+      type: object
+      description: >-
+        Get live events success response
+      example: {
+        "data": [
+                  {
+                    "dimensions": { "country": "US" },
+                    "totals": {
+                      "live_unique_viewers": 1267,
+                      "video_seconds_viewed": 126755,
+                      "alive_ss_ad_start": 1274
+                    }
+                  },
+                  {
+                    "dimensions": { "country": "GB" },
+                    "totals": {
+                      "live_unique_viewers": 2267,
+                      "video_seconds_viewed": 136005,
+                      "alive_ss_ad_start": 1024
+                    }
+                  }
+                ]
+      }
+      properties:
+        data:
+          type: array
+          description: >-
+            array containing metrics per dimension(s)
+          items:
+            type: object
+            description: >-
+              object containing `dimensions` and `totals` objects
+            properties:
+              dimensions:
+                type: object
+                description: >-
+                  Object containing dimension/value that the associated metrics are for
+              totals:
+                type: object
+                description: >-
+                  Object containing metric/value pairs for the associated dimensions
+    Get_Video_Engagement_Response:
+      title:  Get Video Engagement Response
+      required:
+        - video_duration
+      type: object
+      properties:
+        video_duration:
+          type: string
+          description: the video duration in seconds
+      example: {
+          "timeline": {
+            "type": "percentile",
+            "values": [
+              1063, 1063, 1063, 1063, 1063, 1063, 1063, 1063, 1034.94, 1021, 1021, 1021, 1021, 1021, 1021, 1021, 1010.08, 988, 988, 988, 988, 988, 988, 988, 988, 962, 962, 962, 962, 962, 962, 962, 962, 953.97, 950, 950, 950, 950, 950, 950, 950, 944.38, 933, 933, 933, 933, 933, 933, 933, 933, 922, 922, 922, 922, 922, 922, 922, 922, 913.3, 909, 909, 909, 909, 909, 909, 909, 906.03, 900, 900, 900, 900, 900, 900, 900, 900, 875, 875, 875, 875, 875, 875, 875, 875, 837.6, 819, 819, 819, 819, 819, 819, 819, 818.67, 818, 818.67, 819, 819, 819, 819, 819, 819
+            ]
+          },
+          "video_duration": "12"
+        }
+    Get_Analytics_Report_Response:
+      title: Get Analytics Report Response
+      required:
+        - account
+        - item_count
+        - items
+        - summary
+        - video_engagement_1
+        - video_engagement_25
+        - video_engagement_50
+        - video_engagement_75
+        - video_engagement_100
+      type: object
+      properties:
+        account:
+          type: string
+          description: the Video Cloud account id
+        item_count:
+          type: integer
+          description: the total number of items matching the request
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Items'
+          description: array of analytics objects for the videos returned
+        summary:
+          $ref: '#/components/schemas/Summary'
+        video_engagement_1:
+          type: number
+          description: number of views at the 1% point of the video duration for all videos
+        video_engagement_25:
+          type: number
+          description: >-
+            number of views at the 25% point of the video duration for all
+            videos
+        video_engagement_50:
+          type: number
+          description: >-
+            number of views at the 50% point of the video duration for all
+            videos
+        video_engagement_75:
+          type: number
+          description: >-
+            number of views at the 75% point of the video duration for all
+            videos
+        video_engagement_100:
+          type: number
+          description: >-
+            number of views at the 100% point of the video duration for all
+            videos
+      example: {
+          "item_count": 378,
+          "items":
+          [
+            {
+              "video_duration": null,
+              "video_name": "School of Fish",
+              "video_seconds_viewed": 0,
+              "video_impression": 1,
+              "ad_mode_complete": 0,
+              "video": "5068505928001",
+              "engagement_score": null,
+              "video_percent_viewed": 0,
+              "play_request": 0,
+              "video_view": 0,
+              "player_name": "Popular Videos Playlist Player v6",
+              "ad_mode_begin": 0,
+              "play_rate": 0,
+              "player": "players.brightcove.com/1752604059001/Hyuo8j4pM_default"
+            },
+            {
+              "video_duration": null,
+              "video_name": null,
+              "video_seconds_viewed": 0,
+              "video_impression": 2,
+              "ad_mode_complete": 0,
+              "video": null,
+              "engagement_score": null,
+              "video_percent_viewed": 0,
+              "play_request": 0,
+              "video_view": 0,
+              "player_name": "CarouselPlayerPlugin",
+              "ad_mode_begin": 0,
+              "play_rate": 0,
+              "player": "players.brightcove.com/1752604059001/18ba409a-3d7d-424e-9d10-849a5864f09e_default"
+            }
+          ],
+          "summary":
+          {
+            "engagement_score": 404.21,
+            "video_seconds_viewed": 722394,
+            "video_percent_viewed": 6203852.1,
+            "video_impression": 45116,
+            "play_request": 22035,
+            "ad_mode_complete": 757,
+            "video_view": 15348,
+            "ad_mode_begin": 923,
+            "play_rate": 0.34
+          }
+        }
+    Items:
+      title: items
+      type: object
+      properties:
+        ad_mode_begin:
+          type: integer
+          description: number of times a player entered ad mode
+          format: int32
+        ad_mode_complete:
+          type: integer
+          description: number of times a player completed ad mode
+          format: int32
+        bytes_delivered:
+          type: number
+          description: >-
+            the total bytes of data delivered, including the videos, other assets such as images and captions, and (for player reports) the player code - some of the date is obtained from CDNs and may not be available for up to 3 days
+        engagement_score:
+          type: number
+          description: the calculated engagement score for the video
+        play_rate:
+          type: number
+          description: video views divided by video impressions
+        play_request:
+          type: integer
+          description: number of play requests received for a video
+          format: int32
+        video:
+          type: string
+          description: the video id
+        duration:
+          type: string
+          description: >-
+            'the duration of the video in seconds (note that the duration is available only if there is at least one `video_view`)'
+        video_engagement_1:
+          type: number
+          description: number of views at the 1% point of the video duration
+        video_engagement_25:
+          type: number
+          description: number of views at the 25% point of the video duration
+        video_engagement_50:
+          type: number
+          description: number of views at the 50% point of the video duration
+        video_engagement_75:
+          type: number
+          description: number of views at the 75% point of the video duration
+        video_engagement_100:
+          type: number
+          description: number of views at the 100% point of the video duration
+        video_impression:
+          type: integer
+          description: number of times the video was loaded in a player
+          format: int32
+        name:
+          type: string
+          description: name of the video
+        video_percent_viewed:
+          type: number
+          description: average percentage of the video played when viewed
+        video_seconds_viewed:
+          type: number
+          description: total seconds of the video viewed
+        video_view:
+          type: integer
+          description: number of times some portion of the video was viewed
+          format: int32
+    LiveDimensions:
+      enum:
+        - video
+        - video,country
+        - video, device_type
+    Get_Available_Date_Range_Response:
+      title: Get Available Date Range Response
+      required:
+        - reconciled_from
+        - reconciled_to
+      type: object
+      properties:
+        reconciled_from:
+          type: string
+          description: the earliest date that you can use for from and get reconciled data
+        reconciled_to:
+          type: string
+          description: >-
+            'the latest date that you can use for to and get reconciled data (realtime data may be available for later dates)'
+      example: {
+          "reconciled_from": "2011-01-01",
+          "reconciled_to": "2018-08-31"
+        }
+    Get_Alltime_Video_Views_Response:
+      title: Get Alltime_ ideo Views Response
+      required:
+        - alltime_video_views
+      type: object
+      properties:
+        alltime_video_views:
+          type: integer
+          description: all-time video views
+          format: int32
+      example: {
+          "alltime_video_views": 42271
+        }
+    Dimensions:
+      title: dimensions
+      enum:
+        - account
+        - city
+        - country
+        - region
+        - date
+        - date-time
+        - device_os
+        - device_type
+        - player
+        - referrer_domain
+        - destination_domain
+        - search_terms
+        - social_platform
+        - source_type
+        - video
+      type: string
+      example: account
+      x-enum-elements:
+        - name: account
+          description: Analytics data for account as a whole
+        - name: city
+          description: Geo analytics for cities
+        - name: country
+          description: Geo analytics for countries
+        - name: region
+          description: Geo analytics for regions of countries
+        - name: date
+          description: Daily analytics for a range of days
+        - name: datetime
+          description: >-
+            Hourly analytics for a range of hours - available for the previous
+            32 days
+        - name: device_os
+          description: Analytics by device operating systems
+        - name: device_type
+          description: Analytics by device type
+        - name: player
+          description: Analytics by player
+        - name: referrer_domain
+          description: Analytics by referring domain
+        - name: destination_domain
+          description: Analytics by the destination domain
+        - name: search_terms
+          description: Search terms that brought the user to the page
+        - name: source_type
+          description: Source such as search or direct link
+        - name: video
+          description: Analytics by video
+    Where:
+      title: where
+      enum:
+        - account
+        - city
+        - country
+        - region
+        - date
+        - date-time
+        - device_os
+        - device_type
+        - player
+        - referrer_domain
+        - destination_domain
+        - search_terms
+        - social_platform
+        - source_type
+        - video
+      type: string
+      example: account
+      x-enum-elements:
+        - name: account
+          description: ''
+        - name: city
+          description: ''
+        - name: country
+          description: ''
+        - name: region
+          description: ''
+        - name: date
+          description: ''
+        - name: datetime
+          description: ''
+        - name: device_os
+          description: ''
+        - name: device_type
+          description: ''
+        - name: player
+          description: ''
+        - name: referrer_domain
+          description: ''
+        - name: destination_domain
+          description: ''
+        - name: search_terms
+          description: ''
+        - name: social_platform
+          description: ''
+        - name: source_type
+          description: ''
+        - name: video
+          description: ''
+    live_where:
+      title: Live where
+      enum:
+        - country
+        - device_type
+        - video
+      type: string
+      example: 'video==6049313942001,6049313942002'
+      x-enum-elements:
+        - name: country
+          description: ''
+        - name: device_type
+          description: ''
+        - name: video
+          description: ''
+    Format:
+      title: format
+      enum:
+        - csv
+        - json
+        - xlxs
+      type: string
+      example: csv
+      x-enum-elements:
+        - name: csv
+          description: ''
+        - name: json
+          description: ''
+        - name: xlxs
+          description: ''
+  securitySchemes:
+    BC_OAuth2:
+      type: oauth2
+      description: >-
+        Brightcove OAuth API. See the [support documentation](/oauth/index.html) or [Getting Access Tokens](/oauth/code-samples/oauth-api-sample-get-access-token.html) to learn more
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://oauth.brightcove.com/v4/access_token'
+          scopes:
+            video-cloud/analytics/read: Read analytics data
+            video-cloud/video/read: Read video data
