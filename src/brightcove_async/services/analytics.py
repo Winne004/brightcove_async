@@ -1,12 +1,18 @@
+from dataclasses import asdict
+
 import aiohttp
 
 from brightcove_async.protocols import OAuthClientProtocol
 from brightcove_async.schemas.analytics_model import (
     GetAlltimeVideoViewsResponse,
+    GetAnalyticsReportResponse,
+    GetAvailableDateRangeResponse,
     Timeline,
     TimelineWithDuration,
 )
-
+from brightcove_async.schemas.params import (
+    GetAnalyticsReportParams,
+)
 from brightcove_async.services.base import Base
 
 
@@ -28,7 +34,7 @@ class Analytics(Base):
         """Fetches account engagement metrics.
 
         :param account_id: Brightcove account ID.
-        :return: Dictionary containing account engagement data.
+        :return: Pydantic model containing account engagement data.
         """
         return await self.fetch_data(
             endpoint=f"{self.base_url}/engagement/accounts/{account_id}",
@@ -40,7 +46,7 @@ class Analytics(Base):
 
         :param account_id: Brightcove account ID.
         :param player_id: Player ID for which to fetch engagement metrics.
-        :return: Dictionary containing player engagement data.
+        :return: Pydantic model containing player engagement data.
         """
         return await self.fetch_data(
             endpoint=f"{self.base_url}/engagement/accounts/{account_id}/players/{player_id}",
@@ -48,31 +54,54 @@ class Analytics(Base):
         )
 
     async def get_video_engagement(
-        self, account_id: str, video_id: str
+        self,
+        account_id: str,
+        video_id: str,
     ) -> TimelineWithDuration:
         """Fetches video engagement metrics.
 
         :param account_id: Brightcove account ID.
         :param video_id: Video ID for which to fetch engagement metrics.
-        :return: Dictionary containing video engagement data.
+        :return: Pydantic model containing video engagement data.
         """
         return await self.fetch_data(
             endpoint=f"{self.base_url}/engagement/accounts/{account_id}/videos/{video_id}",
             model=TimelineWithDuration,
         )
 
-    async def get_video_analytics(
+    async def get_analytics_report(
+        self,
+        params: GetAnalyticsReportParams,
+    ) -> GetAnalyticsReportResponse:
+        """Fetches analytics report."""
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/data",
+            model=GetAnalyticsReportResponse,
+            params=asdict(params),
+        )
+
+    async def get_available_date_range(
+        self,
+        params: GetAnalyticsReportParams,
+    ) -> GetAvailableDateRangeResponse:
+        """Fetches the available data range for analytics."""
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/data/status",
+            model=GetAvailableDateRangeResponse,
+            params=asdict(params),
+        )
+
+    async def get_alltime_video_views(
         self,
         account_id: str,
         video_id: str,
-        params: dict[str, str] | None = None,
     ) -> GetAlltimeVideoViewsResponse:
         """Fetches video analytics for a specific video.
 
         :param account_id: Brightcove account ID.
         :param video_id: Video ID for which to fetch analytics.
         :param params: Additional query parameters.
-        :return: Dictionary containing video analytics data.
+        :return: Pydantic model containing video analytics data.
         """
         return await self.fetch_data(
             endpoint=f"{self.base_url}/alltime/accounts/{account_id}/videos/{video_id}",
