@@ -1,4 +1,5 @@
 import asyncio
+from dataclasses import asdict
 
 import aiohttp
 
@@ -25,7 +26,7 @@ from brightcove_async.schemas.cms_model import (
     VideoVariant,
     VideoVariants,
 )
-from brightcove_async.schemas.cms_model.params import (
+from brightcove_async.schemas.params import (
     GetVideoCountParams,
     GetVideosQueryParams,
 )
@@ -52,7 +53,7 @@ class CMS(Base):
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/videos",
             model=VideoArray,
-            params=dict(params) if params else None,
+            params=asdict(params) if params else None,
         )
 
     async def create_video(
@@ -77,7 +78,9 @@ class CMS(Base):
         if page_size > self._page_limit:
             raise ValueError("page_size must be less than or equal to 100")
 
-        count = await self.get_video_count(account_id, params=params)
+        video_count_params = GetVideoCountParams(q=params.q) if params else None
+
+        count = await self.get_video_count(account_id, params=video_count_params)
 
         if count.count is None or count.count == 0:
             return results
@@ -92,7 +95,11 @@ class CMS(Base):
             self.fetch_data(
                 endpoint=f"{self.base_url}{account_id}/videos",
                 model=VideoArray,
-                params={**(params or {}), "limit": page_size, "offset": i * page_size},
+                params={
+                    **(asdict(params) if params else {}),
+                    "limit": page_size,
+                    "offset": i * page_size,
+                },
             )
             for i in range(total_pages)
         ]
@@ -110,7 +117,7 @@ class CMS(Base):
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/counts/videos",
             model=VideoCount,
-            params=dict(params) if params else None,
+            params=asdict(params) if params else None,
         )
 
     async def get_video_fields(self, account_id: str) -> CustomFields:

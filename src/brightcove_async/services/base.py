@@ -1,7 +1,7 @@
 import logging
 from abc import ABC
 from http import HTTPStatus
-from typing import TypeVar
+from typing import Any, TypeVar
 
 import aiohttp
 from aiolimiter import AsyncLimiter
@@ -95,6 +95,8 @@ class Base(ABC):
             else None
         )
 
+        params = self.remove_none_values(params) if params else None
+
         async with (
             self.limiter,
             self._session.request(
@@ -112,3 +114,7 @@ class Base(ABC):
 
             json_data = await response.json()
             return model.model_validate(json_data, strict=False)
+
+    def remove_none_values(self, dict: dict[str, Any]) -> dict:
+        """Remove None values from a dataclass instance."""
+        return {k: v for k, v in dict.items() if v is not None}
