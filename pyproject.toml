@@ -1,6 +1,6 @@
 [project]
 name = "brightcove_async"
-version = "0.1.4"
+version = "0.1.5"
 description = "An asynchronous client for the Brightcove API."
 readme = "README.md"
 requires-python = ">=3.13"
