@@ -1,5 +1,4 @@
 import asyncio
-from dataclasses import asdict
 
 import aiohttp
 
@@ -53,7 +52,7 @@ class CMS(Base):
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/videos",
             model=VideoArray,
-            params=asdict(params) if params else None,
+            params=params.serialize_params() if params else None,
         )
 
     async def create_video(
@@ -96,7 +95,7 @@ class CMS(Base):
                 endpoint=f"{self.base_url}{account_id}/videos",
                 model=VideoArray,
                 params={
-                    **(asdict(params) if params else {}),
+                    **(params.serialize_params() if params else {}),
                     "limit": page_size,
                     "offset": i * page_size,
                 },
@@ -117,7 +116,7 @@ class CMS(Base):
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/counts/videos",
             model=VideoCount,
-            params=asdict(params) if params else None,
+            params=params.serialize_params() if params else None,
         )
 
     async def get_video_fields(self, account_id: str) -> CustomFields:

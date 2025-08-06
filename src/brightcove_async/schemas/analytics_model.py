@@ -281,7 +281,6 @@ class Format(StrEnum):
 
 
 class GetAnalyticsReportResponse(BaseModel):
-    account: str = Field(..., description="the Video Cloud account id")
     item_count: int = Field(
         ...,
         description="the total number of items matching the request",
@@ -291,23 +290,3 @@ class GetAnalyticsReportResponse(BaseModel):
         description="array of analytics objects for the videos returned",
     )
     summary: Summary
-    video_engagement_1: float = Field(
-        ...,
-        description="number of views at the 1% point of the video duration for all videos",
-    )
-    video_engagement_25: float = Field(
-        ...,
-        description="number of views at the 25% point of the video duration for all videos",
-    )
-    video_engagement_50: float = Field(
-        ...,
-        description="number of views at the 50% point of the video duration for all videos",
-    )
-    video_engagement_75: float = Field(
-        ...,
-        description="number of views at the 75% point of the video duration for all videos",
-    )
-    video_engagement_100: float = Field(
-        ...,
-        description="number of views at the 100% point of the video duration for all videos",
-    )
