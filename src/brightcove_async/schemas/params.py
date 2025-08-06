@@ -1,8 +1,12 @@
-from dataclasses import dataclass
+from pydantic import BaseModel, Field
 
 
-@dataclass
-class GetVideosQueryParams:
+class ParamsBase(BaseModel):
+    def serialize_params(self) -> dict:
+        return self.model_dump(exclude_none=True, by_alias=True)
+
+
+class GetVideosQueryParams(ParamsBase):
     limit: int | None = None
     offset: int | None = None
     sort: str | None = None
@@ -10,13 +14,11 @@ class GetVideosQueryParams:
     query: str | None = None
 
 
-@dataclass
-class GetVideoCountParams:
+class GetVideoCountParams(ParamsBase):
     q: str | None = None
 
 
-@dataclass
-class GetAnalyticsReportParams:
+class GetAnalyticsReportParams(ParamsBase):
     accounts: str
     dimensions: str
     where: str | None = None
@@ -24,18 +26,17 @@ class GetAnalyticsReportParams:
     sort: str | None = None
     offset: int | None = None
     fields: str | None = None
-    from_: str | int | None = None
+    from_: str | int | None = Field(default=None, serialization_alias="from")
     to: str | int | None = None
-    format_: str | None = None
+    format_: str | None = Field(default=None, serialization_alias="format")
     reconciled: bool | None = None
 
 
-@dataclass
-class GetLivestreamAnalyticsParams:
+class GetLivestreamAnalyticsParams(ParamsBase):
     dimensions: str
     metrics: str
     where: str
     bucket_limit: int | None = None
     bucket_duration: str | None = None
-    from_: str | int | None = None
+    from_: str | int | None = Field(default=None, serialization_alias="from")
     to: str | int | None = None

@@ -1,5 +1,3 @@
-from dataclasses import asdict
-
 import aiohttp
 
 from brightcove_async.protocols import OAuthClientProtocol
@@ -77,7 +75,7 @@ class Analytics(Base):
         return await self.fetch_data(
             endpoint=f"{self.base_url}/data",
             model=GetAnalyticsReportResponse,
-            params=asdict(params),
+            params=params.serialize_params(),
         )
 
     async def get_available_date_range(
@@ -88,7 +86,7 @@ class Analytics(Base):
         return await self.fetch_data(
             endpoint=f"{self.base_url}/data/status",
             model=GetAvailableDateRangeResponse,
-            params=asdict(params),
+            params=params.serialize_params(),
         )
 
     async def get_alltime_video_views(
