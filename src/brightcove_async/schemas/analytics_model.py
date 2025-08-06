@@ -196,7 +196,7 @@ class Items(BaseModel):
         None,
         description="number of times the video was loaded in a player",
     )
-    name: str | None = Field(None, description="name of the video")
+    video_name: str | None = Field(None, description="name of the video")
     video_percent_viewed: float | None = Field(
         None,
         description="average percentage of the video played when viewed",
