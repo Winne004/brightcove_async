@@ -1,4 +1,5 @@
-from .initalise import initialise_brightcove_client
+from . import schemas
 from .client import BrightcoveClient
+from .initalise import initialise_brightcove_client
 
-__all__ = ["initialise_brightcove_client", "BrightcoveClient"]
+__all__ = ["BrightcoveClient", "initialise_brightcove_client", "schemas"]
