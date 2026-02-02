@@ -8,6 +8,7 @@ from brightcove_async.services.analytics import Analytics
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
+from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.syndication import Syndication
 
 
@@ -58,6 +59,8 @@ class BrightcoveClient:
             )
         return self._services[name]
 
+    @overload  # type: ignore[misc]
+    def __getattr__(self, name: Literal["ingest_profiles"]) -> IngestProfiles: ...
     @overload  # type: ignore[misc]
     def __getattr__(self, name: Literal["cms"]) -> CMS: ...
     @overload  # type: ignore[misc]

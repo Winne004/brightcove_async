@@ -4,6 +4,7 @@ from brightcove_async.services.analytics import Analytics
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
+from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.syndication import Syndication
 from brightcove_async.settings import BrightcoveBaseAPIConfig
 
@@ -31,5 +32,10 @@ def build_service_registry(config: BrightcoveBaseAPIConfig) -> dict[str, Service
         "dynamic_ingest": ServiceConfig(
             cls=DynamicIngest,
             base_url=config.dynamic_ingest_base_url,
+        ),
+        "ingest_profiles": ServiceConfig(
+            cls=IngestProfiles,
+            base_url=config.ingest_profiles_base_url,
+            requests_per_second=4,
         ),
     }
