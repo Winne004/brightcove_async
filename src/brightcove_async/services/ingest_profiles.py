@@ -15,7 +15,7 @@ class IngestProfiles(Base):
     ) -> None:
         super().__init__(session, oauth, base_url, limit)
 
-    async def get_ingest_profiles(self, account_id: str) -> IngestProfile:
+    async def get_ingest_profiles(self, account_id: str) -> list[IngestProfile]:
         return await self.fetch_data(
             endpoint=f"{self.base_url}accounts/{account_id}/profiles",
             model=IngestProfile,
