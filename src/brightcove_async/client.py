@@ -1,4 +1,4 @@
-from typing import Literal, Self, overload
+from typing import Self
 
 import aiohttp
 
@@ -44,7 +44,8 @@ class BrightcoveClient:
             )
         return self._oauth
 
-    def _get_service(self, name) -> Base:
+    def _get_service(self, name: str) -> Base:
+        """Lazy-load and cache a service instance by name."""
         if name not in self._services:
             service_cls = self._service_classes[name]
             if self._session is None:
@@ -59,21 +60,30 @@ class BrightcoveClient:
             )
         return self._services[name]
 
-    @overload  # type: ignore[misc]
-    def __getattr__(self, name: Literal["ingest_profiles"]) -> IngestProfiles: ...
-    @overload  # type: ignore[misc]
-    def __getattr__(self, name: Literal["cms"]) -> CMS: ...
-    @overload  # type: ignore[misc]
-    def __getattr__(self, name: Literal["syndication"]) -> Syndication: ...
-    @overload  # type: ignore[misc]
-    def __getattr__(self, name: Literal["analytics"]) -> Analytics: ...
-    @overload  # type: ignore[misc]
-    def __getattr__(self, name: Literal["dynamic_ingest"]) -> DynamicIngest: ...
-    @overload  # type: ignore[misc]
-    def __getattr__(self, name: str) -> Base: ...
+    @property
+    def cms(self) -> CMS:
+        """Access the CMS (Content Management System) API service."""
+        return self._get_service("cms")  # type: ignore[return-value]
 
-    def __getattr__(self, name: str) -> Base:
-        return self._get_service(name)
+    @property
+    def analytics(self) -> Analytics:
+        """Access the Analytics API service."""
+        return self._get_service("analytics")  # type: ignore[return-value]
+
+    @property
+    def syndication(self) -> Syndication:
+        """Access the Syndication API service."""
+        return self._get_service("syndication")  # type: ignore[return-value]
+
+    @property
+    def dynamic_ingest(self) -> DynamicIngest:
+        """Access the Dynamic Ingest API service."""
+        return self._get_service("dynamic_ingest")  # type: ignore[return-value]
+
+    @property
+    def ingest_profiles(self) -> IngestProfiles:
+        """Access the Ingest Profiles API service."""
+        return self._get_service("ingest_profiles")  # type: ignore[return-value]
 
     async def __aenter__(self) -> Self:
         if self._session is None:
