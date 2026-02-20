@@ -241,8 +241,8 @@ async def test_get_service_returns_same_instance():
         )
 
         async with client as c:
-            service1 = c._get_service("cms")
-            service2 = c._get_service("cms")
+            service1 = c._get_service("cms", CMS)
+            service2 = c._get_service("cms", CMS)
 
             assert service1 is service2
 
