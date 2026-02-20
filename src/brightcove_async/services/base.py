@@ -15,6 +15,7 @@ from tenacity import (
 
 from brightcove_async.exceptions import (
     BrightcoveAuthError,
+    BrightcoveError,
     map_status_code_to_exception,
 )
 from brightcove_async.protocols import OAuthClientProtocol
@@ -108,7 +109,22 @@ class Base(ABC):
             try:
                 response.raise_for_status()
             except aiohttp.ClientResponseError as e:
-                raise map_status_code_to_exception(HTTPStatus(e.status)) from e
+                error_details = {}
+                try:
+                    error_body = await response.text()
+                    error_details = {"response_body": error_body}
+                except Exception:
+                    pass
+
+                exc_class: type[BrightcoveError] = map_status_code_to_exception(
+                    HTTPStatus(e.status),
+                )
+                raise exc_class(
+                    message=str(e.message),
+                    status_code=e.status,
+                    endpoint=endpoint,
+                    details=error_details,
+                ) from e
 
             json_data = await response.json()
             return model.model_validate(json_data, strict=False)
