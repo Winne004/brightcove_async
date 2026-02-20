@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Self, TypeVar, cast
 
 import aiohttp
 
@@ -10,6 +10,8 @@ from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
 from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.syndication import Syndication
+
+T = TypeVar("T", bound=Base)
 
 
 class BrightcoveClient:
@@ -44,8 +46,16 @@ class BrightcoveClient:
             )
         return self._oauth
 
-    def _get_service(self, name: str) -> Base:
-        """Lazy-load and cache a service instance by name."""
+    def _get_service(self, name: str, service_type: type[T]) -> T:
+        """Lazy-load and cache a service instance by name.
+
+        Args:
+            name: The service name in the registry
+            service_type: The expected service class type
+
+        Returns:
+            The cached or newly created service instance
+        """
         if name not in self._services:
             service_cls = self._service_classes[name]
             if self._session is None:
@@ -58,32 +68,33 @@ class BrightcoveClient:
                 service_cls.base_url,
                 limit=service_cls.requests_per_second,
             )
-        return self._services[name]
+        # Cast is safe because the registry maps service names to their correct types
+        return cast(T, self._services[name])
 
     @property
     def cms(self) -> CMS:
         """Access the CMS (Content Management System) API service."""
-        return self._get_service("cms")  # type: ignore[return-value]
+        return self._get_service("cms", CMS)
 
     @property
     def analytics(self) -> Analytics:
         """Access the Analytics API service."""
-        return self._get_service("analytics")  # type: ignore[return-value]
+        return self._get_service("analytics", Analytics)
 
     @property
     def syndication(self) -> Syndication:
         """Access the Syndication API service."""
-        return self._get_service("syndication")  # type: ignore[return-value]
+        return self._get_service("syndication", Syndication)
 
     @property
     def dynamic_ingest(self) -> DynamicIngest:
         """Access the Dynamic Ingest API service."""
-        return self._get_service("dynamic_ingest")  # type: ignore[return-value]
+        return self._get_service("dynamic_ingest", DynamicIngest)
 
     @property
     def ingest_profiles(self) -> IngestProfiles:
         """Access the Ingest Profiles API service."""
-        return self._get_service("ingest_profiles")  # type: ignore[return-value]
+        return self._get_service("ingest_profiles", IngestProfiles)
 
     async def __aenter__(self) -> Self:
         if self._session is None:
