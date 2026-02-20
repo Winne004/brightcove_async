@@ -4,6 +4,35 @@ from http import HTTPStatus
 class BrightcoveError(Exception):
     """Base exception for Brightcove API errors."""
 
+    def __init__(
+        self,
+        message: str,
+        status_code: int | None = None,
+        endpoint: str | None = None,
+        details: dict | None = None,
+    ):
+        super().__init__(message)
+        self.message = message
+        self.status_code = status_code
+        self.endpoint = endpoint
+        self.details = details or {}
+
+    def __str__(self) -> str:
+        """Return a formatted error message with context."""
+        parts = [self.message]
+
+        if self.status_code is not None:
+            parts.append(f"status_code={self.status_code}")
+
+        if self.endpoint is not None:
+            parts.append(f"endpoint='{self.endpoint}'")
+
+        if self.details:
+            details_str = ", ".join(f"{k}={v!r}" for k, v in self.details.items())
+            parts.append(f"details={{{details_str}}}")
+
+        return ", ".join(parts)
+
 
 class BrightcoveClientError(BrightcoveError):
     """Base class for 4xx errors."""
@@ -52,7 +81,7 @@ class BrightcoveUnknownError(BrightcoveServerError):
     """Raised when there is an unknown issue with Brightcove."""
 
 
-def map_status_code_to_exception(status_code: int) -> type[Exception]:
+def map_status_code_to_exception(status_code: int) -> type[BrightcoveError]:
     """Map HTTP status codes to Brightcove exception classes using HTTPStatus."""
     mapping = {
         HTTPStatus.UNAUTHORIZED: BrightcoveAuthError,
@@ -64,6 +93,8 @@ def map_status_code_to_exception(status_code: int) -> type[Exception]:
         HTTPStatus.INTERNAL_SERVER_ERROR: BrightcoveUnknownError,
     }
 
-    status = status_code if isinstance(status_code, HTTPStatus) else HTTPStatus(status_code)
+    status = (
+        status_code if isinstance(status_code, HTTPStatus) else HTTPStatus(status_code)
+    )
 
     return mapping.get(status, BrightcoveUnknownError)
