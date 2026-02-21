@@ -1,6 +1,8 @@
 """Pydantic models for Brightcove Ingest Profiles API."""
 
 from pydantic import BaseModel, Field
+
+
 class DigitalMaster(BaseModel):
     """Digital master configuration for an ingest profile."""
 
