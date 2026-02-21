@@ -2,6 +2,7 @@ from brightcove_async.registry import ServiceConfig, build_service_registry
 from brightcove_async.services.analytics import Analytics
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
+from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.syndication import Syndication
 from brightcove_async.settings import BrightcoveBaseAPIConfig
 
@@ -92,13 +93,24 @@ def test_build_service_registry_dynamic_ingest_config():
     assert di_config.requests_per_second == 10
 
 
+def test_build_service_registry_ingest_profiles_config():
+    config = BrightcoveBaseAPIConfig()
+    registry = build_service_registry(config)
+
+    ip_config = registry["ingest_profiles"]
+
+    assert ip_config.cls == IngestProfiles
+    assert ip_config.base_url == config.ingest_profiles_base_url
+    assert ip_config.requests_per_second == 4
+
+
 def test_build_service_registry_custom_urls():
-    """Test build_service_registry with custom URLs."""
     config = BrightcoveBaseAPIConfig(
         cms_base_url="https://custom-cms.example.com/",
         syndication_base_url="https://custom-syndication.example.com/",
         analytics_base_url="https://custom-analytics.example.com/",
         dynamic_ingest_base_url="https://custom-ingest.example.com/",
+        ingest_profiles_base_url="https://custom-profiles.example.com/",
     )
 
     registry = build_service_registry(config)
@@ -107,6 +119,9 @@ def test_build_service_registry_custom_urls():
     assert registry["syndication"].base_url == "https://custom-syndication.example.com/"
     assert registry["analytics"].base_url == "https://custom-analytics.example.com/"
     assert registry["dynamic_ingest"].base_url == "https://custom-ingest.example.com/"
+    assert (
+        registry["ingest_profiles"].base_url == "https://custom-profiles.example.com/"
+    )
 
 
 def test_service_registry_returns_dict():
@@ -115,4 +130,33 @@ def test_service_registry_returns_dict():
     registry = build_service_registry(config)
 
     assert isinstance(registry, dict)
-    assert len(registry) == 4
+    assert len(registry) == 5
+
+
+def test_service_config_all_service_classes_are_base_subclasses():
+    """Test all service classes in the registry inherit from Base."""
+    from brightcove_async.services.base import Base
+
+    config = BrightcoveBaseAPIConfig()
+    registry = build_service_registry(config)
+
+    for name, service_config in registry.items():
+        assert issubclass(service_config.cls, Base), (
+            f"{name} service class does not inherit from Base"
+        )
+
+
+def test_service_config_equality():
+    """Test ServiceConfig with identical values."""
+    config1 = ServiceConfig(cls=CMS, base_url="url1", requests_per_second=4)
+    config2 = ServiceConfig(cls=CMS, base_url="url1", requests_per_second=4)
+
+    assert config1 == config2
+
+
+def test_service_config_inequality():
+    """Test ServiceConfig with different values."""
+    config1 = ServiceConfig(cls=CMS, base_url="url1", requests_per_second=4)
+    config2 = ServiceConfig(cls=Analytics, base_url="url2", requests_per_second=10)
+
+    assert config1 != config2

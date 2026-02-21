@@ -11,11 +11,11 @@ def initialise_brightcove_client(
     """Initialise the Brightcove client with OAuth credentials.
     Returns the configured OAuthClient.
     """
-    client_credentials = BrightcoveOAuthCreds() if oauth_creds is None else oauth_creds  # type: ignore[ReportCallIssueType]
+    client_credentials = BrightcoveOAuthCreds() if oauth_creds is None else oauth_creds  # ty:ignore[missing-argument]
 
     client_config = (
         BrightcoveBaseAPIConfig() if client_config is None else client_config
-    )  # type: ignore[ReportCallIssueType]
+    )
 
     services_registry = build_service_registry(client_config)
 

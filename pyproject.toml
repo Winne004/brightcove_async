@@ -28,6 +28,7 @@ dev = [
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.1.0",
+    "pytest-cov>=7.0.0",
 ]
 
 [tool.ruff.lint]
@@ -36,8 +37,11 @@ extend-select = ["I"]
 [tool.ruff.lint.isort]
 known-first-party = ["brightcove_async"]
 
-[tool.ty.src]
-root = "src"
+[tool.ty.environment]
+root = ["./src", "./tests"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [tool.uv]
 package = true
