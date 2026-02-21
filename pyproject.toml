@@ -10,6 +10,8 @@ dependencies = [
     "pydantic>=2.11.7",
     "pydantic-settings>=2.10.1",
     "tenacity>=9.1.2",
+    "tool>=0.8.0",
+    "ty>=0.0.18",
 ]
 
 [tool.setuptools.package-data]
@@ -22,19 +24,20 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 dev = [
     "datamodel-code-generator>=0.31.2",
-    "mypy>=1.17.0",
+    "ty>=0.0.18",
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.1.0",
 ]
 
-[tool.mypy]
-plugins = [
-  "pydantic.mypy"
-]
-mypy_path = "src"
-namespace_packages = true
-explicit_package_bases = true
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["brightcove_async"]
+
+[tool.ty.src]
+root = "src"
 
 [tool.uv]
 package = true
