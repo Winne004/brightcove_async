@@ -2,8 +2,10 @@ import aiohttp
 
 from brightcove_async.protocols import OAuthClientProtocol
 from brightcove_async.schemas.syndication_model import (
-    SyndicationList,
     Syndication as SyndicationModel,
+)
+from brightcove_async.schemas.syndication_model import (
+    SyndicationList,
 )
 from brightcove_async.services.base import Base
 
