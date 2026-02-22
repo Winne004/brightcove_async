@@ -45,6 +45,49 @@ from brightcove_async.schemas.syndication_model import (
     Type,
 )
 
+# --- Fixtures ---
+
+
+@pytest.fixture
+def mock_video_response():
+    """Fixture to load a mock get videos API response."""
+    return loads(
+        Path("tests/mock_responses/get_videos_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_create_video_response():
+    """Fixture to load a mock create video API response."""
+    return loads(
+        Path("tests/mock_responses/create_video_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_video_count_response():
+    """Fixture to load a mock get video count API response."""
+    return loads(
+        Path("tests/mock_responses/get_video_count_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_video_sources_response():
+    """Fixture to load a mock get video sources API response."""
+    return loads(
+        Path("tests/mock_responses/get_video_sources_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_video_variants_response():
+    """Fixture to load a mock get video variants API response."""
+    return loads(
+        Path("tests/mock_responses/get_all_video_variants_response.json").read_text(),
+    )
+
+
 # --- Analytics Models ---
 
 
@@ -347,11 +390,9 @@ class TestStandardField:
 
 
 class TestResponseModels:
-    def test_get_video_response_model(self):
+    def test_get_video_response_model(self, mock_video_response: dict):
         """Test that VideoArray correctly validates a real API response."""
-        mock_video_response = loads(
-            Path("tests/mock_responses/get_videos_response.json").read_text(),
-        )
+
         validated_response = VideoArray.model_validate(mock_video_response)
 
         assert isinstance(validated_response, VideoArray)
@@ -369,13 +410,10 @@ class TestResponseModels:
         assert video.geo is not None
         assert video.custom_fields is not None
 
-    def test_create_video_response_model(self):
+    def test_create_video_response_model(self, mock_create_video_response: dict):
         """Test that Video model validates a create video response."""
-        mock_create_response = loads(
-            Path("tests/mock_responses/create_video_response.json").read_text(),
-        )
         validated_video = Video.model_validate(
-            mock_create_response,
+            mock_create_video_response,
             strict=False,
         )
 
@@ -383,22 +421,20 @@ class TestResponseModels:
         assert validated_video.id == "734462567001"
         assert validated_video.ad_keys == ' "adKeys": "category=sports&live=true"'
 
-    def test_get_video_count_response_model(self) -> None:
+    def test_get_video_count_response_model(
+        self, mock_video_count_response: dict
+    ) -> None:
         """Test that VideoCount model validates a get video count response."""
-        mock_count_response = loads(
-            Path("tests/mock_responses/get_video_count_response.json").read_text(),
-        )
-        validated_count = VideoCount.model_validate(mock_count_response)
+        validated_count = VideoCount.model_validate(mock_video_count_response)
 
         assert isinstance(validated_count, VideoCount)
         assert validated_count.count == 7650
 
-    def test_video_sources_response_model(self) -> None:
+    def test_video_sources_response_model(
+        self, mock_video_sources_response: dict
+    ) -> None:
         """Test that VideoSourcesList model validates a get video sources response."""
-        mock_sources_response = loads(
-            Path("tests/mock_responses/get_video_sources_response.json").read_text(),
-        )
-        validated_sources = VideoSourcesList.model_validate(mock_sources_response)
+        validated_sources = VideoSourcesList.model_validate(mock_video_sources_response)
 
         assert isinstance(validated_sources, VideoSourcesList)
         assert len(validated_sources.root) == 5
@@ -407,14 +443,11 @@ class TestResponseModels:
             == "https://manifest.prod.boltdns.net/manifest/v1/hls/v4/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/10s/master.m3u8?fastly_token=NWJiMmIyNmNfMWM3YmVhZTA5OTc4YjM4ZjZiZjU1OTk0ZTkzZTUyMzhhNGU5Zjc5YTNkZGYwYWQyNWZkMTcyMGM1MzlmMWVmZg%3D%3D"
         )
 
-    def test_video_variants_response_model(self) -> None:
+    def test_video_variants_response_model(
+        self, mock_video_variants_response: dict
+    ) -> None:
         """Test that VideoVariants model validates a get video variants response."""
-        mock_variants_response = loads(
-            Path(
-                "tests/mock_responses/get_all_video_variants_response.json"
-            ).read_text(),
-        )
-        validated_variants = VideoVariants.model_validate(mock_variants_response)
+        validated_variants = VideoVariants.model_validate(mock_video_variants_response)
 
         assert isinstance(validated_variants, VideoVariants)
         assert len(validated_variants.root) == 3
