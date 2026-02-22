@@ -27,6 +27,7 @@ from brightcove_async.schemas.cms_model import (
     Video,
     VideoArray,
     VideoCount,
+    VideoSourcesList,
 )
 from brightcove_async.schemas.cms_model.Image import Sources
 from brightcove_async.schemas.cms_model.Videofields import CustomField, StandardField
@@ -345,7 +346,7 @@ class TestStandardField:
 
 
 class TestResponseModels:
-    def test_get_videos_response_model(self):
+    def test_get_video_response_model(self):
         """Test that VideoArray correctly validates a real API response."""
         mock_video_response = loads(
             Path("tests/mock_responses/get_videos_response.json").read_text(),
@@ -380,3 +381,27 @@ class TestResponseModels:
         assert isinstance(validated_video, Video)
         assert validated_video.id == "734462567001"
         assert validated_video.ad_keys == ' "adKeys": "category=sports&live=true"'
+
+    def test_get_video_count_response_model(self) -> None:
+        """Test that VideoCount model validates a get video count response."""
+        mock_count_response = loads(
+            Path("tests/mock_responses/get_video_count_response.json").read_text(),
+        )
+        validated_count = VideoCount.model_validate(mock_count_response)
+
+        assert isinstance(validated_count, VideoCount)
+        assert validated_count.count == 7650
+
+    def test_video_sources_response_model(self) -> None:
+        """Test that VideoSourcesList model validates a get video sources response."""
+        mock_sources_response = loads(
+            Path("tests/mock_responses/get_video_sources_response.json").read_text(),
+        )
+        validated_sources = VideoSourcesList.model_validate(mock_sources_response)
+
+        assert isinstance(validated_sources, VideoSourcesList)
+        assert len(validated_sources.root) == 5
+        assert (
+            validated_sources.root[0].src
+            == "https://manifest.prod.boltdns.net/manifest/v1/hls/v4/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/10s/master.m3u8?fastly_token=NWJiMmIyNmNfMWM3YmVhZTA5OTc4YjM4ZjZiZjU1OTk0ZTkzZTUyMzhhNGU5Zjc5YTNkZGYwYWQyNWZkMTcyMGM1MzlmMWVmZg%3D%3D"
+        )
