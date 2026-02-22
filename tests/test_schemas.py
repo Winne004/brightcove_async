@@ -28,6 +28,7 @@ from brightcove_async.schemas.cms_model import (
     VideoArray,
     VideoCount,
     VideoSourcesList,
+    VideoVariants,
 )
 from brightcove_async.schemas.cms_model.Image import Sources
 from brightcove_async.schemas.cms_model.Videofields import CustomField, StandardField
@@ -405,3 +406,17 @@ class TestResponseModels:
             validated_sources.root[0].src
             == "https://manifest.prod.boltdns.net/manifest/v1/hls/v4/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/10s/master.m3u8?fastly_token=NWJiMmIyNmNfMWM3YmVhZTA5OTc4YjM4ZjZiZjU1OTk0ZTkzZTUyMzhhNGU5Zjc5YTNkZGYwYWQyNWZkMTcyMGM1MzlmMWVmZg%3D%3D"
         )
+
+    def test_video_variants_response_model(self) -> None:
+        """Test that VideoVariants model validates a get video variants response."""
+        mock_variants_response = loads(
+            Path(
+                "tests/mock_responses/get_all_video_variants_response.json"
+            ).read_text(),
+        )
+        validated_variants = VideoVariants.model_validate(mock_variants_response)
+
+        assert isinstance(validated_variants, VideoVariants)
+        assert len(validated_variants.root) == 3
+        assert validated_variants.root[0].language == "es-ES"
+        assert validated_variants.root[1].language == "de-DE"
