@@ -366,3 +366,17 @@ class TestResponseModels:
         assert video.images is not None
         assert video.geo is not None
         assert video.custom_fields is not None
+
+    def test_create_video_response_model(self):
+        """Test that Video model validates a create video response."""
+        mock_create_response = loads(
+            Path("tests/mock_responses/create_video_response.json").read_text(),
+        )
+        validated_video = Video.model_validate(
+            mock_create_response,
+            strict=False,
+        )
+
+        assert isinstance(validated_video, Video)
+        assert validated_video.id == "734462567001"
+        assert validated_video.ad_keys == ' "adKeys": "category=sports&live=true"'
