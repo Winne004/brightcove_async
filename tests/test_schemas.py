@@ -390,7 +390,7 @@ class TestStandardField:
 
 
 class TestResponseModels:
-    def test_get_video_response_model(self, mock_video_response: dict):
+    def test_get_video_response_model(self, mock_video_response: list[dict]) -> None:
         """Test that VideoArray correctly validates a real API response."""
 
         validated_response = VideoArray.model_validate(mock_video_response)
@@ -400,9 +400,9 @@ class TestResponseModels:
 
         video = validated_response.root[0]
         assert isinstance(video, Video)
-        assert video.id == "734462567001"
-        assert video.description == "Herring gull on a wharf in Boston"
-        assert video.duration == 18160
+        assert video.id == mock_video_response[0]["id"]
+        assert video.description == mock_video_response[0]["description"]
+        assert video.duration == mock_video_response[0]["duration"]
         assert video.complete is True
         assert video.economics == Economics.AD_SUPPORTED
 
@@ -418,8 +418,10 @@ class TestResponseModels:
         )
 
         assert isinstance(validated_video, Video)
-        assert validated_video.id == "734462567001"
-        assert validated_video.ad_keys == ' "adKeys": "category=sports&live=true"'
+        assert validated_video.id == str(
+            mock_create_video_response["id"]
+        )  # API returns ID as int or str, model casts to str
+        assert validated_video.ad_keys == mock_create_video_response["ad_keys"]
 
     def test_get_video_count_response_model(
         self, mock_video_count_response: dict
@@ -428,28 +430,31 @@ class TestResponseModels:
         validated_count = VideoCount.model_validate(mock_video_count_response)
 
         assert isinstance(validated_count, VideoCount)
-        assert validated_count.count == 7650
+        assert validated_count.count == mock_video_count_response["count"]
 
     def test_video_sources_response_model(
-        self, mock_video_sources_response: dict
+        self, mock_video_sources_response: list[dict]
     ) -> None:
         """Test that VideoSourcesList model validates a get video sources response."""
         validated_sources = VideoSourcesList.model_validate(mock_video_sources_response)
 
         assert isinstance(validated_sources, VideoSourcesList)
-        assert len(validated_sources.root) == 5
-        assert (
-            validated_sources.root[0].src
-            == "https://manifest.prod.boltdns.net/manifest/v1/hls/v4/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/10s/master.m3u8?fastly_token=NWJiMmIyNmNfMWM3YmVhZTA5OTc4YjM4ZjZiZjU1OTk0ZTkzZTUyMzhhNGU5Zjc5YTNkZGYwYWQyNWZkMTcyMGM1MzlmMWVmZg%3D%3D"
-        )
+        assert len(validated_sources.root) == len(mock_video_sources_response)
+        assert validated_sources.root[0].src == mock_video_sources_response[0]["src"]
 
     def test_video_variants_response_model(
-        self, mock_video_variants_response: dict
+        self, mock_video_variants_response: list[dict]
     ) -> None:
         """Test that VideoVariants model validates a get video variants response."""
         validated_variants = VideoVariants.model_validate(mock_video_variants_response)
 
         assert isinstance(validated_variants, VideoVariants)
-        assert len(validated_variants.root) == 3
-        assert validated_variants.root[0].language == "es-ES"
-        assert validated_variants.root[1].language == "de-DE"
+        assert len(validated_variants.root) == len(mock_video_variants_response)
+        assert (
+            validated_variants.root[0].language
+            == mock_video_variants_response[0]["language"]
+        )
+        assert (
+            validated_variants.root[1].language
+            == mock_video_variants_response[1]["language"]
+        )
