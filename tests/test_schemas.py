@@ -2,6 +2,7 @@
 
 from json import loads
 from pathlib import Path
+from typing import Sized
 
 import pytest
 from pydantic import ValidationError
@@ -23,6 +24,7 @@ from brightcove_async.schemas.cms_model import (
     Economics,
     ImageList,
     Playlist,
+    PlaylistReferences,
     PlaylistType,
     State,
     State3,
@@ -123,6 +125,14 @@ def mock_get_digital_master_response():
     """Fixture to load a mock get digital master API response."""
     return loads(
         Path("tests/mock_responses/get_digital_master_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_get_playlists_response():
+    """Fixture to load a mock get playlists API response."""
+    return loads(
+        Path("tests/mock_responses/get_playlists_for_video_response.json").read_text(),
     )
 
 
@@ -578,3 +588,20 @@ class TestResponseModels:
             validated_response.encoding_rate
             == mock_get_digital_master_response["encoding_rate"]
         )
+
+    def test_get_playlists_for_video_response_model(
+        self,
+        mock_get_playlists_response: list[int],
+    ) -> None:
+        """Test that Playlist model validates a get playlists response."""
+
+        validated_response: PlaylistReferences = PlaylistReferences(
+            playlists=mock_get_playlists_response  # ty:ignore[invalid-argument-type]
+        )
+
+        assert isinstance(validated_response, PlaylistReferences)
+        assert isinstance(validated_response.playlists, Sized)
+        assert len(validated_response.playlists) == len(mock_get_playlists_response)
+        assert validated_response.playlists[0] == str(
+            mock_get_playlists_response[0]
+        )  # API returns playlist IDs as ints, model should coerce to str

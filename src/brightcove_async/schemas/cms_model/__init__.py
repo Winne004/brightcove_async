@@ -717,6 +717,7 @@ class PlaylistInputFields(BaseModel):
 
 
 class PlaylistReferences(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     playlists: list[str] | None = Field(
         default=None,
         description="array of EXPLICIT playlist ids that contain the video",
