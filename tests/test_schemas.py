@@ -29,6 +29,7 @@ from brightcove_async.schemas.cms_model import (
     VideoArray,
     VideoCount,
     VideoSourcesList,
+    VideoVariant,
     VideoVariants,
 )
 from brightcove_async.schemas.cms_model.Image import Sources
@@ -94,6 +95,14 @@ def mock_video_images_response():
     """Fixture to load a mock get videos API response with images."""
     return loads(
         Path("tests/mock_responses/get_video_images.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_create_video_variant_response():
+    """Fixture to load a mock create video variant API response."""
+    return loads(
+        Path("tests/mock_responses/create_video_variant.json").read_text(),
     )
 
 
@@ -480,4 +489,31 @@ class TestResponseModels:
         assert (
             validated_response.root["thumbnail"].src
             == mock_video_images_response["thumbnail"]["src"]
+        )
+
+    def test_create_video_variant_response_model(
+        self,
+        mock_create_video_variant_response: dict,
+    ) -> None:
+        """Test that VideoVariant model validates a create video variant response."""
+        validated_variant: VideoVariant = VideoVariant.model_validate(
+            mock_create_video_variant_response
+        )
+
+        assert isinstance(validated_variant, VideoVariant)
+        assert (
+            validated_variant.language == mock_create_video_variant_response["language"]
+        )
+        assert validated_variant.name == mock_create_video_variant_response["name"]
+        assert (
+            validated_variant.description
+            == mock_create_video_variant_response["description"]
+        )
+        assert (
+            validated_variant.long_description
+            == mock_create_video_variant_response["long_description"]
+        )
+        assert (
+            validated_variant.custom_fields
+            == mock_create_video_variant_response["custom_fields"]
         )
