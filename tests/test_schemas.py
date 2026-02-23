@@ -33,6 +33,9 @@ from brightcove_async.schemas.cms_model import (
     VideoVariant,
     VideoVariants,
 )
+from brightcove_async.schemas.cms_model import (
+    DigitalMaster as CMSDigitalMaster,
+)
 from brightcove_async.schemas.cms_model.Image import Sources
 from brightcove_async.schemas.cms_model.Videofields import CustomField, StandardField
 from brightcove_async.schemas.ingest_profiles_model import (
@@ -112,6 +115,14 @@ def mock_get_audio_tracks_response():
     """Fixture to load a mock get video audio tracks API response."""
     return loads(
         Path("tests/mock_responses/get_video_audio_tracks_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_get_digital_master_response():
+    """Fixture to load a mock get digital master API response."""
+    return loads(
+        Path("tests/mock_responses/get_digital_master_response.json").read_text(),
     )
 
 
@@ -542,4 +553,28 @@ class TestResponseModels:
         assert (
             validated_response.root[0].language
             == mock_get_audio_tracks_response[0]["language"]
+        )
+
+    def test_get_digital_master_response_model(
+        self,
+        mock_get_digital_master_response: dict,
+    ) -> None:
+        """Test that DigitalMaster model validates a get digital master response."""
+
+        validated_response: CMSDigitalMaster = CMSDigitalMaster.model_validate(
+            mock_get_digital_master_response
+        )
+
+        assert isinstance(validated_response, CMSDigitalMaster)
+        assert (
+            validated_response.created_at
+            == mock_get_digital_master_response["created_at"]
+        )
+        assert (
+            validated_response.updated_at
+            == mock_get_digital_master_response["updated_at"]
+        )
+        assert (
+            validated_response.encoding_rate
+            == mock_get_digital_master_response["encoding_rate"]
         )
