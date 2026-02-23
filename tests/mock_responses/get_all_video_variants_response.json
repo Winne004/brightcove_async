@@ -1,0 +1,23 @@
+[
+    {
+        "language": "es-ES",
+        "name": "string",
+        "description": "string",
+        "long_description": "string",
+        "custom_fields": {}
+    },
+    {
+        "language": "de-DE",
+        "name": "string",
+        "description": "string",
+        "long_description": "string",
+        "custom_fields": {}
+    },
+    {
+        "language": "ja-JA",
+        "name": "string",
+        "description": "string",
+        "long_description": "string",
+        "custom_fields": {}
+    }
+]
