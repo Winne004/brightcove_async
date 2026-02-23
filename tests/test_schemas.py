@@ -19,6 +19,7 @@ from brightcove_async.schemas.analytics_model import (
     Where,
 )
 from brightcove_async.schemas.cms_model import (
+    AudioTracks,
     Economics,
     ImageList,
     Playlist,
@@ -103,6 +104,14 @@ def mock_create_video_variant_response():
     """Fixture to load a mock create video variant API response."""
     return loads(
         Path("tests/mock_responses/create_video_variant.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_get_audio_tracks_response():
+    """Fixture to load a mock get video audio tracks API response."""
+    return loads(
+        Path("tests/mock_responses/get_video_audio_tracks_response.json").read_text(),
     )
 
 
@@ -516,4 +525,21 @@ class TestResponseModels:
         assert (
             validated_variant.custom_fields
             == mock_create_video_variant_response["custom_fields"]
+        )
+
+    def test_get_video_audio_tracks_response_model(
+        self,
+        mock_get_audio_tracks_response: list[dict],
+    ) -> None:
+        """Test that AudioTracks model validates a get video audio tracks response."""
+
+        validated_response: AudioTracks = AudioTracks.model_validate(
+            mock_get_audio_tracks_response
+        )
+
+        assert isinstance(validated_response, AudioTracks)
+        assert len(validated_response.root) == len(mock_get_audio_tracks_response)
+        assert (
+            validated_response.root[0].language
+            == mock_get_audio_tracks_response[0]["language"]
         )
