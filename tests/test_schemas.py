@@ -20,6 +20,7 @@ from brightcove_async.schemas.analytics_model import (
 )
 from brightcove_async.schemas.cms_model import (
     Economics,
+    ImageList,
     Playlist,
     PlaylistType,
     State,
@@ -85,6 +86,14 @@ def mock_video_variants_response():
     """Fixture to load a mock get video variants API response."""
     return loads(
         Path("tests/mock_responses/get_all_video_variants_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_video_images_response():
+    """Fixture to load a mock get videos API response with images."""
+    return loads(
+        Path("tests/mock_responses/get_video_images.json").read_text(),
     )
 
 
@@ -457,4 +466,18 @@ class TestResponseModels:
         assert (
             validated_variants.root[1].language
             == mock_video_variants_response[1]["language"]
+        )
+
+    def test_get_video_images_response_model(
+        self, mock_video_images_response: dict[str, dict]
+    ) -> None:
+        """Test that ImageList model validates a get video images response."""
+        validated_response = ImageList.model_validate(mock_video_images_response)
+
+        assert isinstance(validated_response, ImageList)
+        assert validated_response is not None
+        assert validated_response.root["thumbnail"] is not None
+        assert (
+            validated_response.root["thumbnail"].src
+            == mock_video_images_response["thumbnail"]["src"]
         )
