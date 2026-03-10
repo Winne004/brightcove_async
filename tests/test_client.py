@@ -1,26 +1,14 @@
+"""Tests for BrightcoveClient lifecycle, service access, and session management."""
+
 from unittest.mock import AsyncMock, create_autospec, patch
 
 import aiohttp
 import pytest
+from conftest import DummyOAuth
 
 from brightcove_async.client import BrightcoveClient
 
 
-class DummyOAuth:
-    def __init__(self, client_id, client_secret, session):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.session = session
-
-    async def get_access_token(self):
-        return "dummy_token"
-
-    @property
-    async def headers(self) -> dict[str, str]:
-        return {"Authorization": f"Bearer {await self.get_access_token()}"}
-
-
-@pytest.mark.asyncio
 async def test_context_manager_initializes_and_closes_session():
     from brightcove_async.registry import ServiceConfig
     from brightcove_async.services.cms import CMS
@@ -48,7 +36,6 @@ async def test_context_manager_initializes_and_closes_session():
         assert client._session is None
 
 
-@pytest.mark.asyncio
 async def test_oauth_property_lazy_instantiates():
     from brightcove_async.registry import ServiceConfig
     from brightcove_async.services.cms import CMS
@@ -74,7 +61,6 @@ async def test_oauth_property_lazy_instantiates():
             assert c._oauth is oauth
 
 
-@pytest.mark.asyncio
 async def test_services_are_lazy_loaded_and_singleton():
     from brightcove_async.registry import ServiceConfig
     from brightcove_async.services.analytics import Analytics
@@ -128,7 +114,6 @@ async def test_services_are_lazy_loaded_and_singleton():
             assert ana1 is ana2
 
 
-@pytest.mark.asyncio
 async def test_accessing_services_without_context_manager_raises():
     from brightcove_async.registry import ServiceConfig
     from brightcove_async.services.analytics import Analytics
@@ -157,7 +142,6 @@ async def test_accessing_services_without_context_manager_raises():
         _ = client.oauth
 
 
-@pytest.mark.asyncio
 async def test_client_with_external_session():
     """Test client with externally provided session."""
     from brightcove_async.registry import ServiceConfig
@@ -186,7 +170,6 @@ async def test_client_with_external_session():
     external_session.close.assert_not_called()
 
 
-@pytest.mark.asyncio
 async def test_client_aexit_clears_services_and_oauth():
     """Test that __aexit__ clears services and oauth."""
     from brightcove_async.registry import ServiceConfig
@@ -219,7 +202,6 @@ async def test_client_aexit_clears_services_and_oauth():
         assert len(client._services) == 0
 
 
-@pytest.mark.asyncio
 async def test_get_service_returns_same_instance():
     """Test _get_service returns singleton instances."""
     from brightcove_async.registry import ServiceConfig
@@ -247,7 +229,6 @@ async def test_get_service_returns_same_instance():
             assert service1 is service2
 
 
-@pytest.mark.asyncio
 async def test_client_getattr_dynamic_service_access():
     """Test __getattr__ allows dynamic service access."""
     from brightcove_async.registry import ServiceConfig
@@ -279,7 +260,6 @@ async def test_client_getattr_dynamic_service_access():
             assert cms is not analytics
 
 
-@pytest.mark.asyncio
 async def test_client_reentry_creates_new_session():
     """Test that re-entering context manager creates new session."""
     from brightcove_async.registry import ServiceConfig
@@ -317,3 +297,159 @@ async def test_client_reentry_creates_new_session():
         assert len(sessions) == 2
         sessions[0].close.assert_awaited_once()
         sessions[1].close.assert_awaited_once()
+
+
+async def test_dynamic_ingest_property():
+    """Test dynamic_ingest property returns DynamicIngest service."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.dynamic_ingest import DynamicIngest
+
+    services_registry = {
+        "dynamic_ingest": ServiceConfig(
+            cls=DynamicIngest,
+            base_url="di_url",
+            requests_per_second=10,
+        ),
+    }
+
+    with patch("aiohttp.ClientSession") as MockSession:
+        mock_session = AsyncMock()
+        MockSession.return_value = mock_session
+
+        client = BrightcoveClient(
+            services_registry=services_registry,
+            client_id="id",
+            client_secret="secret",
+            oauth_cls=DummyOAuth,
+        )
+
+        async with client as c:
+            di = c.dynamic_ingest
+            assert isinstance(di, DynamicIngest)
+            # Singleton check
+            assert c.dynamic_ingest is di
+
+
+async def test_ingest_profiles_property():
+    """Test ingest_profiles property returns IngestProfiles service."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.ingest_profiles import IngestProfiles
+
+    services_registry = {
+        "ingest_profiles": ServiceConfig(
+            cls=IngestProfiles,
+            base_url="ip_url",
+            requests_per_second=4,
+        ),
+    }
+
+    with patch("aiohttp.ClientSession") as MockSession:
+        mock_session = AsyncMock()
+        MockSession.return_value = mock_session
+
+        client = BrightcoveClient(
+            services_registry=services_registry,
+            client_id="id",
+            client_secret="secret",
+            oauth_cls=DummyOAuth,
+        )
+
+        async with client as c:
+            ip = c.ingest_profiles
+            assert isinstance(ip, IngestProfiles)
+            assert c.ingest_profiles is ip
+
+
+async def test_get_service_unknown_name_raises_key_error():
+    """Test _get_service raises KeyError for unknown service name."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.cms import CMS
+
+    services_registry = {
+        "cms": ServiceConfig(cls=CMS, base_url="cms_url", requests_per_second=4),
+    }
+
+    with patch("aiohttp.ClientSession") as MockSession:
+        mock_session = AsyncMock()
+        MockSession.return_value = mock_session
+
+        client = BrightcoveClient(
+            services_registry=services_registry,
+            client_id="id",
+            client_secret="secret",
+            oauth_cls=DummyOAuth,
+        )
+
+        async with client as c:
+            with pytest.raises(KeyError):
+                c._get_service("nonexistent", CMS)
+
+
+async def test_accessing_dynamic_ingest_without_context_raises():
+    """Test accessing dynamic_ingest without context manager raises RuntimeError."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.dynamic_ingest import DynamicIngest
+
+    services_registry = {
+        "dynamic_ingest": ServiceConfig(
+            cls=DynamicIngest,
+            base_url="di_url",
+        ),
+    }
+
+    client = BrightcoveClient(
+        services_registry=services_registry,
+        client_id="id",
+        client_secret="secret",
+        oauth_cls=DummyOAuth,
+    )
+    with pytest.raises(RuntimeError, match="Client session not initialized"):
+        _ = client.dynamic_ingest
+
+
+async def test_accessing_ingest_profiles_without_context_raises():
+    """Test accessing ingest_profiles without context manager raises RuntimeError."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.ingest_profiles import IngestProfiles
+
+    services_registry = {
+        "ingest_profiles": ServiceConfig(
+            cls=IngestProfiles,
+            base_url="ip_url",
+        ),
+    }
+
+    client = BrightcoveClient(
+        services_registry=services_registry,
+        client_id="id",
+        client_secret="secret",
+        oauth_cls=DummyOAuth,
+    )
+    with pytest.raises(RuntimeError, match="Client session not initialized"):
+        _ = client.ingest_profiles
+
+
+async def test_oauth_property_returns_same_instance():
+    """Test oauth property always returns same instance (singleton)."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.cms import CMS
+
+    services_registry = {
+        "cms": ServiceConfig(cls=CMS, base_url="cms_url", requests_per_second=4),
+    }
+
+    with patch("aiohttp.ClientSession") as MockSession:
+        mock_session = AsyncMock()
+        MockSession.return_value = mock_session
+
+        client = BrightcoveClient(
+            services_registry=services_registry,
+            client_id="id",
+            client_secret="secret",
+            oauth_cls=DummyOAuth,
+        )
+
+        async with client as c:
+            oauth1 = c.oauth
+            oauth2 = c.oauth
+            assert oauth1 is oauth2

@@ -1,6 +1,7 @@
-from unittest.mock import AsyncMock, patch
+"""Tests for the Analytics service."""
 
-import aiohttp
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
 from brightcove_async.schemas.analytics_model import (
@@ -14,189 +15,136 @@ from brightcove_async.schemas.analytics_model import (
 from brightcove_async.schemas.params import GetAnalyticsReportParams
 from brightcove_async.services.analytics import Analytics
 
-
-class DummyOAuth:
-    """Dummy OAuth class for testing."""
-
-    async def get_access_token(self):
-        return "test_token"
-
-    @property
-    async def headers(self):
-        return {"Authorization": "Bearer test_token"}
-
-
-@pytest.fixture
-def mock_session():
-    """Create a mock aiohttp.ClientSession."""
-    return AsyncMock(spec=aiohttp.ClientSession)
-
-
-@pytest.fixture
-def dummy_oauth():
-    """Create a dummy OAuth client."""
-    return DummyOAuth()
+BASE_URL = "https://analytics.api.brightcove.com/v1"
 
 
 @pytest.fixture
 def analytics_service(mock_session, dummy_oauth):
-    """Create an Analytics service instance for testing."""
     return Analytics(
         session=mock_session,
         oauth=dummy_oauth,
-        base_url="https://analytics.api.brightcove.com/v1",
+        base_url=BASE_URL,
         limit=10,
     )
 
 
-def test_analytics_initialization(analytics_service):
-    """Test Analytics service initializes with correct parameters."""
-    assert analytics_service._limit == 10
-    assert analytics_service.base_url == "https://analytics.api.brightcove.com/v1"
+class TestAnalyticsInitialization:
+    def test_stores_limit_and_url(self, analytics_service):
+        assert analytics_service._limit == 10
+        assert analytics_service.base_url == BASE_URL
+
+    def test_base_url_property_override(self, analytics_service):
+        """Analytics overrides base_url as a property — verify it works."""
+        assert analytics_service.base_url == BASE_URL
 
 
-@pytest.mark.asyncio
-async def test_get_account_engagement(analytics_service):
-    """Test get_account_engagement method."""
-    with patch.object(
-        analytics_service,
-        "fetch_data",
-        new_callable=AsyncMock,
-    ) as mock_fetch:
-        from unittest.mock import MagicMock
+class TestAnalyticsEndpoints:
+    """Verify each method calls fetch_data with the exact correct endpoint and model."""
 
-        mock_fetch.return_value = MagicMock(spec=Timeline)
+    async def test_get_account_engagement(self, analytics_service):
+        with patch.object(
+            analytics_service, "fetch_data", new_callable=AsyncMock
+        ) as mock_fetch:
+            mock_fetch.return_value = MagicMock(spec=Timeline)
+            await analytics_service.get_account_engagement("acc123")
 
-        await analytics_service.get_account_engagement("account123")
+            mock_fetch.assert_called_once_with(
+                endpoint=f"{BASE_URL}/engagement/accounts/acc123",
+                model=Timeline,
+            )
 
-        mock_fetch.assert_called_once()
-        call_args = mock_fetch.call_args
-        assert "engagement/accounts/account123" in call_args.kwargs["endpoint"]
-        assert call_args.kwargs["model"] == Timeline
+    async def test_get_player_engagement(self, analytics_service):
+        with patch.object(
+            analytics_service, "fetch_data", new_callable=AsyncMock
+        ) as mock_fetch:
+            mock_fetch.return_value = MagicMock(spec=Timeline)
+            await analytics_service.get_player_engagement("acc123", "player456")
 
+            mock_fetch.assert_called_once_with(
+                endpoint=f"{BASE_URL}/engagement/accounts/acc123/players/player456",
+                model=Timeline,
+            )
 
-@pytest.mark.asyncio
-async def test_get_player_engagement(analytics_service):
-    """Test get_player_engagement method."""
-    with patch.object(
-        analytics_service,
-        "fetch_data",
-        new_callable=AsyncMock,
-    ) as mock_fetch:
-        from unittest.mock import MagicMock
+    async def test_get_video_engagement(self, analytics_service):
+        with patch.object(
+            analytics_service, "fetch_data", new_callable=AsyncMock
+        ) as mock_fetch:
+            mock_fetch.return_value = MagicMock(spec=TimelineWithDuration)
+            await analytics_service.get_video_engagement("acc123", "vid789")
 
-        mock_fetch.return_value = MagicMock(spec=Timeline)
+            mock_fetch.assert_called_once_with(
+                endpoint=f"{BASE_URL}/engagement/accounts/acc123/videos/vid789",
+                model=TimelineWithDuration,
+            )
 
-        await analytics_service.get_player_engagement(
-            "account123",
-            "player456",
-        )
+    async def test_get_analytics_report(self, analytics_service):
+        with patch.object(
+            analytics_service, "fetch_data", new_callable=AsyncMock
+        ) as mock_fetch:
+            mock_fetch.return_value = GetAnalyticsReportResponse(
+                item_count=0,
+                items=[],
+                summary=Summary(),
+            )
+            params = GetAnalyticsReportParams(accounts="acc123", dimensions="video")
+            await analytics_service.get_analytics_report(params)
 
-        mock_fetch.assert_called_once()
-        call_args = mock_fetch.call_args
-        assert "account123" in call_args.kwargs["endpoint"]
-        assert "player456" in call_args.kwargs["endpoint"]
-        assert call_args.kwargs["model"] == Timeline
+            mock_fetch.assert_called_once_with(
+                endpoint=f"{BASE_URL}/data",
+                model=GetAnalyticsReportResponse,
+                params=params.serialize_params(),
+            )
 
+    async def test_get_analytics_report_passes_serialized_params(
+        self, analytics_service
+    ):
+        """Verify params are serialized (aliases resolved) before passing to fetch_data."""
+        with patch.object(
+            analytics_service, "fetch_data", new_callable=AsyncMock
+        ) as mock_fetch:
+            mock_fetch.return_value = GetAnalyticsReportResponse(
+                item_count=0,
+                items=[],
+                summary=Summary(),
+            )
+            params = GetAnalyticsReportParams(
+                accounts="acc123",
+                dimensions="video",
+                from_="2024-01-01",
+            )
+            await analytics_service.get_analytics_report(params)
 
-@pytest.mark.asyncio
-async def test_get_video_engagement(analytics_service):
-    """Test get_video_engagement method."""
-    with patch.object(
-        analytics_service,
-        "fetch_data",
-        new_callable=AsyncMock,
-    ) as mock_fetch:
-        from unittest.mock import MagicMock
+            call_params = mock_fetch.call_args.kwargs["params"]
+            assert "from" in call_params
+            assert "from_" not in call_params
 
-        mock_fetch.return_value = MagicMock(spec=TimelineWithDuration)
+    async def test_get_available_date_range(self, analytics_service):
+        with patch.object(
+            analytics_service, "fetch_data", new_callable=AsyncMock
+        ) as mock_fetch:
+            mock_fetch.return_value = GetAvailableDateRangeResponse(
+                reconciled_from="2024-01-01",
+                reconciled_to="2024-12-31",
+            )
+            params = GetAnalyticsReportParams(accounts="acc123", dimensions="video")
+            await analytics_service.get_available_date_range(params)
 
-        await analytics_service.get_video_engagement("account123", "video789")
+            mock_fetch.assert_called_once_with(
+                endpoint=f"{BASE_URL}/data/status",
+                model=GetAvailableDateRangeResponse,
+                params=params.serialize_params(),
+            )
 
-        mock_fetch.assert_called_once()
-        call_args = mock_fetch.call_args
-        assert "account123" in call_args.kwargs["endpoint"]
-        assert "video789" in call_args.kwargs["endpoint"]
-        assert call_args.kwargs["model"] == TimelineWithDuration
+    async def test_get_alltime_video_views(self, analytics_service):
+        with patch.object(
+            analytics_service, "fetch_data", new_callable=AsyncMock
+        ) as mock_fetch:
+            mock_fetch.return_value = GetAlltimeVideoViewsResponse(
+                alltime_video_views=1000
+            )
+            await analytics_service.get_alltime_video_views("acc123", "vid456")
 
-
-@pytest.mark.asyncio
-async def test_get_analytics_report(analytics_service):
-    """Test get_analytics_report method."""
-    with patch.object(
-        analytics_service,
-        "fetch_data",
-        new_callable=AsyncMock,
-    ) as mock_fetch:
-        mock_fetch.return_value = GetAnalyticsReportResponse(
-            item_count=0,
-            items=[],
-            summary=Summary(**{}),
-        )
-
-        params = GetAnalyticsReportParams(
-            accounts="account123",
-            dimensions="video",
-        )
-
-        await analytics_service.get_analytics_report(params)
-
-        mock_fetch.assert_called_once()
-        call_args = mock_fetch.call_args
-        assert "data" in call_args.kwargs["endpoint"]
-        assert call_args.kwargs["model"] == GetAnalyticsReportResponse
-        assert call_args.kwargs["params"] is not None
-
-
-@pytest.mark.asyncio
-async def test_get_available_date_range(analytics_service):
-    """Test get_available_date_range method."""
-    with patch.object(
-        analytics_service,
-        "fetch_data",
-        new_callable=AsyncMock,
-    ) as mock_fetch:
-        mock_fetch.return_value = GetAvailableDateRangeResponse(
-            reconciled_from="2024-01-01",
-            reconciled_to="2024-12-31",
-        )
-
-        params = GetAnalyticsReportParams(
-            accounts="account123",
-            dimensions="video",
-        )
-
-        await analytics_service.get_available_date_range(params)
-
-        mock_fetch.assert_called_once()
-        call_args = mock_fetch.call_args
-        assert "data/status" in call_args.kwargs["endpoint"]
-        assert call_args.kwargs["model"] == GetAvailableDateRangeResponse
-
-
-@pytest.mark.asyncio
-async def test_get_alltime_video_views(analytics_service):
-    """Test get_alltime_video_views method."""
-    with patch.object(
-        analytics_service,
-        "fetch_data",
-        new_callable=AsyncMock,
-    ) as mock_fetch:
-        mock_fetch.return_value = GetAlltimeVideoViewsResponse(alltime_video_views=1000)
-
-        await analytics_service.get_alltime_video_views(
-            "account123",
-            "video456",
-        )
-
-        mock_fetch.assert_called_once()
-        call_args = mock_fetch.call_args
-        assert "account123" in call_args.kwargs["endpoint"]
-        assert "video456" in call_args.kwargs["endpoint"]
-        assert call_args.kwargs["model"] == GetAlltimeVideoViewsResponse
-
-
-@pytest.mark.asyncio
-async def test_base_url_property(analytics_service):
-    """Test base_url property returns correct URL."""
-    assert analytics_service.base_url == "https://analytics.api.brightcove.com/v1"
+            mock_fetch.assert_called_once_with(
+                endpoint=f"{BASE_URL}/alltime/accounts/acc123/videos/vid456",
+                model=GetAlltimeVideoViewsResponse,
+            )
