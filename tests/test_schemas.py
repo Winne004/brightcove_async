@@ -1,5 +1,9 @@
 """Tests for schema models validation and serialization."""
 
+from json import loads
+from pathlib import Path
+from typing import Sized
+
 import pytest
 from pydantic import ValidationError
 
@@ -16,14 +20,23 @@ from brightcove_async.schemas.analytics_model import (
     Where,
 )
 from brightcove_async.schemas.cms_model import (
+    AudioTracks,
     Economics,
+    ImageList,
     Playlist,
+    PlaylistReferences,
     PlaylistType,
     State,
     State3,
     Video,
     VideoArray,
     VideoCount,
+    VideoSourcesList,
+    VideoVariant,
+    VideoVariants,
+)
+from brightcove_async.schemas.cms_model import (
+    DigitalMaster as CMSDigitalMaster,
 )
 from brightcove_async.schemas.cms_model.Image import Sources
 from brightcove_async.schemas.cms_model.Videofields import CustomField, StandardField
@@ -39,6 +52,89 @@ from brightcove_async.schemas.syndication_model import (
     SyndicationList,
     Type,
 )
+
+# --- Fixtures ---
+
+
+@pytest.fixture
+def mock_video_response():
+    """Fixture to load a mock get videos API response."""
+    return loads(
+        Path("tests/mock_responses/get_videos_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_create_video_response():
+    """Fixture to load a mock create video API response."""
+    return loads(
+        Path("tests/mock_responses/create_video_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_video_count_response():
+    """Fixture to load a mock get video count API response."""
+    return loads(
+        Path("tests/mock_responses/get_video_count_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_video_sources_response():
+    """Fixture to load a mock get video sources API response."""
+    return loads(
+        Path("tests/mock_responses/get_video_sources_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_video_variants_response():
+    """Fixture to load a mock get video variants API response."""
+    return loads(
+        Path("tests/mock_responses/get_all_video_variants_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_video_images_response():
+    """Fixture to load a mock get videos API response with images."""
+    return loads(
+        Path("tests/mock_responses/get_video_images.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_create_video_variant_response():
+    """Fixture to load a mock create video variant API response."""
+    return loads(
+        Path("tests/mock_responses/create_video_variant.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_get_audio_tracks_response():
+    """Fixture to load a mock get video audio tracks API response."""
+    return loads(
+        Path("tests/mock_responses/get_video_audio_tracks_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_get_digital_master_response():
+    """Fixture to load a mock get digital master API response."""
+    return loads(
+        Path("tests/mock_responses/get_digital_master_response.json").read_text(),
+    )
+
+
+@pytest.fixture
+def mock_get_playlists_response():
+    """Fixture to load a mock get playlists API response."""
+    return loads(
+        Path("tests/mock_responses/get_playlists_for_video_response.json").read_text(),
+    )
+
 
 # --- Analytics Models ---
 
@@ -181,7 +277,7 @@ class TestSyndicationList:
             root=[
                 Syndication(name="Feed1", type=Type.google),
                 Syndication(name="Feed2", type=Type.mp4),
-            ]
+            ],
         )
         assert len(sl.root) == 2
 
@@ -339,3 +435,173 @@ class TestStandardField:
     def test_with_values(self):
         sf = StandardField(id="tags", description="Video tags")
         assert sf.id == "tags"
+
+
+class TestResponseModels:
+    def test_get_video_response_model(self, mock_video_response: list[dict]) -> None:
+        """Test that VideoArray correctly validates a real API response."""
+
+        validated_response = VideoArray.model_validate(mock_video_response)
+
+        assert isinstance(validated_response, VideoArray)
+        assert len(validated_response.root) == 1
+
+        video = validated_response.root[0]
+        assert isinstance(video, Video)
+        assert video.id == mock_video_response[0]["id"]
+        assert video.description == mock_video_response[0]["description"]
+        assert video.duration == mock_video_response[0]["duration"]
+        assert video.complete is True
+        assert video.economics == Economics.AD_SUPPORTED
+
+        assert video.images is not None
+        assert video.geo is not None
+        assert video.custom_fields is not None
+
+    def test_create_video_response_model(self, mock_create_video_response: dict):
+        """Test that Video model validates a create video response."""
+        validated_video = Video.model_validate(
+            mock_create_video_response,
+            strict=False,
+        )
+
+        assert isinstance(validated_video, Video)
+        assert validated_video.id == str(
+            mock_create_video_response["id"]
+        )  # API returns ID as int or str, model casts to str
+        assert validated_video.ad_keys == mock_create_video_response["ad_keys"]
+
+    def test_get_video_count_response_model(
+        self, mock_video_count_response: dict
+    ) -> None:
+        """Test that VideoCount model validates a get video count response."""
+        validated_count = VideoCount.model_validate(mock_video_count_response)
+
+        assert isinstance(validated_count, VideoCount)
+        assert validated_count.count == mock_video_count_response["count"]
+
+    def test_video_sources_response_model(
+        self, mock_video_sources_response: list[dict]
+    ) -> None:
+        """Test that VideoSourcesList model validates a get video sources response."""
+        validated_sources = VideoSourcesList.model_validate(mock_video_sources_response)
+
+        assert isinstance(validated_sources, VideoSourcesList)
+        assert len(validated_sources.root) == len(mock_video_sources_response)
+        assert validated_sources.root[0].src == mock_video_sources_response[0]["src"]
+
+    def test_video_variants_response_model(
+        self, mock_video_variants_response: list[dict]
+    ) -> None:
+        """Test that VideoVariants model validates a get video variants response."""
+        validated_variants = VideoVariants.model_validate(mock_video_variants_response)
+
+        assert isinstance(validated_variants, VideoVariants)
+        assert len(validated_variants.root) == len(mock_video_variants_response)
+        assert (
+            validated_variants.root[0].language
+            == mock_video_variants_response[0]["language"]
+        )
+        assert (
+            validated_variants.root[1].language
+            == mock_video_variants_response[1]["language"]
+        )
+
+    def test_get_video_images_response_model(
+        self, mock_video_images_response: dict[str, dict]
+    ) -> None:
+        """Test that ImageList model validates a get video images response."""
+        validated_response = ImageList.model_validate(mock_video_images_response)
+
+        assert isinstance(validated_response, ImageList)
+        assert validated_response is not None
+        assert validated_response.root["thumbnail"] is not None
+        assert (
+            validated_response.root["thumbnail"].src
+            == mock_video_images_response["thumbnail"]["src"]
+        )
+
+    def test_create_video_variant_response_model(
+        self,
+        mock_create_video_variant_response: dict,
+    ) -> None:
+        """Test that VideoVariant model validates a create video variant response."""
+        validated_variant: VideoVariant = VideoVariant.model_validate(
+            mock_create_video_variant_response
+        )
+
+        assert isinstance(validated_variant, VideoVariant)
+        assert (
+            validated_variant.language == mock_create_video_variant_response["language"]
+        )
+        assert validated_variant.name == mock_create_video_variant_response["name"]
+        assert (
+            validated_variant.description
+            == mock_create_video_variant_response["description"]
+        )
+        assert (
+            validated_variant.long_description
+            == mock_create_video_variant_response["long_description"]
+        )
+        assert (
+            validated_variant.custom_fields
+            == mock_create_video_variant_response["custom_fields"]
+        )
+
+    def test_get_video_audio_tracks_response_model(
+        self,
+        mock_get_audio_tracks_response: list[dict],
+    ) -> None:
+        """Test that AudioTracks model validates a get video audio tracks response."""
+
+        validated_response: AudioTracks = AudioTracks.model_validate(
+            mock_get_audio_tracks_response
+        )
+
+        assert isinstance(validated_response, AudioTracks)
+        assert len(validated_response.root) == len(mock_get_audio_tracks_response)
+        assert (
+            validated_response.root[0].language
+            == mock_get_audio_tracks_response[0]["language"]
+        )
+
+    def test_get_digital_master_response_model(
+        self,
+        mock_get_digital_master_response: dict,
+    ) -> None:
+        """Test that DigitalMaster model validates a get digital master response."""
+
+        validated_response: CMSDigitalMaster = CMSDigitalMaster.model_validate(
+            mock_get_digital_master_response
+        )
+
+        assert isinstance(validated_response, CMSDigitalMaster)
+        assert (
+            validated_response.created_at
+            == mock_get_digital_master_response["created_at"]
+        )
+        assert (
+            validated_response.updated_at
+            == mock_get_digital_master_response["updated_at"]
+        )
+        assert (
+            validated_response.encoding_rate
+            == mock_get_digital_master_response["encoding_rate"]
+        )
+
+    def test_get_playlists_for_video_response_model(
+        self,
+        mock_get_playlists_response: list[int],
+    ) -> None:
+        """Test that Playlist model validates a get playlists response."""
+
+        validated_response: PlaylistReferences = PlaylistReferences(
+            playlists=mock_get_playlists_response  # ty:ignore[invalid-argument-type]
+        )
+
+        assert isinstance(validated_response, PlaylistReferences)
+        assert isinstance(validated_response.playlists, Sized)
+        assert len(validated_response.playlists) == len(mock_get_playlists_response)
+        assert validated_response.playlists[0] == str(
+            mock_get_playlists_response[0]
+        )  # API returns playlist IDs as ints, model should coerce to str

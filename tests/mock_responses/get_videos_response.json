@@ -1,0 +1,223 @@
+[
+    {
+        "video_preview": {
+            "start": 10000,
+            "sources": [
+                {
+                    "ext_x_version": "7",
+                    "src": "https://manifest.prod.boltdns.net/.../preview.m3u8?...",
+                    "type": "application/x-mpegURL"
+                }
+            ]
+        },
+        "ad_keys": " \"adKeys\": \"category=sports&live=true\"",
+        "clip_source_video_id": "4723947979",
+        "complete": true,
+        "created_at": "2015-09-17T16:08:37.108Z",
+        "created_by": {
+            "email": "string",
+            "id": "string",
+            "type": "user"
+        },
+        "cue_points": [
+            {
+                "force_stop": true,
+                "metadata": "string",
+                "name": "string",
+                "time": 10.527,
+                "type": "AD"
+            }
+        ],
+        "custom_fields": {
+            "property1": "string",
+            "property2": "string"
+        },
+        "delivery_type": "dynamic_origin",
+        "description": "Herring gull on a wharf in Boston",
+        "digital_master_id": 734462494001,
+        "drm_disabled": true,
+        "duration": 18160,
+        "economics": "AD_SUPPORTED",
+        "folder_id": "560039e5e4b0e69e4b01cacd",
+        "forensic_watermarking": "ACTIVE",
+        "geo": {
+            "countries": [
+                "us",
+                "ca",
+                "fr"
+            ],
+            "exclude_countries": true,
+            "restricted": true
+        },
+        "has_digital_master": true,
+        "id": "734462567001",
+        "images": {
+            "thumbnail": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/jit/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/main/160x90/20s629ms/match/image.jpg",
+                "sources": [
+                    {
+                        "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/jit/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/main/160x90/20s629ms/match/image.jpg",
+                        "height": 90,
+                        "width": 160
+                    }
+                ]
+            },
+            "poster": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/jit/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/main/1280x720/20s629ms/match/image.jpg",
+                "sources": [
+                    {
+                        "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/jit/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/main/1280x720/20s629ms/match/image.jpg",
+                        "height": 720,
+                        "width": 1280
+                    }
+                ]
+            },
+            "portrait.es": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/bac8717a-43db-4fa8-a6f0-189c80ee4c4e/800x1200/match/image.jpg",
+                "sources": [
+                    {
+                        "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/bac8717a-43db-4fa8-a6f0-189c80ee4c4e/800x1200/match/image.jpg",
+                        "height": 1200,
+                        "width": 800
+                    }
+                ]
+            },
+            "thumbnail.en": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/0ce2da4d-ca36-469b-9024-0273d79feeeb/292x108/match/image.jpg",
+                "sources": [
+                    {
+                        "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/0ce2da4d-ca36-469b-9024-0273d79feeeb/292x108/match/image.jpg",
+                        "height": 108,
+                        "width": 292
+                    }
+                ]
+            },
+            "poster.en": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/a7cb150d-c84a-48e0-9469-5b4ce80fba53/1920x1080/match/image.jpg",
+                "sources": [
+                    {
+                        "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/a7cb150d-c84a-48e0-9469-5b4ce80fba53/1920x1080/match/image.jpg",
+                        "height": 1080,
+                        "width": 1920
+                    }
+                ]
+            },
+            "square.de": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/22209955-e136-4f17-914c-e19ec4c58886/570x570/match/image.jpg",
+                "sources": [
+                    {
+                        "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/22209955-e136-4f17-914c-e19ec4c58886/570x570/match/image.jpg",
+                        "height": 570,
+                        "width": 570
+                    }
+                ]
+            },
+            "ultra-wide.hi": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/72fd489f-d978-44ba-8d04-1e33c7c36cef/3840x1646/match/image.jpg",
+                "sources": [
+                    {
+                        "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/72fd489f-d978-44ba-8d04-1e33c7c36cef/3840x1646/match/image.jpg",
+                        "height": 1646,
+                        "width": 3840
+                    }
+                ]
+            },
+            "wide.fr": {
+                "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/4405a5d5-8b9e-4c2b-be71-cf4e2c153e87/2560x1440/match/image.jpg",
+                "sources": [
+                    {
+                        "src": "https://cf-images.us-east-1.prod.boltdns.net/v1/static/57838016001/ee705e97-3fb5-409c-99d8-703e9f57bd0a/4405a5d5-8b9e-4c2b-be71-cf4e2c153e87/2560x1440/match/image.jpg",
+                        "height": 1440,
+                        "width": 2560
+                    }
+                ]
+            }
+        },
+        "labels": [
+            "string"
+        ],
+        "link": {
+            "text": "string",
+            "url": "string"
+        },
+        "long_description": "Herring Gull near Fort Point Channel in Boston, MA, USA. 2019-04-25.",
+        "name": "Laughing Gull",
+        "offline_enabled": true,
+        "original_filename": "gull-boston.mov",
+        "playback_rights_id": "string",
+        "projection": "equirectangular",
+        "published_at": "2019-04-30T23:27:22.507Z",
+        "reference_id": "laughing_gull_2019_04_25",
+        "schedule": {
+            "ends_at": "2020-05-20T20:41:07.689Z",
+            "starts_at": "2019-05-20T20:41:07.689Z"
+        },
+        "sharing": {
+            "by_external_acct": true,
+            "by_id": 57838016001,
+            "by_reference": true,
+            "source_id": 239487239487,
+            "to_external_acct": true
+        },
+        "state": "ACTIVE",
+        "tags": [
+            "birds",
+            "sea"
+        ],
+        "text_tracks": [
+            {
+                "default": false,
+                "id": "string",
+                "kind": "subtitles",
+                "label": "string",
+                "mime_type": "string",
+                "src": "string",
+                "srclang": "string",
+                "status": null
+            }
+        ],
+        "transcripts": [
+            {
+                "id": "string",
+                "account_id": "string",
+                "default": true,
+                "label": "string",
+                "sources": [
+                    "string"
+                ],
+                "src": "string",
+                "srclang": "string",
+                "status": "draft"
+            }
+        ],
+        "updated_at": "2018-02-27T19:09:20.401Z",
+        "updated_by": {
+            "email": "string",
+            "id": "string",
+            "type": "user"
+        },
+        "variants": [
+            {
+                "language": "es-ES",
+                "name": "string",
+                "description": "string",
+                "long_description": "string",
+                "custom_fields": {}
+            },
+            {
+                "language": "de-DE",
+                "name": "string",
+                "description": "string",
+                "long_description": "string",
+                "custom_fields": {}
+            },
+            {
+                "language": "ja-JA",
+                "name": "string",
+                "description": "string",
+                "long_description": "string",
+                "custom_fields": {}
+            }
+        ]
+    }
+]

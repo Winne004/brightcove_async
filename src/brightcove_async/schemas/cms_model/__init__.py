@@ -8,7 +8,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field, RootModel, field_validator
+from pydantic import BaseModel, ConfigDict, Field, RootModel, field_validator
 
 from . import Image as Image_1
 from . import Videofields
@@ -717,6 +717,7 @@ class PlaylistInputFields(BaseModel):
 
 
 class PlaylistReferences(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     playlists: list[str] | None = Field(
         default=None,
         description="array of EXPLICIT playlist ids that contain the video",
@@ -742,6 +743,7 @@ class ShareVideoRequest(BaseModel):
 
 
 class Sharing(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     by_external_acct: bool | None = Field(
         default=None,
         description="whether the video was shared from another account",
@@ -1237,6 +1239,7 @@ class ImageList(RootModel[dict[str, Image]]):
 
 
 class Video(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     ad_keys: str | None = Field(
         default=None,
         description="string representing the ad key/value pairs assigned to the video. Key/value pairs are formatted as key=value and are separated by ampersands - can only be added on update, not creation",

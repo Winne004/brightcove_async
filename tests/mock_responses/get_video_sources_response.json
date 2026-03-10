@@ -1,0 +1,44 @@
+[
+    {
+        "ext_x_version": "4",
+        "src": "https://manifest.prod.boltdns.net/manifest/v1/hls/v4/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/10s/master.m3u8?fastly_token=NWJiMmIyNmNfMWM3YmVhZTA5OTc4YjM4ZjZiZjU1OTk0ZTkzZTUyMzhhNGU5Zjc5YTNkZGYwYWQyNWZkMTcyMGM1MzlmMWVmZg%3D%3D",
+        "type": "application/x-mpegURL",
+        "uploaded_at": "2017-06-05T11:20:53.731Z"
+    },
+    {
+        "ext_x_version": "5",
+        "src": "https://manifest.prod.boltdns.net/manifest/v1/hls/v5/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/10s/master.m3u8?fastly_token=NWJiMmIyNmNfNDc4YjJiNTM1YzkwYzcwNzliNmY3MDVjMzJmZjJhZjdmNjAxMzM0NWEzMTk3MzY2MGIwYWZhNzVhYjMyMzNhYg%3D%3D",
+        "type": "application/x-mpegURL",
+        "uploaded_at": "2017-06-05T11:20:53.731Z"
+    },
+    {
+        "profiles": "urn:mpeg:dash:profile:isoff-live:2011",
+        "src": "https://manifest.prod.boltdns.net/manifest/v1/dash/live-baseurl/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/2s/manifest.mpd?fastly_token=NWJiMmIyNmNfYjM3YTFiZjU5MmJjNzQzZjFkZTVlZmY0NTVhNmYxMzU3N2M2ODk5MmU1YjkyNDg5ZWRlNWRmMGNlODdjYjg5YQ%3D%3D",
+        "type": "application/dash+xml",
+        "uploaded_at": "2017-06-05T11:20:53.731Z"
+    },
+    {
+        "codec": "H264",
+        "container": "MP4",
+        "duration": 49690,
+        "encoding_rate": 2129000,
+        "height": 720,
+        "remote": false,
+        "size": 13242064,
+        "src": "https://bcbolt446c5271-a.akamaihd.net/media/v1/pmp4/static/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/high.mp4?akamai_token=exp=1538437740~acl=/media/v1/pmp4/static/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/high.mp4*~hmac=619d67d75397e01c0bb9bd88ea047ace80bd03b56261337233b5d53f2632c690",
+        "uploaded_at": "2017-06-05T11:20:53.731Z",
+        "width": 1280
+    },
+    {
+        "codec": "H264",
+        "container": "MP4",
+        "duration": 49690,
+        "encoding_rate": 574000,
+        "height": 270,
+        "remote": false,
+        "size": 3586929,
+        "src": "https://bcbolt446c5271-a.akamaihd.net/media/v1/pmp4/static/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/mid.mp4?akamai_token=exp=1538437740~acl=/media/v1/pmp4/static/clear/57838016001/853641cb-d66b-4f08-bb02-8489b5fba897/mid.mp4*~hmac=fde050eac8c8d3bb5b6c9141639a3dc770b8b8a3a3f88f5436c803b133d940fc",
+        "uploaded_at": "2017-06-05T11:20:53.731Z",
+        "width": 480
+    }
+]

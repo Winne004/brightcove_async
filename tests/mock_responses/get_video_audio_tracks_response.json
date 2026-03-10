@@ -1,0 +1,15 @@
+[
+    {
+        "duration": 86053,
+        "encoding_rates": [
+            64000,
+            96000,
+            127000,
+            192000
+        ],
+        "id": "en_alternate",
+        "is_default": true,
+        "language": "en",
+        "variant": "main"
+    }
+]
