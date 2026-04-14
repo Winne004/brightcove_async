@@ -81,18 +81,18 @@ class Base(ABC):
         method: str = "GET",
         params: dict | None = None,
         headers: dict | None = None,
-        json: BaseModel | None = None,
+        payload: BaseModel | None = None,
     ) -> T:
         if headers is None:
             headers = await self._oauth.headers
 
         body = (
-            json.model_dump(
+            payload.model_dump(
                 exclude_none=True,
                 exclude_unset=True,
                 exclude_defaults=True,
             )
-            if json
+            if payload
             else None
         )
 
