@@ -119,4 +119,10 @@ def test_service_registry_returns_dict():
     registry = build_service_registry(config)
 
     assert isinstance(registry, dict)
-    assert "ingest_profiles" in registry
+    assert set(registry.keys()) == {
+        "cms",
+        "syndication",
+        "analytics",
+        "dynamic_ingest",
+        "ingest_profiles",
+    }
