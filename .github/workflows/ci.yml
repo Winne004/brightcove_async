@@ -23,7 +23,7 @@ jobs:
           python-version-file: .python-version
 
       - name: Install dependencies
-        run: uv sync --all-groups
+        run: uv sync --all-groups --frozen
 
       - name: Ruff lint
         run: uv run --with ruff ruff check .
