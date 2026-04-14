@@ -98,9 +98,6 @@ def map_status_code_to_exception(status_code: int) -> type[BrightcoveError]:
         HTTPStatus.INTERNAL_SERVER_ERROR: BrightcoveUnknownError,
     }
 
-    status = (
-        status_code if isinstance(status_code, HTTPStatus) else HTTPStatus(status_code)
-    )
     try:
         status = (
             status_code
