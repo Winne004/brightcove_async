@@ -42,6 +42,10 @@ class BrightcoveAuthError(BrightcoveClientError):
     """Raised when authentication with the Brightcove API fails."""
 
 
+class BrightcoveForbiddenError(BrightcoveClientError):
+    """Raised when the caller lacks permission for the requested resource."""
+
+
 class BrightcoveBadValueError(BrightcoveClientError):
     """Raised when a bad value is provided to the Brightcove API."""
 
@@ -85,6 +89,7 @@ def map_status_code_to_exception(status_code: int) -> type[BrightcoveError]:
     """Map HTTP status codes to Brightcove exception classes using HTTPStatus."""
     mapping = {
         HTTPStatus.UNAUTHORIZED: BrightcoveAuthError,
+        HTTPStatus.FORBIDDEN: BrightcoveForbiddenError,
         HTTPStatus.BAD_REQUEST: BrightcoveBadValueError,
         HTTPStatus.METHOD_NOT_ALLOWED: BrightcoveMethodNotAllowedError,
         HTTPStatus.NOT_FOUND: BrightcoveResourceNotFoundError,
@@ -96,5 +101,13 @@ def map_status_code_to_exception(status_code: int) -> type[BrightcoveError]:
     status = (
         status_code if isinstance(status_code, HTTPStatus) else HTTPStatus(status_code)
     )
+    try:
+        status = (
+            status_code
+            if isinstance(status_code, HTTPStatus)
+            else HTTPStatus(status_code)
+        )
+    except ValueError:
+        return BrightcoveUnknownError
 
     return mapping.get(status, BrightcoveUnknownError)

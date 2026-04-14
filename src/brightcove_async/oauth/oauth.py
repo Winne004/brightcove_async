@@ -28,7 +28,7 @@ class OAuthClient:
             (aiohttp.ClientConnectionError),
         ),
         wait=wait_exponential(multiplier=1, min=1, max=3),  # exponential backoff
-        stop=stop_after_attempt(3),  # up to 5 retries
+        stop=stop_after_attempt(3),  # up to 3 retries
     )
     async def _get_access_token(self) -> None:
         headers = {"Content-Type": "application/x-www-form-urlencoded"}

@@ -248,8 +248,8 @@ async def test_get_service_returns_same_instance():
 
 
 @pytest.mark.asyncio
-async def test_client_getattr_dynamic_service_access():
-    """Test __getattr__ allows dynamic service access."""
+async def test_client_service_properties_are_distinct():
+    """Test service properties return distinct instances."""
     from brightcove_async.registry import ServiceConfig
     from brightcove_async.services.analytics import Analytics
     from brightcove_async.services.cms import CMS

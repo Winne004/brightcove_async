@@ -99,6 +99,7 @@ def test_build_service_registry_custom_urls():
         syndication_base_url="https://custom-syndication.example.com/",
         analytics_base_url="https://custom-analytics.example.com/",
         dynamic_ingest_base_url="https://custom-ingest.example.com/",
+        ingest_profiles_base_url="https://custom-profiles.example.com/",
     )
 
     registry = build_service_registry(config)
@@ -107,6 +108,9 @@ def test_build_service_registry_custom_urls():
     assert registry["syndication"].base_url == "https://custom-syndication.example.com/"
     assert registry["analytics"].base_url == "https://custom-analytics.example.com/"
     assert registry["dynamic_ingest"].base_url == "https://custom-ingest.example.com/"
+    assert (
+        registry["ingest_profiles"].base_url == "https://custom-profiles.example.com/"
+    )
 
 
 def test_service_registry_returns_dict():
@@ -115,4 +119,4 @@ def test_service_registry_returns_dict():
     registry = build_service_registry(config)
 
     assert isinstance(registry, dict)
-    assert len(registry) == 4
+    assert "ingest_profiles" in registry
