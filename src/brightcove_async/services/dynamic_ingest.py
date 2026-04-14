@@ -29,7 +29,7 @@ class DynamicIngest(Base):
             endpoint=f"{self.base_url}{account_id}/videos/{video_id}/ingest-requests",
             model=IngestMediaAssetResponse,
             method="POST",
-            json=video_or_asset_data,
+            payload=video_or_asset_data,
         )
 
     async def get_temporary_s3_urls(

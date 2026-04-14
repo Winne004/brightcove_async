@@ -106,7 +106,7 @@ async def test_create_video(cms_service):
         mock_fetch.assert_called_once()
         call_args = mock_fetch.call_args
         assert call_args.kwargs["method"] == "POST"
-        assert call_args.kwargs["json"] == video_data
+        assert call_args.kwargs["payload"] == video_data
 
 
 @pytest.mark.asyncio

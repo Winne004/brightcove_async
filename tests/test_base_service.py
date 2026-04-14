@@ -131,7 +131,7 @@ async def test_fetch_data_post_with_json(base_service, mock_session):
         endpoint="https://api.example.com/v1/items",
         model=DummyModel,
         method="POST",
-        json=request_body,
+        payload=request_body,
     )
 
     assert result.id == 2
@@ -338,7 +338,7 @@ async def test_fetch_data_excludes_none_values_from_json(base_service, mock_sess
         endpoint="https://api.example.com/v1/items",
         model=DummyModel,
         method="POST",
-        json=request_body,
+        payload=request_body,
     )
 
     call_kwargs = mock_session.request.call_args.kwargs

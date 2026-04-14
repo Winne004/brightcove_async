@@ -62,7 +62,7 @@ class CMS(Base):
             endpoint=f"{self.base_url}{account_id}/videos",
             model=Video,
             method="POST",
-            json=video_data,
+            payload=video_data,
         )
 
     async def get_videos_for_account(
