@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Ruff lint
+        run: uv run --with ruff ruff check .
+
+      - name: Ruff format check
+        run: uv run --with ruff ruff format --check .
+
+      - name: Type check
+        run: uv run ty check
+
+      - name: Run tests with 90% coverage minimum
+        run: uv run --with pytest-cov pytest --cov=brightcove_async --cov-report=term-missing --cov-fail-under=90
