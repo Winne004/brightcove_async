@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 from brightcove_async.client import BrightcoveClient
-from brightcove_async.initalise import initialise_brightcove_client
+from brightcove_async.initialise import initialise_brightcove_client
 from brightcove_async.oauth.oauth import OAuthClient
 from brightcove_async.settings import BrightcoveBaseAPIConfig, BrightcoveOAuthCreds
 
@@ -9,8 +9,8 @@ from brightcove_async.settings import BrightcoveBaseAPIConfig, BrightcoveOAuthCr
 def test_initialise_brightcove_client_with_defaults():
     """Test initialise_brightcove_client with default parameters."""
     with (
-        patch("brightcove_async.initalise.BrightcoveOAuthCreds") as MockOAuthCreds,
-        patch("brightcove_async.initalise.BrightcoveBaseAPIConfig") as MockAPIConfig,
+        patch("brightcove_async.initialise.BrightcoveOAuthCreds") as MockOAuthCreds,
+        patch("brightcove_async.initialise.BrightcoveBaseAPIConfig") as MockAPIConfig,
     ):
         mock_creds = MagicMock()
         mock_creds.client_id = "test_id"
@@ -22,7 +22,7 @@ def test_initialise_brightcove_client_with_defaults():
         MockAPIConfig.return_value = mock_config
 
         with patch(
-            "brightcove_async.initalise.build_service_registry",
+            "brightcove_async.initialise.build_service_registry",
         ) as mock_registry:
             mock_registry.return_value = {}
 
@@ -35,7 +35,7 @@ def test_initialise_brightcove_client_with_defaults():
 
 def test_initialise_brightcove_client_with_custom_creds():
     """Test initialise_brightcove_client with custom OAuth credentials."""
-    with patch("brightcove_async.initalise.build_service_registry") as mock_registry:
+    with patch("brightcove_async.initialise.build_service_registry") as mock_registry:
         mock_registry.return_value = {}
 
         mock_creds = MagicMock(spec=BrightcoveOAuthCreds)
@@ -52,7 +52,7 @@ def test_initialise_brightcove_client_with_custom_creds():
 
 def test_initialise_brightcove_client_with_custom_config():
     """Test initialise_brightcove_client with custom API configuration."""
-    with patch("brightcove_async.initalise.BrightcoveOAuthCreds") as MockOAuthCreds:
+    with patch("brightcove_async.initialise.BrightcoveOAuthCreds") as MockOAuthCreds:
         mock_creds = MagicMock()
         mock_creds.client_id = "test_id"
         mock_creds.client_secret = MagicMock()
@@ -65,7 +65,7 @@ def test_initialise_brightcove_client_with_custom_config():
         )
 
         with patch(
-            "brightcove_async.initalise.build_service_registry",
+            "brightcove_async.initialise.build_service_registry",
         ) as mock_registry:
             mock_registry.return_value = {}
 
@@ -78,8 +78,8 @@ def test_initialise_brightcove_client_with_custom_config():
 def test_initialise_brightcove_client_uses_oauth_client():
     """Test that initialise_brightcove_client uses OAuthClient class."""
     with (
-        patch("brightcove_async.initalise.BrightcoveOAuthCreds") as MockOAuthCreds,
-        patch("brightcove_async.initalise.build_service_registry") as mock_registry,
+        patch("brightcove_async.initialise.BrightcoveOAuthCreds") as MockOAuthCreds,
+        patch("brightcove_async.initialise.build_service_registry") as mock_registry,
     ):
         mock_creds = MagicMock()
         mock_creds.client_id = "test_id"
@@ -97,9 +97,9 @@ def test_initialise_brightcove_client_uses_oauth_client():
 def test_initialise_brightcove_client_builds_service_registry():
     """Test that initialise_brightcove_client builds service registry."""
     with (
-        patch("brightcove_async.initalise.BrightcoveOAuthCreds") as MockOAuthCreds,
-        patch("brightcove_async.initalise.BrightcoveBaseAPIConfig") as MockAPIConfig,
-        patch("brightcove_async.initalise.build_service_registry") as mock_registry,
+        patch("brightcove_async.initialise.BrightcoveOAuthCreds") as MockOAuthCreds,
+        patch("brightcove_async.initialise.BrightcoveBaseAPIConfig") as MockAPIConfig,
+        patch("brightcove_async.initialise.build_service_registry") as mock_registry,
     ):
         mock_creds = MagicMock()
         mock_creds.client_id = "test_id"
