@@ -9,9 +9,10 @@ Use uv exclusively for Python package management in this project.
 
 Use these commands:
 
-- Install dependencies: `uv add <package>`
-- Remove dependencies: `uv remove <package>`
-- Sync environment: `uv sync`
+- Add a runtime dependency: `uv add <package>`
+- Add a dev dependency: `uv add --group dev <package>`
+- Remove a dependency: `uv remove <package>`
+- Sync environment from the lockfile: `uv sync`
 - Lock dependencies: `uv lock`
 
 ## Running Python Code
