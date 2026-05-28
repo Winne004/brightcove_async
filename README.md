@@ -6,7 +6,7 @@
 
 - Fully asynchronous API using `asyncio` 
 - Simple authentication with OAuth2 client credentials
-- Support for core Brightcove API endpoints (Videos, Analytics, etc.)
+- Support for core Brightcove API endpoints (Videos, Analytics, Audience, etc.)
 - Strong typing and data validation powered by Pydantic for reliable development and rich IDE autocompletion
 
 ## Installation
@@ -45,6 +45,36 @@ if __name__ == "__main__":
 
 ## Usage
 
+### Audience API
+
+Retrieve leads and view events captured by Brightcove's Audience module:
+
+```python
+import asyncio
+
+import brightcove_async
+from brightcove_async.schemas.params import GetLeadsParams, GetViewEventsParams
+
+async def main() -> None:
+    client = brightcove_async.initialise_brightcove_client()
+    async with client as client_instance:
+        leads = await client_instance.audience.get_leads(
+            account_id="12345",
+            params=GetLeadsParams(limit=10, sort="created_at"),
+        )
+        print(leads.model_dump())
+
+        view_events = await client_instance.audience.get_view_events(
+            account_id="12345",
+            params=GetViewEventsParams(limit=10),
+        )
+        print(view_events.model_dump())
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 ### Authentication
 
 `brightcove_async` handles OAuth2 token management automatically. The easiest way to do this is to set the following environmental variables: 
@@ -55,9 +85,10 @@ export CLIENT_SECRET="your_client_secret"
 
 ## API Coverage
 
-- [x] Videos - In progress 
-- [x] Analytics - In progress 
-- [x] Syndication - In progress 
+- [x] Videos - In progress
+- [x] Analytics - In progress
+- [x] Audience - In progress
+- [x] Syndication - In progress
 
 ## Documentation
 

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from brightcove_async.services.analytics import Analytics
+from brightcove_async.services.audience import Audience
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
@@ -37,5 +38,9 @@ def build_service_registry(config: BrightcoveBaseAPIConfig) -> dict[str, Service
             cls=IngestProfiles,
             base_url=config.ingest_profiles_base_url,
             requests_per_second=4,
+        ),
+        "audience": ServiceConfig(
+            cls=Audience,
+            base_url=config.audience_base_url,
         ),
     }

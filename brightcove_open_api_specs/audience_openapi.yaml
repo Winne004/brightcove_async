@@ -1,0 +1,652 @@
+openapi: 3.0.3
+x-bc-implicit-head: true
+x-bc-implicit-options: true
+x-bc-upstream: 'https://backend_server'
+info:
+  title: Audience API Reference
+  description: |-
+    Reference for the Brightcove Audience API, used to retrieve audience data for your accounts. To test API requests, you can use our [API Testing Tools](https://apis.support.brightcove.com/getting-started/concepts-testing-tools-brightcove-apis.html).
+
+    For additional in-depth guides to features of the API, see the **[Overview](/audience/getting-started/overview-audience-api.html)**.
+
+     **Base URL**: https://audience.api.brightcove.com/v1
+  version: 1.0.0
+  x-bc-access: public
+servers:
+  - url: 'https://audience.api.brightcove.com/v1'
+    variables: {}
+tags:
+  - name: Leads
+    description: 'Get leads for a Video Cloud account.'
+  - name: View Events
+    description: >-
+      Get view events for a Video Cloud account
+paths:
+  '/accounts/{{account_id}}/leads':
+    get:
+      tags:
+        - Leads
+      summary: Get Leads
+      description: Get leads for an account
+      operationId: GetLeads
+      security:
+        - BC_OAuth2:
+          - video-cloud/audience/read
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sort_leads'
+        - $ref: '#/components/parameters/fields_leads'
+        - $ref: '#/components/parameters/where'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Get_Leads_Response'
+        '400':
+          description: 'BAD_REQUEST_ERROR: Query parameters are invalid '
+        '401':
+          description: >-
+            UNAUTHORIZED_ERROR: The access token is either absent, has expired,
+            or is invalid
+        '404':
+          description: 'RESOURCE_NOT_FOUND: The URL does not exist '
+        '429':
+          description: >-
+            REQUEST_THROTTLED_ERROR: The user has exceeded the rate limiting
+            policy
+        '500':
+          description: 'INTERNAL_ERROR: An internal error has occurred '
+        '504':
+          description: >-
+            GATEWAY_TIMEOUT_ERROR: The server timed out while fulfilling your
+            request
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  '/accounts/{{account_id}}/view_events':
+    get:
+      tags:
+        - View Events
+      summary: Get View Events
+      description: >-
+        Get view events for an account - note that only view events that have
+        been processed will appear in the response
+      operationId: GetViewEvents
+      security:
+        - BC_OAuth2:
+          - video-cloud/audience/read
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - $ref: '#/components/parameters/Content-Type'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/fields'
+        - $ref: '#/components/parameters/where'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Get_View_Events_Response'
+        '400':
+          description: 'BAD_REQUEST_ERROR: Query parameters are invalid '
+        '401':
+          description: >-
+            UNAUTHORIZED_ERROR: The access token is either absent, has expired,
+            or is invalid
+        '404':
+          description: 'RESOURCE_NOT_FOUND: The URL does not exist '
+        '429':
+          description: >-
+            REQUEST_THROTTLED_ERROR: The user has exceeded the rate limiting
+            policy
+        '500':
+          description: 'INTERNAL_ERROR: An internal error has occurred '
+        '504':
+          description: >-
+            GATEWAY_TIMEOUT_ERROR: The server timed out while fulfilling your
+            request
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+components:
+  parameters:
+    account_id:
+      name: account_id
+      in: path
+      description: a Video Cloud account ID
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: number
+    Content-Type:
+      name: Content-Type
+      in: header
+      description: 'Content-Type: application/json'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Authorization:
+      name: Authorization
+      in: header
+      description: 'Authorization: Bearer access_token (see Getting Access Tokens)'
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: Number of items to return
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+        default: 25
+        example: 25
+        minimum: 1
+        maximum: 200
+    offset:
+      name: offset
+      in: query
+      description: Number of items to skip
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        example: 0
+    sort:
+      name: sort
+      in: query
+      description: 'Field to sort results by (prefix with `-` for descending order)'
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/Sort'
+    sort_leads:
+      name: sort
+      in: query
+      description: 'Field to sort lead results by (prefix with `-` for descending order)'
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/SortLeads'
+    fields:
+      name: fields
+      in: query
+      description: |-
+        Fields to return for view events
+
+        **Note:** by default, all fields are returned. Use this parameter to return fewer fields.
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/Fields'
+    fields_leads:
+      name: fields
+      in: query
+      description: |-
+        Fields to return for leads
+
+        **Note:** by default, all fields are returned. Use this parameter to return fewer fields.
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/FieldsLeads'
+    where:
+      name: where
+      in: query
+      description: >-
+        One or more field==value pairs to filter the results; fields
+        supported are `video_id`, `video_name`, `tracking_id`,
+        `external_id`, `player_id`, `page_url`, `watched`, `time_watched`,
+        `created_at`, `updated_at`, `is_synced`
+      style: form
+      explode: true
+      schema:
+        type: string
+    from:
+      name: from
+      in: query
+      description: >-
+        'Start time for the period covered by the report — epoch time in
+        milliseconds or a date in the format `yyyy-mm-dd` (such as
+        `2013-09-26`) or a relative date in `d` (days), `h` (hours), `m`
+        (minutes), `s` (seconds) (such as `-2d` or `-6h`)'
+      style: form
+      explode: true
+      schema:
+        oneOf:
+          - type: string
+          - type: integer
+    to:
+      name: to
+      in: query
+      description: >-
+        End time for the period covered by the report — epoch time in
+        milliseconds or a date in the format `yyyy-mm-dd` (such as
+        `2013-09-26`) or a relative date in `d` (days), `h` (hours), `m`
+        (minutes), `s` (seconds) (such as `-2d` or `-6h`)
+      style: form
+      explode: true
+      schema:
+        oneOf:
+          - type: string
+          - type: integer
+  schemas:
+    Get_Leads_Response:
+      title: Get Leads Response
+      type: object
+      properties:
+        count:
+          type: number
+          description: the total number of items
+        limit:
+          type: number
+          description: the limit for items in this request
+        offset:
+          type: number
+          description: the offset for items in this request
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeadsResult'
+          description: array of result items
+      example: {
+        "result": [
+          {
+            "email_address": "rcrooks@brightcove.com",
+            "first_name": "Robert",
+            "last_name": "Crooks",
+            "business_phone": "",
+            "company_name": "Brightcove",
+            "page_url": "https://players.brightcove.net/20318290001/HyH9wwb4BZ_default/index.html?playlistId=4344773088001",
+            "player_id": "HyH9wwb4BZ",
+            "video_id": "6038250741001",
+            "video_name": "Creating a Smart Playlist",
+            "created_at": "2019-07-19T20:26:33.535Z",
+            "external_id": "cc8e546c-89e1-4de2-b83a-21fc8a7974f3"
+          },
+          {
+            "email_address": "aladron@brightcove.com",
+            "first_name": "Alberto",
+            "last_name": "Ladron",
+            "business_phone": "",
+            "company_name": "Brightcove",
+            "page_url": "https://players.brightcove.net/20318290001/HyH9wwb4BZ_default/index.html?playlistId=4344773088001",
+            "player_id": "HyH9wwb4BZ",
+            "video_id": "6038250741001",
+            "video_name": "Creating a Smart Playlist",
+            "created_at": "2019-07-19T20:26:28.229Z",
+            "external_id": "2e3d9209-0018-4ade-82c7-83d9a15fb5b2"
+          }
+        ],
+        "count": 14,
+        "offset": 0,
+        "limit": 4
+      }
+    LeadsResult:
+      title: Leads Result
+      type: object
+      properties:
+        created_at:
+          type: string
+          description: the date created
+        email_address:
+          type: string
+          description: 'the lead&#39;s email address'
+          example: jane@doe.com
+        first_name:
+          type: string
+          description: 'the lead&#39;s first name'
+          example: Jane
+        last_name:
+          type: string
+          description: 'the lead&#39;s last name'
+          example: Doe
+        business_phone:
+          type: string
+          description: 'the lead&#39;s phone number'
+        country:
+          type: string
+          description: 'the lead&#39;s country'
+        company_name:
+          type: string
+          description: 'the lead&#39;s company name'
+        industry:
+          type: string
+          description: 'the lead&#39;s industry'
+        page_url:
+          type: string
+          description: the url for the Brightcove player
+        player_id:
+          type: string
+          description: the ID for the Brightcove player
+        video_id:
+          type: string
+          description: the Video Cloud video id
+        video_name:
+          type: string
+          description: the Video Cloud video name
+    Get_View_Events_Response:
+      title: Get View Events Response
+      type: object
+      properties:
+        count:
+          type: number
+          description: the total number of items
+        limit:
+          type: number
+          description: the limit for items in this request
+        offset:
+          type: number
+          description: the offset for items in this request
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResult'
+          description: array of result items
+      example: {
+            "count": 27,
+            "limit": 25,
+            "offset": 0,
+            "result": [
+              {
+                  "created_at": "2016-04-25T18:30:21.651Z",
+                  "page_url": "https://players.brightcove.net/1486906377/V1s6NOwRx_default/index.html?videoId=4842718056001",
+                  "player_id": "V1s6NOwRx",
+                  "time_watched": 2,
+                  "updated_at": "2016-04-25T18:30:21.651Z",
+                  "video_id": "4842718056001",
+                  "video_name": "Horses Heading to the Track",
+                  "watched": 19
+              },
+              {
+                  "created_at": "2016-04-25T18:31:55.071Z",
+                  "page_url": "https://players.brightcove.net/1486906377/BkgFuzyhg_default/index.html?videoId=4842718056001",
+                  "player_id": "BkgFuzyhg",
+                  "time_watched": 15,
+                  "updated_at": "2016-04-25T18:32:00.879Z",
+                  "video_id": "4842718056001",
+                  "video_name": "Horses Heading to the Track",
+                  "watched": 99
+              }
+            ]
+          }
+    EventResult:
+      title: Event Result
+      description: |-
+        Result object for an event. Note that in addition to the fields shown here, there may be custom slot events and metrics as well as UTM fields
+      type: object
+      properties:
+        created_at:
+          type: string
+          description: Creation date
+          example: 2016-04-25T18:30:21.651Z
+        is_synched:
+          type: boolean
+          description: Whether the view event has been synchronized
+        page_url:
+          type: string
+          description: Page URL where the event occurred
+          example: https://players.brightcove.net/1486906377/V1s6NOwRx_default/index.html?videoId=4842718056001
+        player_id:
+          type: string
+          description: The Brightcove player ID
+          example: BkgFuzyhg
+        time_watched:
+          type: integer
+          description: Seconds of the video watched
+          example: 15
+        tracking_id:
+          type: string
+          description: A custom tracking id
+        external_id:
+          type: string
+          description: ID from the Marketing Automation Platform or a custom GUID
+        updated_at:
+          type: string
+          description: Last updated date
+          example: 2016-04-25T18:30:21.651Z
+        video_id:
+          type: string
+          description: The Brightcove video ID
+          example: 4842718056001
+        video_name:
+          type: string
+          description: The Brightcove video title
+          example: Foggy Morning in Seattle
+        watched:
+          type: integer
+          description: Percent of the video watched
+          example: 75
+    Sort:
+      title: sort for view events
+      enum:
+        - video_id
+        - video_name
+        - tracking_id
+        - external_id
+        - player_id
+        - page_url
+        - watched
+        - time_watched
+        - created_at
+        - updated_at
+        - is_synced
+        - utm_source
+        - utm_medium
+        - utm_campaign
+        - utm_term
+        - utm_content
+      type: string
+      example: video_id
+      default: created_at
+      x-enum-elements:
+        - name: video_id
+          description: Video id
+        - name: video_name
+          description: Video name
+        - name: tracking_id
+          description: Custom tracking id
+        - name: external_id
+          description: 'The Marketo, Eloqua or other custom GUID'
+        - name: player_id
+          description: Player id
+        - name: page_url
+          description: URL of the video page
+        - name: watched
+          description: Percent of video watched
+        - name: time_watched
+          description: Total secondes video was watched
+        - name: created_at
+          description: When video was created
+        - name: updated_at
+          description: When video was last updated
+        - name: is_synced
+          description: >-
+            A boolean denoting whether or not the view event has been
+            synchronized
+        - name: utm_source
+          description: UTM field found in the page_url
+        - name: utm_medium
+          description: UTM field found in the page_url
+        - name: utm_medium
+          description: UTM field found in the page_url
+        - name: utm_term
+          description: UTM field found in the page_url
+        - name: utm_content
+          description: UTM field found in the page_url
+    SortLeads:
+      title: sort for Leads
+      enum:
+        - video_id
+        - video_name
+        - player_id
+        - created_at
+      type: string
+      example: video_id
+      default: created_at
+      x-enum-elements:
+        - name: video_id
+          description: Video id
+        - name: video_name
+          description: Video name
+        - name: player_id
+          description: Player id
+        - name: created_at
+          description: When video was created
+    Fields:
+      title: fields
+      description: >-
+        See [Fields for filtering and
+        selection](/develop/overview-audience-api.html#Retrieving_view_events)
+        for more information
+      enum:
+        - video_id
+        - video_name
+        - tracking_id
+        - external_id
+        - player_id
+        - page_url
+        - watched
+        - time_watched
+        - created_at
+        - updated_at
+        - is_synced
+        - utm_source
+        - utm_medium
+        - utm_campaign
+        - utm_term
+        - utm_content
+      type: string
+      example: video_id
+      x-enum-elements:
+        - name: video_id
+          description: Brightcove video id
+        - name: video_name
+          description: Brightcove video name
+        - name: tracking_id
+          description: Custom tracking id
+        - name: external_id
+          description: 'The Marketo, Eloqua or other custom GUID'
+        - name: player_id
+          description: Brightcove player id
+        - name: page_url
+          description: The URL of the page where the view event was created
+        - name: watched
+          description: Percent watched
+        - name: time_watched
+          description: Seconds watched
+        - name: created_at
+          description: Creation date
+        - name: updated_at
+          description: Last modified date
+        - name: is_synced
+          description: >-
+            A boolean denoting whether or not the view event has been
+            synchronized
+        - name: utm_source
+          description: UTM field found in the page_url
+        - name: utm_medium
+          description: UTM field found in the page_url
+        - name: utm_medium
+          description: UTM field found in the page_url
+        - name: utm_term
+          description: UTM field found in the page_url
+        - name: utm_content
+          description: UTM field found in the page_url
+    FieldsLeads:
+      title: fields
+      description: >-
+        Fields for Leads. See [Fields for filtering and
+        selection](/develop/overview-audience-api.html#Retrieving_view_events)
+        for more information
+      enum:
+        - video_id
+        - video_name
+        - external_id
+        - first_name
+        - last_name
+        - email_address
+        - business_phone
+        - country
+        - company_name
+        - industry
+        - player_id
+        - page_url
+        - created_at
+      type: string
+      example: video_id
+      x-enum-elements:
+        - name: video_id
+          description: Brightcove video id
+        - name: video_name
+          description: Brightcove video name
+        - name: tracking_id
+          description: Custom tracking id
+        - name: external_id
+          description: 'The Marketo, Eloqua or other custom GUID'
+        - name: player_id
+          description: Brightcove player id
+        - name: page_url
+          description: The URL of the page where the view event was created
+        - name: watched
+          description: Percent watched
+        - name: time_watched
+          description: Seconds watched
+        - name: created_at
+          description: Creation date
+        - name: updated_at
+          description: Last modified date
+        - name: is_synced
+          description: >-
+            A boolean denoting whether or not the view event has been
+            synchronized
+        - name: utm_source
+          description: UTM field found in the page_url
+        - name: utm_medium
+          description: UTM field found in the page_url
+        - name: utm_medium
+          description: UTM field found in the page_url
+        - name: utm_term
+          description: UTM field found in the page_url
+        - name: utm_content
+          description: UTM field found in the page_url
+  securitySchemes:
+    BC_OAuth2:
+      type: oauth2
+      description: >-
+        Brightcove OAuth API. See the [support documentation](https://apis.support.brightcove.com/oauth/) or [Getting Access Tokens](https://apis.support.brightcove.com/oauth/guides/getting-access-tokens.html) to learn more
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://oauth.brightcove.com/v4/access_token'
+          scopes:
+            video-cloud/audience/read: Read Leads and Events data
+            video-cloud/audience/write: Write Leads and Events data
