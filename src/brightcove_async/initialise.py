@@ -15,7 +15,7 @@ def initialise_brightcove_client(
 
     client_config = (
         BrightcoveBaseAPIConfig() if client_config is None else client_config
-    )  # type: ignore[ReportCallIssueType]
+    )
 
     services_registry = build_service_registry(client_config)
 
