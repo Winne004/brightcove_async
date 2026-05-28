@@ -17,6 +17,6 @@ Use these commands:
 
 ## Running Python Code
 
-- Run a Python script with `uv run python <script-name>.py` (or `uv run python -m <module>` )
- - Run Python tools with `uv run <tool>` (e.g. `uv run pytest`, `uv run ruff`, `uv run ty`, `uv run pre-commit`)
+- Run a Python script with `uv run python <script-name>.py` (or `uv run python -m <module>`)
+- Run Python tools with `uv run <tool>` (e.g. `uv run pytest`, `uv run ruff`, `uv run ty`, `uv run pre-commit`)
 - Launch a Python REPL with `uv run python`
