@@ -10,10 +10,6 @@ from brightcove_async.services.base import Base
 
 
 class Audience(Base):
-    @property
-    def base_url(self) -> str:
-        return "https://audience.api.brightcove.com/v1"
-
     def __init__(
         self,
         session: aiohttp.ClientSession,
