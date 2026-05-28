@@ -177,6 +177,7 @@ def test_get_leads_response_model():
     assert response.count == 14
     assert response.limit == 4
     assert response.offset == 0
+    assert response.result is not None
     assert len(response.result) == 1
     assert response.result[0].email_address == "test@example.com"
     assert response.result[0].first_name == "Jane"
@@ -204,6 +205,7 @@ def test_get_view_events_response_model():
     assert response.count == 27
     assert response.limit == 25
     assert response.offset == 0
+    assert response.result is not None
     assert len(response.result) == 1
     assert response.result[0].video_id == "4842718056001"
     assert response.result[0].watched == 19
