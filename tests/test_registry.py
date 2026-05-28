@@ -125,4 +125,5 @@ def test_service_registry_returns_dict():
         "analytics",
         "dynamic_ingest",
         "ingest_profiles",
+        "audience",
     }

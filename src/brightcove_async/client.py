@@ -5,6 +5,7 @@ import aiohttp
 from brightcove_async.protocols import OAuthClientProtocol
 from brightcove_async.registry import ServiceConfig
 from brightcove_async.services.analytics import Analytics
+from brightcove_async.services.audience import Audience
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
@@ -95,6 +96,11 @@ class BrightcoveClient:
     def ingest_profiles(self) -> IngestProfiles:
         """Access the Ingest Profiles API service."""
         return self._get_service("ingest_profiles", IngestProfiles)
+
+    @property
+    def audience(self) -> Audience:
+        """Access the Audience API service."""
+        return self._get_service("audience", Audience)
 
     async def __aenter__(self) -> Self:
         if self._session is None:
