@@ -1,6 +1,5 @@
 import logging
 from abc import ABC
-from http import HTTPStatus
 from typing import TypeVar
 
 import aiohttp
