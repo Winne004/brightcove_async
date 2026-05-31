@@ -36,6 +36,11 @@ brightcove_retry = retry(
     stop=stop_after_attempt(5),
 )
 
+# Exceptions that indicate the OAuth token fetch itself failed.
+# aiohttp.ClientResponseError: OAuth endpoint returned a non-2xx status (e.g. 503).
+# ValueError: OAuth endpoint returned 200 but with no access_token in the body.
+_OAUTH_FETCH_ERRORS = (aiohttp.ClientResponseError, ValueError)
+
 
 class Base(ABC):
     """Abstract base class all API wrapper classes have to inherit from.
@@ -100,6 +105,11 @@ class Base(ABC):
                 details=error_details,
             ) from e
 
+    def _convert_oauth_error(self, e: Exception) -> BrightcoveAuthError:
+        """Wrap a raw OAuth fetch error as BrightcoveAuthError and clear the token."""
+        self._oauth.invalidate_token()
+        return BrightcoveAuthError(message=str(e))
+
     @brightcove_retry
     async def fetch_data(
         self,
@@ -111,7 +121,10 @@ class Base(ABC):
         payload: BaseModel | None = None,
     ) -> T:
         if headers is None:
-            headers = await self._oauth.headers
+            try:
+                headers = await self._oauth.headers
+            except _OAUTH_FETCH_ERRORS as e:
+                raise self._convert_oauth_error(e) from e
 
         body = (
             payload.model_dump(
@@ -148,6 +161,9 @@ class Base(ABC):
     async def _delete(self, endpoint: str) -> None:
         try:
             headers = await self._oauth.headers
+        except _OAUTH_FETCH_ERRORS as e:
+            raise self._convert_oauth_error(e) from e
+        try:
             async with (
                 self.limiter,
                 self._session.request("DELETE", endpoint, headers=headers) as response,
@@ -163,6 +179,9 @@ class Base(ABC):
     async def _get_text(self, endpoint: str) -> str:
         try:
             headers = await self._oauth.headers
+        except _OAUTH_FETCH_ERRORS as e:
+            raise self._convert_oauth_error(e) from e
+        try:
             async with (
                 self.limiter,
                 self._session.request("GET", endpoint, headers=headers) as response,
@@ -178,7 +197,11 @@ class Base(ABC):
     @brightcove_retry
     async def _put_text(self, endpoint: str, content: str) -> None:
         try:
-            headers = {**await self._oauth.headers, "Content-Type": "text/plain"}
+            base_headers = await self._oauth.headers
+        except _OAUTH_FETCH_ERRORS as e:
+            raise self._convert_oauth_error(e) from e
+        headers = {**base_headers, "Content-Type": "text/plain"}
+        try:
             async with (
                 self.limiter,
                 self._session.request(

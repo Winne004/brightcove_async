@@ -1,69 +1,6 @@
 from __future__ import annotations
 
-from enum import StrEnum
-
 from pydantic import BaseModel, Field
-
-
-class SortLeads(StrEnum):
-    video_id = "video_id"
-    video_name = "video_name"
-    player_id = "player_id"
-    created_at = "created_at"
-
-
-class Sort(StrEnum):
-    video_id = "video_id"
-    video_name = "video_name"
-    tracking_id = "tracking_id"
-    external_id = "external_id"
-    player_id = "player_id"
-    page_url = "page_url"
-    watched = "watched"
-    time_watched = "time_watched"
-    created_at = "created_at"
-    updated_at = "updated_at"
-    is_synced = "is_synced"
-    utm_source = "utm_source"
-    utm_medium = "utm_medium"
-    utm_campaign = "utm_campaign"
-    utm_term = "utm_term"
-    utm_content = "utm_content"
-
-
-class FieldsLeads(StrEnum):
-    video_id = "video_id"
-    video_name = "video_name"
-    external_id = "external_id"
-    first_name = "first_name"
-    last_name = "last_name"
-    email_address = "email_address"
-    business_phone = "business_phone"
-    country = "country"
-    company_name = "company_name"
-    industry = "industry"
-    player_id = "player_id"
-    page_url = "page_url"
-    created_at = "created_at"
-
-
-class Fields(StrEnum):
-    video_id = "video_id"
-    video_name = "video_name"
-    tracking_id = "tracking_id"
-    external_id = "external_id"
-    player_id = "player_id"
-    page_url = "page_url"
-    watched = "watched"
-    time_watched = "time_watched"
-    created_at = "created_at"
-    updated_at = "updated_at"
-    is_synced = "is_synced"
-    utm_source = "utm_source"
-    utm_medium = "utm_medium"
-    utm_campaign = "utm_campaign"
-    utm_term = "utm_term"
-    utm_content = "utm_content"
 
 
 class LeadsResult(BaseModel):

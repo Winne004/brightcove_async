@@ -5,7 +5,6 @@ import aiohttp
 import pytest
 from aiohttp import BasicAuth
 
-from brightcove_async.exceptions import BrightcoveAuthError
 from brightcove_async.oauth.oauth import OAuthClient
 
 
@@ -89,14 +88,14 @@ async def test_get_access_token_refreshes_expired_token(oauth_client, mock_sessi
 
 @pytest.mark.asyncio
 async def test_get_access_token_raises_on_failure(oauth_client, mock_session):
-    """Test that BrightcoveAuthError is raised when token fetch returns no token."""
+    """Test that ValueError is raised when token fetch returns no token."""
     mock_response = AsyncMock()
     mock_response.json = AsyncMock(return_value={})  # No access_token
     mock_response.raise_for_status = MagicMock()
 
     mock_session.post.return_value.__aenter__.return_value = mock_response
 
-    with pytest.raises(BrightcoveAuthError):
+    with pytest.raises(ValueError, match="access_token"):
         await oauth_client.get_access_token()
 
 
@@ -138,12 +137,12 @@ async def test_retry_on_connection_error(oauth_client, mock_session):
 
 @pytest.mark.asyncio
 async def test_http_error_response(oauth_client, mock_session):
-    """Test handling of HTTP 200 with missing access_token raises BrightcoveAuthError."""
+    """Test that a 200 response with no access_token raises ValueError."""
     mock_response = AsyncMock()
     mock_response.json = AsyncMock(return_value={"error": "invalid"})
     mock_response.raise_for_status = MagicMock()  # Don't raise, just return empty
 
     mock_session.post.return_value.__aenter__.return_value = mock_response
 
-    with pytest.raises(BrightcoveAuthError):
+    with pytest.raises(ValueError, match="access_token"):
         await oauth_client.get_access_token()
