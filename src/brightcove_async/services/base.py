@@ -38,8 +38,13 @@ brightcove_retry = retry(
 
 # Exceptions that indicate the OAuth token fetch itself failed.
 # aiohttp.ClientResponseError: OAuth endpoint returned a non-2xx status (e.g. 503).
+# aiohttp.ClientConnectionError: Unable to connect to the OAuth endpoint.
 # ValueError: OAuth endpoint returned 200 but with no access_token in the body.
-_OAUTH_FETCH_ERRORS = (aiohttp.ClientResponseError, ValueError)
+_OAUTH_FETCH_ERRORS = (
+    aiohttp.ClientResponseError,
+    aiohttp.ClientConnectionError,
+    ValueError,
+)
 
 
 class Base(ABC):
