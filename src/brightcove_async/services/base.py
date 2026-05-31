@@ -16,6 +16,7 @@ from brightcove_async.exceptions import (
     BrightcoveAuthError,
     BrightcoveConnectionError,
     BrightcoveError,
+    BrightcoveTooManyRequestsError,
     map_status_code_to_exception,
 )
 from brightcove_async.protocols import OAuthClientProtocol
@@ -25,10 +26,24 @@ logger = logging.getLogger(__name__)
 
 brightcove_retry = retry(
     retry=retry_if_exception_type(
-        (BrightcoveConnectionError, BrightcoveAuthError),
+        (
+            BrightcoveConnectionError,
+            BrightcoveAuthError,
+            BrightcoveTooManyRequestsError,
+        ),
     ),
     wait=wait_exponential(multiplier=1, min=1, max=3),
     stop=stop_after_attempt(5),
+)
+
+# Exceptions that indicate the OAuth token fetch itself failed.
+# aiohttp.ClientResponseError: OAuth endpoint returned a non-2xx status (e.g. 503).
+# aiohttp.ClientConnectionError: Unable to connect to the OAuth endpoint.
+# ValueError: OAuth endpoint returned 200 but with no access_token in the body.
+_OAUTH_FETCH_ERRORS = (
+    aiohttp.ClientResponseError,
+    aiohttp.ClientConnectionError,
+    ValueError,
 )
 
 
@@ -95,6 +110,15 @@ class Base(ABC):
                 details=error_details,
             ) from e
 
+    def _convert_oauth_error(self, e: Exception) -> BrightcoveError:
+        """Convert a raw OAuth fetch error into a Brightcove exception and clear the token."""
+        self._oauth.invalidate_token()
+        if isinstance(e, aiohttp.ClientConnectionError):
+            return BrightcoveConnectionError(message=str(e))
+        if isinstance(e, aiohttp.ClientResponseError):
+            return BrightcoveAuthError(message=str(e), status_code=e.status)
+        return BrightcoveAuthError(message=str(e))
+
     @brightcove_retry
     async def fetch_data(
         self,
@@ -106,7 +130,10 @@ class Base(ABC):
         payload: BaseModel | None = None,
     ) -> T:
         if headers is None:
-            headers = await self._oauth.headers
+            try:
+                headers = await self._oauth.headers
+            except _OAUTH_FETCH_ERRORS as e:
+                raise self._convert_oauth_error(e) from e
 
         body = (
             payload.model_dump(
@@ -133,6 +160,9 @@ class Base(ABC):
                 await self._raise_for_status(response, endpoint)
                 json_data = await response.json()
                 return model.model_validate(json_data, strict=False)
+        except BrightcoveAuthError:
+            self._oauth.invalidate_token()
+            raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
 
@@ -140,11 +170,17 @@ class Base(ABC):
     async def _delete(self, endpoint: str) -> None:
         try:
             headers = await self._oauth.headers
+        except _OAUTH_FETCH_ERRORS as e:
+            raise self._convert_oauth_error(e) from e
+        try:
             async with (
                 self.limiter,
                 self._session.request("DELETE", endpoint, headers=headers) as response,
             ):
                 await self._raise_for_status(response, endpoint)
+        except BrightcoveAuthError:
+            self._oauth.invalidate_token()
+            raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
 
@@ -152,19 +188,29 @@ class Base(ABC):
     async def _get_text(self, endpoint: str) -> str:
         try:
             headers = await self._oauth.headers
+        except _OAUTH_FETCH_ERRORS as e:
+            raise self._convert_oauth_error(e) from e
+        try:
             async with (
                 self.limiter,
                 self._session.request("GET", endpoint, headers=headers) as response,
             ):
                 await self._raise_for_status(response, endpoint)
                 return await response.text()
+        except BrightcoveAuthError:
+            self._oauth.invalidate_token()
+            raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
 
     @brightcove_retry
     async def _put_text(self, endpoint: str, content: str) -> None:
         try:
-            headers = {**await self._oauth.headers, "Content-Type": "text/plain"}
+            base_headers = await self._oauth.headers
+        except _OAUTH_FETCH_ERRORS as e:
+            raise self._convert_oauth_error(e) from e
+        headers = {**base_headers, "Content-Type": "text/plain"}
+        try:
             async with (
                 self.limiter,
                 self._session.request(
@@ -172,5 +218,8 @@ class Base(ABC):
                 ) as response,
             ):
                 await self._raise_for_status(response, endpoint)
+        except BrightcoveAuthError:
+            self._oauth.invalidate_token()
+            raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e

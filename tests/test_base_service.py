@@ -26,6 +26,9 @@ class DummyOAuth:
     async def get_access_token(self):
         return "test_token"
 
+    def invalidate_token(self) -> None:
+        pass
+
     @property
     async def headers(self):
         return {"Authorization": "Bearer test_token"}
