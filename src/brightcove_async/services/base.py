@@ -88,9 +88,7 @@ class Base(ABC):
                 error_details = {"response_body": error_body}
             except Exception:
                 pass
-            exc_class: type[BrightcoveError] = map_status_code_to_exception(
-                HTTPStatus(e.status)
-            )
+            exc_class: type[BrightcoveError] = map_status_code_to_exception(e.status)
             raise exc_class(
                 message=str(e.message),
                 status_code=e.status,
