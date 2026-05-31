@@ -4,17 +4,11 @@ from brightcove_async.protocols import OAuthClientProtocol
 from brightcove_async.schemas.syndication_model import (
     Syndication as SyndicationModel,
 )
-from brightcove_async.schemas.syndication_model import (
-    SyndicationList,
-)
+from brightcove_async.schemas.syndication_model import SyndicationList
 from brightcove_async.services.base import Base
 
 
 class Syndication(Base):
-    @property
-    def base_url(self) -> str:
-        return "https://edge.social.api.brightcove.com/v1/accounts/"
-
     def __init__(
         self,
         session: aiohttp.ClientSession,
@@ -26,7 +20,7 @@ class Syndication(Base):
 
     async def get_all_syndications(self, account_id: str) -> SyndicationList:
         return await self.fetch_data(
-            endpoint=f"{self.base_url}{account_id}/mrss/syndications",
+            endpoint=f"{self.base_url}/accounts/{account_id}/mrss/syndications",
             model=SyndicationList,
         )
 
@@ -36,6 +30,73 @@ class Syndication(Base):
         syndication_id: str,
     ) -> SyndicationModel:
         return await self.fetch_data(
-            endpoint=f"{self.base_url}{account_id}/mrss/syndications/{syndication_id}",
+            endpoint=f"{self.base_url}/accounts/{account_id}/mrss/syndications/{syndication_id}",
             model=SyndicationModel,
+        )
+
+    async def create_syndication(
+        self,
+        account_id: str,
+        syndication: SyndicationModel,
+    ) -> SyndicationModel:
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/accounts/{account_id}/mrss/syndications",
+            model=SyndicationModel,
+            method="POST",
+            payload=syndication,
+        )
+
+    async def update_syndication(
+        self,
+        account_id: str,
+        syndication_id: str,
+        syndication: SyndicationModel,
+    ) -> SyndicationModel:
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/accounts/{account_id}/mrss/syndications/{syndication_id}",
+            model=SyndicationModel,
+            method="PUT",
+            payload=syndication,
+        )
+
+    async def patch_syndication(
+        self,
+        account_id: str,
+        syndication_id: str,
+        syndication: SyndicationModel,
+    ) -> SyndicationModel:
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/accounts/{account_id}/mrss/syndications/{syndication_id}",
+            model=SyndicationModel,
+            method="PATCH",
+            payload=syndication,
+        )
+
+    async def delete_syndication(
+        self,
+        account_id: str,
+        syndication_id: str,
+    ) -> None:
+        await self._delete(
+            f"{self.base_url}/accounts/{account_id}/mrss/syndications/{syndication_id}"
+        )
+
+    async def get_template(
+        self,
+        account_id: str,
+        syndication_id: str,
+    ) -> str:
+        return await self._get_text(
+            f"{self.base_url}/accounts/{account_id}/mrss/syndications/{syndication_id}/template"
+        )
+
+    async def upload_template(
+        self,
+        account_id: str,
+        syndication_id: str,
+        content: str,
+    ) -> None:
+        await self._put_text(
+            f"{self.base_url}/accounts/{account_id}/mrss/syndications/{syndication_id}/template",
+            content,
         )

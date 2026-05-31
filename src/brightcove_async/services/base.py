@@ -15,6 +15,7 @@ from tenacity import (
 
 from brightcove_async.exceptions import (
     BrightcoveAuthError,
+    BrightcoveConnectionError,
     BrightcoveError,
     map_status_code_to_exception,
 )
@@ -22,6 +23,14 @@ from brightcove_async.protocols import OAuthClientProtocol
 
 T = TypeVar("T", bound=BaseModel)
 logger = logging.getLogger(__name__)
+
+brightcove_retry = retry(
+    retry=retry_if_exception_type(
+        (BrightcoveConnectionError, BrightcoveAuthError),
+    ),
+    wait=wait_exponential(multiplier=1, min=1, max=3),
+    stop=stop_after_attempt(5),
+)
 
 
 class Base(ABC):
@@ -67,13 +76,29 @@ class Base(ABC):
         """Property that must be defined in any subclass to indicate the base API URL."""
         return self._base_url
 
-    @retry(
-        retry=retry_if_exception_type(
-            (aiohttp.ClientConnectionError, BrightcoveAuthError),
-        ),
-        wait=wait_exponential(multiplier=1, min=1, max=3),
-        stop=stop_after_attempt(5),
-    )
+    async def _raise_for_status(
+        self, response: aiohttp.ClientResponse, endpoint: str
+    ) -> None:
+        try:
+            response.raise_for_status()
+        except aiohttp.ClientResponseError as e:
+            error_details: dict = {}
+            try:
+                error_body = await response.text()
+                error_details = {"response_body": error_body}
+            except Exception:
+                pass
+            exc_class: type[BrightcoveError] = map_status_code_to_exception(
+                HTTPStatus(e.status)
+            )
+            raise exc_class(
+                message=str(e.message),
+                status_code=e.status,
+                endpoint=endpoint,
+                details=error_details,
+            ) from e
+
+    @brightcove_retry
     async def fetch_data(
         self,
         endpoint: str,
@@ -88,6 +113,7 @@ class Base(ABC):
 
         body = (
             payload.model_dump(
+                mode="json",
                 exclude_none=True,
                 exclude_unset=True,
                 exclude_defaults=True,
@@ -96,35 +122,58 @@ class Base(ABC):
             else None
         )
 
-        async with (
-            self.limiter,
-            self._session.request(
-                method,
-                endpoint,
-                params=params,
-                headers=headers,
-                json=body,
-            ) as response,
-        ):
-            try:
-                response.raise_for_status()
-            except aiohttp.ClientResponseError as e:
-                error_details = {}
-                try:
-                    error_body = await response.text()
-                    error_details = {"response_body": error_body}
-                except Exception:
-                    pass
+        try:
+            async with (
+                self.limiter,
+                self._session.request(
+                    method,
+                    endpoint,
+                    params=params,
+                    headers=headers,
+                    json=body,
+                ) as response,
+            ):
+                await self._raise_for_status(response, endpoint)
+                json_data = await response.json()
+                return model.model_validate(json_data, strict=False)
+        except aiohttp.ClientConnectionError as e:
+            raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
 
-                exc_class: type[BrightcoveError] = map_status_code_to_exception(
-                    HTTPStatus(e.status),
-                )
-                raise exc_class(
-                    message=str(e.message),
-                    status_code=e.status,
-                    endpoint=endpoint,
-                    details=error_details,
-                ) from e
+    @brightcove_retry
+    async def _delete(self, endpoint: str) -> None:
+        try:
+            headers = await self._oauth.headers
+            async with (
+                self.limiter,
+                self._session.request("DELETE", endpoint, headers=headers) as response,
+            ):
+                await self._raise_for_status(response, endpoint)
+        except aiohttp.ClientConnectionError as e:
+            raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
 
-            json_data = await response.json()
-            return model.model_validate(json_data, strict=False)
+    @brightcove_retry
+    async def _get_text(self, endpoint: str) -> str:
+        try:
+            headers = await self._oauth.headers
+            async with (
+                self.limiter,
+                self._session.request("GET", endpoint, headers=headers) as response,
+            ):
+                await self._raise_for_status(response, endpoint)
+                return await response.text()
+        except aiohttp.ClientConnectionError as e:
+            raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
+
+    @brightcove_retry
+    async def _put_text(self, endpoint: str, content: str) -> None:
+        try:
+            headers = {**await self._oauth.headers, "Content-Type": "text/plain"}
+            async with (
+                self.limiter,
+                self._session.request(
+                    "PUT", endpoint, headers=headers, data=content
+                ) as response,
+            ):
+                await self._raise_for_status(response, endpoint)
+        except aiohttp.ClientConnectionError as e:
+            raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e

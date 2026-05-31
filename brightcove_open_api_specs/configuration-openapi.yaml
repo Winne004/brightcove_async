@@ -1,0 +1,472 @@
+openapi: '3.0.0'
+x-bc-implicit-head: true
+x-bc-implicit-options: true
+x-bc-upstream: 'https://mrss_config_server'
+info:
+  description: |-
+    The Syndication Configuration API allows you to create, manage, and retrieve MRSS feeds generated from your Video Cloud video library.
+
+    **Base URL: 'https://social.api.brightcove.com/v1'**
+  version: 1.0.0
+  title: Brightcove Syndication Configuration API
+  x-bc-access: public
+servers:
+  - url: 'https://social.api.brightcove.com/v1'
+    variables: {}
+paths:
+  '/accounts/{{account_id}}/mrss/syndications':
+    post:
+      tags:
+        - Syndications
+      summary: Create a new syndication
+      description: >-
+        Creates a new syndication.
+      operationId: postSyndication
+      security:
+        - BC_OAuth2:
+          - video-cloud/social/mrss/write
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Syndication'
+      responses:
+        '201':
+          description: The newly created syndication.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Syndication'
+        '400':
+          description: Request body syntax error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '401':
+          description: Insufficient permissions to access this API method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '422':
+          description: Invalid request body fields or values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+    get:
+      tags:
+        - Syndications
+      summary: Get all syndications
+      description: >-
+        Gets a list of all syndications currently configured for the account.
+      operationId: getSyndications
+      security:
+        - BC_OAuth2:
+          - video-cloud/social/mrss/read
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: A list of syndications.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyndicationList'
+        '401':
+          description: Insufficient permissions to access this API method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+  '/accounts/{{account_id}}/mrss/syndications/{syndication_id}':
+    put:
+      tags:
+        - Syndications
+      summary: Update a syndication
+      description: >-
+        Updates the configuration data for a syndication.  A fully populated Syndication object should be passed as the request body.  Read-only fields can be omitted, and will be ignored if they are included.  Note that the *type* property cannot be changed from the value specified when the syndication was created.
+      operationId: putSyndication
+      security:
+        - BC_OAuth2:
+          - video-cloud/social/mrss/write
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/SyndicationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Syndication'
+      responses:
+        '200':
+          description: The updated syndication.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Syndication'
+        '401':
+          description: Insufficient permissions to access this API method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '404':
+          description: Syndication not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+    patch:
+      tags:
+        - Syndications
+      summary: Update a syndication
+      description: >-
+        Updates the configuration data for a syndication.  A Syndication object specifying non-null values for writable fields to be updated should be passed as the request body.  Note that the *type* property cannot be changed from the value specified when the syndication was created.
+      operationId: patchSyndication
+      security:
+        - BC_OAuth2:
+          - video-cloud/social/mrss/write
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/SyndicationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Syndication'
+      responses:
+        '200':
+          description: The updated syndication.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Syndication'
+        '401':
+          description: Insufficient permissions to access this API method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '404':
+          description: Syndication not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+    delete:
+      tags:
+        - Syndications
+      summary: Delete a syndication
+      description: >-
+        Deletes a syndication.
+      operationId: deleteSyndication
+      security:
+        - BC_OAuth2:
+          - video-cloud/social/mrss/write
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/SyndicationId'
+      responses:
+        '200':
+          description: Syndication successfully deleted
+        '401':
+          description: Insufficient permissions to access this API method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '404':
+          description: Syndication not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+    get:
+      tags:
+        - Syndications
+      summary: Get a syndication
+      description: >-
+        Gets the configuration data for a syndication.
+      operationId: getSyndication
+      security:
+        - BC_OAuth2:
+          - video-cloud/social/mrss/read
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/SyndicationId'
+      responses:
+        '200':
+          description: The specified syndication.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Syndication'
+        '401':
+          description: Insufficient permissions to access this API method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '404':
+          description: Syndication not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+  '/accounts/{{account_id}}/mrss/syndications/{syndication_id}/template':
+    put:
+      tags:
+        - Templates
+      summary: Upload a custom feed template
+      description: >-
+        Uploads a custom feed template to a universal syndication.
+      operationId: putTemplate
+      security:
+        - BC_OAuth2:
+          - video-cloud/social/mrss/write
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/SyndicationId'
+      requestBody:
+        description: A feed template document
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: The newly uploaded template.
+        '400':
+          description: Request body syntax error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '401':
+          description: Insufficient permissions to access this API method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+    get:
+      tags:
+        - Templates
+      summary: Get a custom feed template
+      description: >-
+        Gets a universal syndication's custom feed template.
+      operationId: getTemplate
+      security:
+        - BC_OAuth2:
+          - video-cloud/social/mrss/read
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/SyndicationId'
+      responses:
+        '200':
+          description: The universal syndication's feed template.  If one has not yet been uploaded, a default empty template will be returned.
+        '401':
+          description: Insufficient permissions to access this API method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '403':
+          description: Forbidden, syndication was not of type universal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '404':
+          description: Syndication not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseErrorList'
+components:
+  schemas:
+    Syndication:
+      type: object
+      required:
+      - name
+      - type
+      properties:
+        id:
+          type: string
+          description: Id of this syndication
+          readOnly: true
+        name:
+          type: string
+          description: Name of this syndication
+        type:
+          type: string
+          enum: [
+            "advanced",
+            "google",
+            "iphone",
+            "ipad",
+            "mp4",
+            "itunes",
+            "roku",
+            "source",
+            "universal"
+          ]
+          description: The syndication type.  Valid values are [advanced, google, iphone, ipad, mp4, itunes, roku, source, universal].  Cannot be changed after syndication creation time.
+        include_all_content:
+          type: boolean
+          description: If true, all content is included in this syndication.  If false, a valid include_filter property must be specified for the syndication.
+        include_filter:
+          type: string
+          description: A CMS video search filter string used to select the subset of content included in this syndication.  The include_all_content field must be set to false if a value is specified for this property.
+        sort:
+          type: string
+          description: A CMS video sorting specifier indicating the desired feed results return order.  CMS-supported values like "name", "reference_id", "created_at", "published_at", "updated_at", "schedule.starts_at", "schedule.ends_at", "state", "plays_total", and "plays_trailing_week" can be specified.  To sort in descending order, preface the value with a minus (-) sign, i.e. "-created_at".  If no value is specified, the feed will be sorted by most recent updated_at date by default.
+        title:
+          type: string
+          description: The title of this feed. Will be included inside of the <channel> tag for some syndication types.
+        description:
+          type: string
+          description: The description of this feed. Will be included inside of the <channel> tag for some syndication types.
+        syndication_url:
+          type: string
+          readOnly: true
+          description: The URL of this syndication's feed.  Read-only.
+        destination_url:
+          type: string
+          description: The URL to be included inside of the <channel> tag in the feed.
+        keywords:
+            type: string
+            description: A comma-separated list of keywords for iTunes
+        author:
+            type: string
+            description: iTunes author specification
+        category:
+            type: string
+            description: iTunes category specification
+        album_art_url:
+            type: string
+            description: iTunes album art url.
+        explicit:
+            type: string
+            enum: ["yes", "no"]
+            description: iTunes explicit content indicator, accepts "yes" or "no" values.
+        owner_name:
+            type: string
+            description: iTunes owner name.
+        owner_email:
+            type: string
+            description: iTunes owner email.
+        language:
+            type: string
+            description: iTunes or Roku feed language field.
+        fetch_sources:
+            type: boolean
+            description: For universal feeds, specifies whether the feed service should fetch video source metadata and make it available to the template.  The default value is true.  If source metadata is not needed by the template, setting this to false can improve feed generation performance.
+        fetch_digital_master:
+            type: boolean
+            description: For universal feeds, specifies whether the feed service should fetch digital master metadata and make it available to the template.  The default value is false.  If digital master metadata is not needed by the template, keeping this setting as false can improve feed generation performance.
+        fetch_dynamic_renditions:
+            type: boolean
+            description: For universal feeds, specifies whether the feed service should fetch dynamic rendition metadata and make it available to the template.  The default value is false.  If dynamic rendition metadata is not needed by the template, keeping this setting as false can improve feed generation performance.
+        content_type_header:
+            type: string
+            description: >-
+              If set, overrides the Content-Type header returned by the feed server for this syndication's feed. Otherwise the feed defaults to a syndication type-specific header value
+            example: 'application/xml'
+    SyndicationList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Syndication'
+    ResponseError:
+      type: object
+      properties:
+        error_code:
+          type: string
+          description: Application error code
+          readOnly: true
+        message:
+          type: string
+          description: Application error message
+          readOnly: true
+    ResponseErrorList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ResponseError'
+  parameters:
+    AccountId:
+      name: account_id
+      in: path
+      description: ID of the account
+      required: true
+      schema:
+        type: string
+    SyndicationId:
+      name: syndication_id
+      in: path
+      description: ID of the syndication
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    BC_OAuth2:
+      type: oauth2
+      description: >-
+        Brightcove OAuth API. See the [support documentation](/oauth/) or [Getting Access Tokens](/oauth/guides/getting-access-tokens.html) to learn more
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://oauth.brightcove.com/v4/access_token'
+          scopes:
+            video-cloud/social/mrss/read: Read MRSS feed configuration data
+            video-cloud/social/mrss/write: Write MRSS feed configuration data

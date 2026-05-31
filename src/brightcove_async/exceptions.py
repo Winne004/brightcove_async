@@ -77,6 +77,10 @@ class BrightcoveTooManyRequestsError(BrightcoveClientError):
     """Raised when too many requests are made to the Brightcove API."""
 
 
+class BrightcoveConnectionError(BrightcoveError):
+    """Raised when a connection to the Brightcove API cannot be established."""
+
+
 class BrightcoveServerError(BrightcoveError):
     """Base class for server errors."""
 
