@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from brightcove_async.exceptions import (
     BrightcoveAuthError,
     BrightcoveBadValueError,
+    BrightcoveConnectionError,
     BrightcoveResourceNotFoundError,
 )
 from brightcove_async.services.base import Base
@@ -89,6 +90,70 @@ def test_limiter_singleton(base_service):
     limiter2 = base_service.limiter
 
     assert limiter1 is limiter2
+
+
+@pytest.mark.asyncio
+async def test_raise_for_status_passes_on_success(base_service):
+    """Test _raise_for_status does not raise when response is successful."""
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock()
+
+    await base_service._raise_for_status(
+        mock_response, "https://api.example.com/v1/items"
+    )
+
+    mock_response.raise_for_status.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_raise_for_status_maps_404(base_service):
+    """Test _raise_for_status maps 404 to BrightcoveResourceNotFoundError."""
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=404
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_response.text = AsyncMock(return_value="Not found")
+
+    with pytest.raises(BrightcoveResourceNotFoundError) as exc_info:
+        await base_service._raise_for_status(
+            mock_response, "https://api.example.com/v1/items/1"
+        )
+
+    assert exc_info.value.details == {"response_body": "Not found"}
+
+
+@pytest.mark.asyncio
+async def test_raise_for_status_maps_400(base_service):
+    """Test _raise_for_status maps 400 to BrightcoveBadValueError."""
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=400
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_response.text = AsyncMock(return_value="Bad request")
+
+    with pytest.raises(BrightcoveBadValueError):
+        await base_service._raise_for_status(
+            mock_response, "https://api.example.com/v1/items"
+        )
+
+
+@pytest.mark.asyncio
+async def test_raise_for_status_includes_endpoint(base_service):
+    """Test _raise_for_status includes the endpoint in the raised exception."""
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=404
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_response.text = AsyncMock(return_value="")
+
+    endpoint = "https://api.example.com/v1/items/42"
+    with pytest.raises(BrightcoveResourceNotFoundError) as exc_info:
+        await base_service._raise_for_status(mock_response, endpoint)
+
+    assert exc_info.value.endpoint == endpoint
 
 
 @pytest.mark.asyncio
@@ -272,6 +337,26 @@ async def test_fetch_data_handles_401_error(base_service, mock_session):
         )
 
     assert mock_session.request.call_count == 5
+
+
+@pytest.mark.asyncio
+async def test_fetch_data_translates_connection_error(base_service, mock_session):
+    """Test that aiohttp.ClientConnectionError is translated to BrightcoveConnectionError."""
+    mock_session.request.return_value.__aenter__.side_effect = (
+        aiohttp.ClientConnectionError("Connection failed")
+    )
+
+    from tenacity import RetryError
+
+    with pytest.raises(RetryError) as exc_info:
+        await base_service.fetch_data(
+            endpoint="https://api.example.com/v1/items",
+            model=DummyModel,
+        )
+
+    assert isinstance(
+        exc_info.value.last_attempt.exception(), BrightcoveConnectionError
+    )
 
 
 @pytest.mark.asyncio

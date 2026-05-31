@@ -13,7 +13,7 @@ class BrightcoveBaseAPIConfig(BaseSettings):
     """Base API configuration for Brightcove."""
 
     cms_base_url: str = "https://cms.api.brightcove.com/v1/accounts/"
-    syndication_base_url: str = "https://edge.social.api.brightcove.com/v1/accounts/"
+    syndication_base_url: str = "https://social.api.brightcove.com/v1"
     analytics_base_url: str = "https://analytics.api.brightcove.com/v1"
     dynamic_ingest_base_url: str = "https://ingest.api.brightcove.com/v1/accounts/"
     ingest_profiles_base_url: str = "https://ingestion.api.brightcove.com/v1/"
