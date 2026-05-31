@@ -16,6 +16,7 @@ from brightcove_async.exceptions import (
     BrightcoveAuthError,
     BrightcoveConnectionError,
     BrightcoveError,
+    BrightcoveTooManyRequestsError,
     map_status_code_to_exception,
 )
 from brightcove_async.protocols import OAuthClientProtocol
@@ -25,7 +26,11 @@ logger = logging.getLogger(__name__)
 
 brightcove_retry = retry(
     retry=retry_if_exception_type(
-        (BrightcoveConnectionError, BrightcoveAuthError),
+        (
+            BrightcoveConnectionError,
+            BrightcoveAuthError,
+            BrightcoveTooManyRequestsError,
+        ),
     ),
     wait=wait_exponential(multiplier=1, min=1, max=3),
     stop=stop_after_attempt(5),
@@ -133,6 +138,9 @@ class Base(ABC):
                 await self._raise_for_status(response, endpoint)
                 json_data = await response.json()
                 return model.model_validate(json_data, strict=False)
+        except BrightcoveAuthError:
+            self._oauth.invalidate_token()
+            raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
 
@@ -145,6 +153,9 @@ class Base(ABC):
                 self._session.request("DELETE", endpoint, headers=headers) as response,
             ):
                 await self._raise_for_status(response, endpoint)
+        except BrightcoveAuthError:
+            self._oauth.invalidate_token()
+            raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
 
@@ -158,6 +169,9 @@ class Base(ABC):
             ):
                 await self._raise_for_status(response, endpoint)
                 return await response.text()
+        except BrightcoveAuthError:
+            self._oauth.invalidate_token()
+            raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
 
@@ -172,5 +186,8 @@ class Base(ABC):
                 ) as response,
             ):
                 await self._raise_for_status(response, endpoint)
+        except BrightcoveAuthError:
+            self._oauth.invalidate_token()
+            raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
