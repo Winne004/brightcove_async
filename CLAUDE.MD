@@ -93,7 +93,7 @@ Run tools with `uv run`:
 2. Add query/body params model in `schemas/params.py` when needed.
 3. Add async method to the relevant service in `src/brightcove_async/services/`.
 4. Use `fetch_data` with an explicit Pydantic model for all JSON endpoints — `fetch_data` is strictly for JSON request/response pairs where the response is validated against the model.
-5. For non-JSON endpoints (e.g. DELETE with no response body, or `text/plain` responses), do **not** use `fetch_data`. Instead, call `self._session.request(...)` directly using `self.limiter` and `await self._oauth.headers`, and handle HTTP errors via a `_raise_for_status` helper that maps `aiohttp.ClientResponseError` to Brightcove exceptions. See `Syndication` service for the established pattern.
+5. For non-JSON endpoints (e.g. DELETE with no response body, or `text/plain` responses), do **not** use `fetch_data`. Instead, use the Base helpers (`self._delete`, `self._get_text`, `self._put_text`), which handle rate limiting, retries, and `_raise_for_status` error mapping for you.
 6. Add/extend tests in `tests/test_<service>_service.py`.
 
 ### Adding a new service
