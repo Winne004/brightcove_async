@@ -38,8 +38,8 @@ extend-select = ["I"]
 [tool.ruff.lint.isort]
 known-first-party = ["brightcove_async"]
 
-[tool.ty.src]
-root = "src"
+[tool.ty.environment]
+root = ["src"]
 
 [tool.uv]
 package = true
