@@ -52,11 +52,5 @@ class GetLeadsParams(ParamsBase):
     to: str | int | None = None
 
 
-class GetViewEventsParams(ParamsBase):
-    limit: int | None = None
-    offset: int | None = None
-    sort: str | None = None
-    fields: str | None = None
-    where: str | None = None
-    from_: str | int | None = Field(default=None, serialization_alias="from")
-    to: str | int | None = None
+class GetViewEventsParams(GetLeadsParams):
+    pass

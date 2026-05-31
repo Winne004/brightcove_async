@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field, RootModel
 
@@ -124,17 +123,4 @@ class Syndication(BaseModel):
 
 
 class SyndicationList(RootModel[list[Syndication]]):
-    pass
-
-
-class ResponseError(BaseModel):
-    error_code: Optional[str] = Field(
-        default=None, description="Application error code"
-    )
-    message: Optional[str] = Field(
-        default=None, description="Application error message"
-    )
-
-
-class ResponseErrorList(RootModel[list[ResponseError]]):
     pass
