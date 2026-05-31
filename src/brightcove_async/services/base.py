@@ -110,9 +110,13 @@ class Base(ABC):
                 details=error_details,
             ) from e
 
-    def _convert_oauth_error(self, e: Exception) -> BrightcoveAuthError:
-        """Wrap a raw OAuth fetch error as BrightcoveAuthError and clear the token."""
+    def _convert_oauth_error(self, e: Exception) -> BrightcoveError:
+        """Convert a raw OAuth fetch error into a Brightcove exception and clear the token."""
         self._oauth.invalidate_token()
+        if isinstance(e, aiohttp.ClientConnectionError):
+            return BrightcoveConnectionError(message=str(e))
+        if isinstance(e, aiohttp.ClientResponseError):
+            return BrightcoveAuthError(message=str(e), status_code=e.status)
         return BrightcoveAuthError(message=str(e))
 
     @brightcove_retry
