@@ -24,6 +24,9 @@ def get_internal_imports(path: Path) -> list[str]:
             if node.level == 0:
                 if node.module and node.module.startswith("brightcove_async"):
                     imports.append(node.module)
+                    for alias in node.names:
+                        if alias.name != "*":
+                            imports.append(f"{node.module}.{alias.name}")
             else:
                 # Resolve relative import to absolute module path.
                 # Level 1 = current package; each extra level goes one package up.
