@@ -15,7 +15,7 @@ def _package_of(path: Path) -> str:
 
 def get_internal_imports(path: Path) -> list[str]:
     """Return all brightcove_async.* imports in path, resolving relative imports to absolute."""
-    tree = ast.parse(path.read_text())
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     imports: list[str] = []
     package = _package_of(path)
 
