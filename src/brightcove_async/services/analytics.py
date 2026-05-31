@@ -15,10 +15,6 @@ from brightcove_async.services.base import Base
 
 
 class Analytics(Base):
-    @property
-    def base_url(self) -> str:
-        return "https://analytics.api.brightcove.com/v1"
-
     def __init__(
         self,
         session: aiohttp.ClientSession,
