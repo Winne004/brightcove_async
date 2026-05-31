@@ -32,6 +32,7 @@ class OAuthClient:
         ),
         wait=wait_exponential(multiplier=1, min=1, max=3),
         stop=stop_after_attempt(3),
+        reraise=True,
     )
     async def _get_access_token(self) -> None:
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
