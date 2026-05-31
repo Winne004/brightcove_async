@@ -35,11 +35,10 @@ class DynamicIngest(Base):
     async def get_temporary_s3_urls(
         self,
         account_id: str,
+        video_id: str,
         source_name: str,
     ) -> GetS3UrlsResponse:
         return await self.fetch_data(
-            endpoint=f"{self.base_url}{account_id}/videos/{{video_id}}/upload-urls/{source_name}",
+            endpoint=f"{self.base_url}{account_id}/videos/{video_id}/upload-urls/{source_name}",
             model=GetS3UrlsResponse,
-            method="GET",
-            params={"source_name": source_name},
         )
