@@ -57,14 +57,12 @@ class Base(ABC):
 
     """
 
-    _limit: int = 10
-
     def __init__(
         self,
         session: aiohttp.ClientSession,
         oauth: OAuthClientProtocol,
         base_url: str,
-        limit: int = 10,
+        limit: float = 10,
     ) -> None:
         """Args:.
 
@@ -75,15 +73,54 @@ class Base(ABC):
         self._oauth: OAuthClientProtocol = oauth
         self._session: aiohttp.ClientSession = session
         self._base_url: str = base_url
-        self._limit = limit
+        self._limit: float = limit
         self._limiter: AsyncLimiter | None = None
+        self._time_period: float = 1.0
 
     @property
     def limiter(self) -> AsyncLimiter:
         """AsyncLimiter instance to control the rate of API calls."""
         if self._limiter is None:
-            self._limiter = AsyncLimiter(max_rate=self._limit, time_period=1)
+            self._limiter = AsyncLimiter(
+                max_rate=self._limit, time_period=self._time_period
+            )
         return self._limiter
+
+    @property
+    def time_period(self) -> float:
+        """Time period in seconds for the rate limiter."""
+        return self._time_period
+
+    @time_period.setter
+    def time_period(self, value: float) -> None:
+        """Set the time period for the rate limiter and reset the limiter instance.
+
+        Args:
+            value (float): The new time period in seconds.
+
+        """
+        if value <= 0:
+            raise ValueError("time_period must be greater than 0")
+        self._time_period = value
+        self._limiter = None  # Reset limiter to apply new time period on next access
+
+    @property
+    def max_requests(self) -> float:
+        """Max requests allowed in the time period for the rate limiter."""
+        return self._limit
+
+    @max_requests.setter
+    def max_requests(self, value: float) -> None:
+        """Set the max requests for the rate limiter and reset the limiter instance.
+
+        Args:
+            value (float): The new max requests allowed in the time period.
+
+        """
+        if value <= 0:
+            raise ValueError("max_requests must be greater than 0")
+        self._limit = value
+        self._limiter = None  # Reset limiter to apply new max requests on next access
 
     @property
     def base_url(self) -> str:
