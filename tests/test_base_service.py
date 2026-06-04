@@ -95,6 +95,40 @@ def test_limiter_singleton(base_service):
     assert limiter1 is limiter2
 
 
+def test_time_period_setter(base_service):
+    """Test time_period setter updates time period and resets limiter."""
+    base_service.time_period = 2
+
+    assert base_service.time_period == 2
+    assert base_service._limiter is None  # Limiter should be reset
+
+
+def test_time_period_setter_invalid_value(base_service):
+    """Test time_period setter raises ValueError for non-positive values."""
+    with pytest.raises(ValueError):
+        base_service.time_period = 0
+
+    with pytest.raises(ValueError):
+        base_service.time_period = -1
+
+
+def test_max_requests_setter(base_service):
+    """Test max_requests setter updates max requests and resets limiter."""
+    base_service.max_requests = 20
+
+    assert base_service.max_requests == 20
+    assert base_service._limiter is None  # Limiter should be reset
+
+
+def test_max_requests_setter_invalid_value(base_service):
+    """Test max_requests setter raises ValueError for non-positive values."""
+    with pytest.raises(ValueError):
+        base_service.max_requests = 0
+
+    with pytest.raises(ValueError):
+        base_service.max_requests = -5
+
+
 @pytest.mark.asyncio
 async def test_raise_for_status_passes_on_success(base_service):
     """Test _raise_for_status does not raise when response is successful."""
