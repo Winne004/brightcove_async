@@ -41,6 +41,10 @@ class BrightcoveClientError(BrightcoveError):
 class BrightcoveAuthError(BrightcoveClientError):
     """Raised when authentication with the Brightcove API fails."""
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.token_invalidated: bool = False
+
 
 class BrightcoveForbiddenError(BrightcoveClientError):
     """Raised when the caller lacks permission for the requested resource."""

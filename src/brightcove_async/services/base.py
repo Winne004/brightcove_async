@@ -1,12 +1,16 @@
+import contextlib
 import logging
 from abc import ABC
+from http import HTTPStatus
 from typing import TypeVar
 
 import aiohttp
 from aiolimiter import AsyncLimiter
 from pydantic import BaseModel
 from tenacity import (
+    RetryCallState,
     retry,
+    retry_if_exception,
     retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
@@ -24,15 +28,31 @@ from brightcove_async.protocols import OAuthClientProtocol
 T = TypeVar("T", bound=BaseModel)
 logger = logging.getLogger(__name__)
 
+
+def _retry_after_wait(retry_state: RetryCallState) -> float:
+    """Use the Retry-After header value from a 429 response when available."""
+    exc = retry_state.outcome.exception() if retry_state.outcome else None
+    if isinstance(exc, BrightcoveTooManyRequestsError):
+        retry_after = exc.details.get("retry_after")
+        if retry_after is not None:
+            return float(retry_after)
+    exp = wait_exponential(multiplier=1, min=1, max=10)
+    return exp(retry_state)
+
+
 brightcove_retry = retry(
-    retry=retry_if_exception_type(
-        (
-            BrightcoveConnectionError,
-            BrightcoveAuthError,
-            BrightcoveTooManyRequestsError,
-        ),
+    retry=(
+        retry_if_exception_type(
+            (BrightcoveConnectionError, BrightcoveTooManyRequestsError),
+        )
+        | retry_if_exception(
+            # Only retry auth errors when the token was actually invalidated
+            # (oauth-managed headers). Custom-supplied headers cannot be
+            # refreshed — retrying would just repeat the same 401.
+            lambda e: isinstance(e, BrightcoveAuthError) and e.token_invalidated,
+        )
     ),
-    wait=wait_exponential(multiplier=1, min=1, max=3),
+    wait=_retry_after_wait,
     stop=stop_after_attempt(5),
 )
 
@@ -139,6 +159,11 @@ class Base(ABC):
                 error_details = {"response_body": error_body}
             except Exception:
                 pass
+            if e.status == HTTPStatus.TOO_MANY_REQUESTS:
+                retry_after_raw = response.headers.get("Retry-After")
+                if retry_after_raw is not None:
+                    with contextlib.suppress(ValueError):
+                        error_details["retry_after"] = int(retry_after_raw)
             exc_class: type[BrightcoveError] = map_status_code_to_exception(e.status)
             raise exc_class(
                 message=str(e.message),
@@ -166,7 +191,8 @@ class Base(ABC):
         headers: dict | None = None,
         payload: BaseModel | None = None,
     ) -> T:
-        if headers is None:
+        using_oauth_headers = headers is None
+        if using_oauth_headers:
             try:
                 headers = await self._oauth.headers
             except _OAUTH_FETCH_ERRORS as e:
@@ -197,8 +223,10 @@ class Base(ABC):
                 await self._raise_for_status(response, endpoint)
                 json_data = await response.json()
                 return model.model_validate(json_data, strict=False)
-        except BrightcoveAuthError:
-            self._oauth.invalidate_token()
+        except BrightcoveAuthError as e:
+            if using_oauth_headers:
+                self._oauth.invalidate_token()
+                e.token_invalidated = True
             raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
@@ -215,8 +243,9 @@ class Base(ABC):
                 self._session.request("DELETE", endpoint, headers=headers) as response,
             ):
                 await self._raise_for_status(response, endpoint)
-        except BrightcoveAuthError:
+        except BrightcoveAuthError as e:
             self._oauth.invalidate_token()
+            e.token_invalidated = True
             raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
@@ -234,8 +263,9 @@ class Base(ABC):
             ):
                 await self._raise_for_status(response, endpoint)
                 return await response.text()
-        except BrightcoveAuthError:
+        except BrightcoveAuthError as e:
             self._oauth.invalidate_token()
+            e.token_invalidated = True
             raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
@@ -255,8 +285,9 @@ class Base(ABC):
                 ) as response,
             ):
                 await self._raise_for_status(response, endpoint)
-        except BrightcoveAuthError:
+        except BrightcoveAuthError as e:
             self._oauth.invalidate_token()
+            e.token_invalidated = True
             raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
