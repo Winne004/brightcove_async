@@ -1,3 +1,4 @@
+import asyncio
 import time
 
 import aiohttp
@@ -22,6 +23,7 @@ class OAuthClient:
         self._request_time = 0.0
         self._token_life = 240.0  # Token expires after 4 minutes
         self._session: aiohttp.ClientSession = session
+        self._token_lock = asyncio.Lock()
 
     def invalidate_token(self) -> None:
         self._access_token = None
@@ -49,6 +51,10 @@ class OAuthClient:
         ):
             response.raise_for_status()
             json_data = await response.json()
+            if not isinstance(json_data, dict):
+                raise ValueError(
+                    f"OAuth server returned unexpected response type: {type(json_data).__name__}"
+                )
             access_token = json_data.get("access_token")
             if not access_token:
                 raise ValueError("OAuth server returned no access_token")
@@ -56,11 +62,17 @@ class OAuthClient:
             self._request_time = time.time()
 
     async def get_access_token(self) -> str:
-        if (
-            not self._access_token
-            or time.time() - self._request_time > self._token_life
-        ):
-            await self._get_access_token()
+        # Fast path: token is valid, no lock needed
+        if self._access_token and time.time() - self._request_time <= self._token_life:
+            return self._access_token
+
+        async with self._token_lock:
+            # Re-check under the lock in case another coroutine already refreshed
+            if (
+                not self._access_token
+                or time.time() - self._request_time > self._token_life
+            ):
+                await self._get_access_token()
 
         if not self._access_token:
             raise ValueError("Failed to fetch access token.")

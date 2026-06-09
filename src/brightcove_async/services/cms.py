@@ -9,6 +9,7 @@ from brightcove_async.schemas.cms_model import (
     Channel,
     ChannelAffiliateList,
     ChannelList,
+    Contract,
     ContractList,
     CreateVideoRequestBodyFields,
     CustomFields,
@@ -65,6 +66,8 @@ class CMS(Base):
             payload=video_data,
         )
 
+    _page_concurrency = 10
+
     async def get_videos_for_account(
         self,
         account_id: str,
@@ -90,20 +93,35 @@ class CMS(Base):
             else number_of_pages
         )
 
-        tasks = [
-            self.fetch_data(
-                endpoint=f"{self.base_url}{account_id}/videos",
-                model=VideoArray,
-                params={
-                    **(params.serialize_params() if params else {}),
-                    "limit": page_size,
-                    "offset": i * page_size,
-                },
-            )
-            for i in range(total_pages)
-        ]
+        # Strip pagination keys — this method owns offset/limit for each page.
+        base_params = (
+            {
+                k: v
+                for k, v in params.serialize_params().items()
+                if k not in ("limit", "offset")
+            }
+            if params
+            else {}
+        )
 
-        pages = await asyncio.gather(*tasks)
+        semaphore = asyncio.Semaphore(self._page_concurrency)
+
+        async def fetch_page(i: int) -> VideoArray:
+            async with semaphore:
+                return await self.fetch_data(
+                    endpoint=f"{self.base_url}{account_id}/videos",
+                    model=VideoArray,
+                    params={**base_params, "limit": page_size, "offset": i * page_size},
+                )
+
+        tasks = [asyncio.ensure_future(fetch_page(i)) for i in range(total_pages)]
+
+        try:
+            pages = await asyncio.gather(*tasks)
+        except Exception:
+            for t in tasks:
+                t.cancel()
+            raise
 
         for page in pages:
             results.root.extend(page.root)
@@ -287,10 +305,10 @@ class CMS(Base):
         account_id: str,
         channel_id: str,
         contract_id: str,
-    ) -> ContractList:
+    ) -> Contract:
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/channels/{channel_id}/contracts/{contract_id}",
-            model=ContractList,
+            model=Contract,
         )
 
     async def list_shares(
