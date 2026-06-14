@@ -76,6 +76,19 @@ class BrightcoveIllegalFieldError(BrightcoveClientError):
 class BrightcoveTooManyRequestsError(BrightcoveClientError):
     """Raised when too many requests are made to the Brightcove API."""
 
+    def __init__(
+        self,
+        message: str,
+        status_code: int | None = None,
+        endpoint: str | None = None,
+        details: dict | None = None,
+        retry_after: float | None = None,
+    ):
+        super().__init__(
+            message=message, status_code=status_code, endpoint=endpoint, details=details
+        )
+        self.retry_after = retry_after
+
 
 class BrightcoveConnectionError(BrightcoveError):
     """Raised when a connection to the Brightcove API cannot be established."""
