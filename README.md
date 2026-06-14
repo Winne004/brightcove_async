@@ -53,10 +53,7 @@ Always use the client as an async context manager. The HTTP session and OAuth cl
 import asyncio
 
 import brightcove_async
-from brightcove_async.schemas.cms_model import (
-    CreateVideoRequestBodyFields,
-    State,
-)
+from brightcove_async.schemas import CreateVideoRequestBodyFields, State
 
 
 async def main() -> None:
@@ -65,8 +62,8 @@ async def main() -> None:
         video = await bc.cms.create_video(
             account_id="12345",
             video_data=CreateVideoRequestBodyFields(
-                name="test",
-                State=State.ACTIVE,
+                name="My Video",
+                state=State.ACTIVE,
             ),
         )
         print(video.model_dump())
@@ -78,28 +75,103 @@ if __name__ == "__main__":
 
 Services are exposed as properties on the client (`bc.cms`, `bc.analytics`, `bc.audience`, `bc.syndication`, `bc.dynamic_ingest`, `bc.ingest_profiles`) and are created lazily on first access.
 
+Schema models can be imported from the top-level `brightcove_async.schemas` namespace or directly from the submodule:
+
+```python
+# Top-level convenience (any model from any service)
+from brightcove_async.schemas import Video, Playlist, GetVideosQueryParams
+
+# Direct submodule import (preferred when using many CMS types)
+from brightcove_async.schemas.cms_model import VideoVariant, FolderCreateFields
+from brightcove_async.schemas.params import GetVideosQueryParams
+```
+
 ## Usage
 
 ### CMS
 
 ```python
-from brightcove_async.schemas.params import GetVideosQueryParams
+from brightcove_async.schemas import (
+    CreateVideoRequestBodyFields,
+    UpdateVideoRequestBodyFields,
+    GetVideosQueryParams,
+    PlaylistInputFields,
+    FolderCreateFields,
+    RemoteAssetBody,
+)
 
 async with client as bc:
-    # A single page of videos
+    ACCOUNT = "12345"
+
+    # ── Videos ────────────────────────────────────────────────────────────────
+
+    # Single page
     videos = await bc.cms.get_videos(
-        account_id="12345",
+        account_id=ACCOUNT,
         params=GetVideosQueryParams(limit=20, sort="-created_at"),
     )
 
-    # Every video for an account, fetched page by page concurrently
-    all_videos = await bc.cms.get_videos_for_account(
-        account_id="12345",
-        page_size=100,
+    # All videos, fetched concurrently page by page
+    all_videos = await bc.cms.get_videos_for_account(account_id=ACCOUNT, page_size=100)
+
+    # Create / update / delete
+    video = await bc.cms.create_video(
+        account_id=ACCOUNT,
+        video_data=CreateVideoRequestBodyFields(name="My Video"),
+    )
+    await bc.cms.update_video(
+        account_id=ACCOUNT,
+        video_id=video.id,
+        video_data=UpdateVideoRequestBodyFields(tags=["tutorial"]),
+    )
+    await bc.cms.delete_video(account_id=ACCOUNT, video_ids=[video.id])
+
+    # ── Playlists ──────────────────────────────────────────────────────────────
+
+    playlist = await bc.cms.create_playlist(
+        account_id=ACCOUNT,
+        playlist_data=PlaylistInputFields(name="My Playlist", type="EXPLICIT"),
+    )
+    await bc.cms.update_playlist(
+        account_id=ACCOUNT,
+        playlist_id=playlist.id,
+        playlist_data=PlaylistInputFields(name="Renamed"),
+    )
+    await bc.cms.delete_playlist(account_id=ACCOUNT, playlist_id=playlist.id)
+
+    # ── Folders ────────────────────────────────────────────────────────────────
+
+    folder = await bc.cms.create_folder(
+        account_id=ACCOUNT,
+        folder_data=FolderCreateFields(name="Archive"),
+    )
+    await bc.cms.add_video_to_folder(
+        account_id=ACCOUNT, folder_id=folder.id, video_id="6789"
     )
 
-    video = await bc.cms.get_video_by_id(account_id="12345", video_id="6789")
-    sources = await bc.cms.get_video_sources(account_id="12345", video_id="6789")
+    # ── Remote assets (manifests / renditions) ─────────────────────────────────
+
+    manifest = await bc.cms.add_hls_manifest(
+        account_id=ACCOUNT,
+        video_id="6789",
+        body=RemoteAssetBody(remote_url="https://cdn.example.com/master.m3u8"),
+    )
+    await bc.cms.delete_hls_manifest(
+        account_id=ACCOUNT, video_id="6789", asset_id=manifest.id
+    )
+
+    # ── Subscriptions ──────────────────────────────────────────────────────────
+
+    from brightcove_async.schemas import SubscriptionCreateFields, Event
+
+    sub = await bc.cms.create_subscription(
+        account_id=ACCOUNT,
+        subscription_data=SubscriptionCreateFields(
+            endpoint="https://my.app/webhook",
+            events=[Event.video_change],
+        ),
+    )
+    await bc.cms.delete_subscription(account_id=ACCOUNT, subscription_id=sub.id)
 ```
 
 ### Analytics
@@ -216,9 +288,39 @@ Each service has its own request-per-second budget enforced by an `AsyncLimiter`
 
 ## API coverage
 
+### CMS (`bc.cms`)
+
+| Resource | Methods |
+| --- | --- |
+| Videos | `get_videos`, `create_video`, `update_video`, `delete_video`, `get_videos_for_account`*, `get_video_count`, `get_video_by_id` |
+| Video sources / images | `get_video_sources`, `get_video_images`, `delete_video_image`, `get_clear_video`, `get_video_clear_sources` |
+| Video variants | `get_video_variants`, `create_video_variant`, `get_video_variant`, `update_video_variant`, `delete_video_variant` |
+| Audio tracks | `get_video_audio_tracks`, `get_video_audio_track`, `update_video_audio_track`, `delete_video_audio_track` |
+| Digital master | `get_digital_master_info`, `delete_digital_master` |
+| Ingest jobs | `get_status_of_ingest_jobs`, `get_ingest_job_status` |
+| Playlist references | `get_playlists_for_video`, `remove_video_from_all_playlists` |
+| Playlists | `get_playlists`, `create_playlist`, `get_playlist_count`, `get_playlist`, `update_playlist`, `delete_playlist`, `get_videos_in_playlist`, `get_video_count_in_playlist` |
+| Custom fields | `get_all_video_fields`, `get_video_fields`, `create_custom_field`, `get_custom_field`, `update_custom_field`, `delete_custom_field` |
+| Folders | `get_folders`, `create_folder`, `get_folder`, `update_folder`, `delete_folder`, `get_videos_in_folder`, `add_video_to_folder`, `remove_video_from_folder` |
+| Labels | `get_labels`, `create_label`, `update_label`, `delete_label` |
+| Channels | `list_channels`, `get_channel_details`, `update_channel`, `list_channel_affiliates`, `add_affiliate`, `remove_affiliate` |
+| Contracts | `list_contracts`, `get_contract`, `approve_contract` |
+| Video shares | `list_shares`, `share_video`, `get_share`, `unshare_video` |
+| Subscriptions | `get_subscriptions`, `create_subscription`, `get_subscription`, `delete_subscription` |
+| Assets | `get_assets`, `get_dynamic_renditions` |
+| HLS manifests | `get_hls_manifests`, `add_hls_manifest`, `get_hls_manifest`, `update_hls_manifest`, `delete_hls_manifest` |
+| DASH manifests | `get_dash_manifests`, `add_dash_manifest`, `get_dash_manifest`, `update_dash_manifest`, `delete_dash_manifest` |
+| HDS manifests | `get_hds_manifests`, `add_hds_manifest`, `get_hds_manifest`, `update_hds_manifest`, `delete_hds_manifest` |
+| ISM manifests | `get_ism_manifests`, `add_ism_manifest`, `get_ism_manifest`, `update_ism_manifest`, `delete_ism_manifest` |
+| ISMC manifests | `get_ismc_manifests`, `add_ismc_manifest`, `get_ismc_manifest`, `update_ismc_manifest`, `delete_ismc_manifest` |
+| Renditions | `add_rendition`, `get_rendition`, `update_rendition`, `delete_rendition` |
+
+\* Paginated helper that fetches all pages concurrently.
+
+### Other services
+
 | Service | Methods |
 | --- | --- |
-| `cms` | `get_videos`, `create_video`, `get_videos_for_account`, `get_video_count`, `get_video_fields`, `get_video_by_id`, `get_video_sources`, `get_video_images`, `get_video_variants`, `get_video_variant`, `get_video_audio_tracks`, `get_video_audio_track`, `get_digital_master_info`, `get_playlists_for_video`, `get_status_of_ingest_jobs`, `get_ingest_job_status`, `list_channels`, `get_channel_details`, `list_channel_affiliates`, `list_contracts`, `get_contract`, `list_shares` |
 | `analytics` | `get_account_engagement`, `get_player_engagement`, `get_video_engagement`, `get_analytics_report`, `get_available_date_range`, `get_alltime_video_views` |
 | `audience` | `get_leads`, `get_view_events` |
 | `syndication` | `get_all_syndications`, `get_syndication`, `create_syndication`, `update_syndication`, `patch_syndication`, `delete_syndication`, `get_template`, `upload_template` |
