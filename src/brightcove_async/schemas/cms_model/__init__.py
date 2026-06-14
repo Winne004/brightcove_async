@@ -1506,4 +1506,4 @@ class FolderUpdateFields(BaseModel):
 
 
 class RemoteAssetBody(BaseModel):
-    remote_url: str | None = Field(default=None, max_length=250)
+    remote_url: str = Field(max_length=250)

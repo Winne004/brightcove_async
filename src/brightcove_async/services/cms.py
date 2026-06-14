@@ -4,6 +4,7 @@ import aiohttp
 
 from brightcove_async.protocols import OAuthClientProtocol
 from brightcove_async.schemas.cms_model import (
+    AddAffiliate,
     ApproveContractFields,
     AudioTrack,
     AudioTracks,
@@ -34,6 +35,7 @@ from brightcove_async.schemas.cms_model import (
     PlaylistArray,
     PlaylistCount,
     PlaylistInputFields,
+    PlaylistReferences,
     RemoteAssetBody,
     ShareVideoRequest,
     Subscription,
@@ -59,7 +61,7 @@ from brightcove_async.schemas.params import (
     GetVideoCountParams,
     GetVideosQueryParams,
 )
-from brightcove_async.services.base import Base
+from brightcove_async.services.base import Base, brightcove_retry
 
 
 class CMS(Base):
@@ -360,10 +362,10 @@ class CMS(Base):
         self,
         account_id: str,
         video_id: str,
-    ) -> Playlist:
+    ) -> PlaylistReferences:
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/videos/{video_id}/references",
-            model=Playlist,
+            model=PlaylistReferences,
         )
 
     async def remove_video_from_all_playlists(
@@ -620,9 +622,12 @@ class CMS(Base):
 
     async def add_affiliate(
         self, account_id: str, channel_name: str, affiliate_account_id: str
-    ) -> None:
-        await self._put_empty(
-            f"{self.base_url}{account_id}/channels/{channel_name}/members/{affiliate_account_id}"
+    ) -> AddAffiliate:
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}{account_id}/channels/{channel_name}/members/{affiliate_account_id}",
+            model=AddAffiliate,
+            method="PUT",
+            payload=AddAffiliate(account_id=affiliate_account_id),
         )
 
     async def remove_affiliate(
@@ -671,18 +676,25 @@ class CMS(Base):
             model=VideoShareList,
         )
 
+    @brightcove_retry
     async def share_video(
         self,
         account_id: str,
         video_id: str,
-        share_data: ShareVideoRequest,
+        share_data: list[ShareVideoRequest],
     ) -> VideoShareList:
-        return await self.fetch_data(
-            endpoint=f"{self.base_url}{account_id}/videos/{video_id}/shares",
-            model=VideoShareList,
-            method="POST",
-            payload=share_data,
+        headers = await self._get_oauth_headers()
+        body = [
+            item.model_dump(mode="json", exclude_none=True, exclude_unset=True)
+            for item in share_data
+        ]
+        json_data = await self._send_request(
+            "POST",
+            f"{self.base_url}{account_id}/videos/{video_id}/shares",
+            headers,
+            json_body=body,
         )
+        return VideoShareList.model_validate(json_data, strict=False)
 
     async def get_share(
         self, account_id: str, video_id: str, affiliate_account_id: str

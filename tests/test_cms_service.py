@@ -4,6 +4,7 @@ import aiohttp
 import pytest
 
 from brightcove_async.schemas.cms_model import (
+    AddAffiliate,
     ApproveContractFields,
     AudioTrack,
     AudioTracks,
@@ -35,6 +36,7 @@ from brightcove_async.schemas.cms_model import (
     PlaylistArray,
     PlaylistCount,
     PlaylistInputFields,
+    PlaylistReferences,
     RemoteAssetBody,
     ShareVideoRequest,
     Subscription,
@@ -370,9 +372,11 @@ async def test_get_ingest_job_status(cms_service):
 @pytest.mark.asyncio
 async def test_get_playlists_for_video(cms_service):
     with patch.object(cms_service, "fetch_data", new_callable=AsyncMock) as mock_fetch:
-        mock_fetch.return_value = Playlist()
+        mock_fetch.return_value = PlaylistReferences()
         await cms_service.get_playlists_for_video("account123", "video123")
-        mock_fetch.assert_called_once()
+        call_args = mock_fetch.call_args
+        assert "references" in call_args.kwargs["endpoint"]
+        assert call_args.kwargs["model"] == PlaylistReferences
 
 
 @pytest.mark.asyncio
@@ -680,9 +684,15 @@ async def test_list_channel_affiliates(cms_service):
 
 @pytest.mark.asyncio
 async def test_add_affiliate(cms_service):
-    with patch.object(cms_service, "_put_empty", new_callable=AsyncMock) as mock_put:
+    with patch.object(cms_service, "fetch_data", new_callable=AsyncMock) as mock_fetch:
+        mock_fetch.return_value = AddAffiliate(account_id="affiliate456")
         await cms_service.add_affiliate("account123", "my_channel", "affiliate456")
-        assert "channels/my_channel/members/affiliate456" in mock_put.call_args.args[0]
+        call_args = mock_fetch.call_args
+        assert (
+            "channels/my_channel/members/affiliate456" in call_args.kwargs["endpoint"]
+        )
+        assert call_args.kwargs["method"] == "PUT"
+        assert call_args.kwargs["model"] == AddAffiliate
 
 
 @pytest.mark.asyncio
@@ -742,13 +752,19 @@ async def test_list_shares(cms_service):
 
 @pytest.mark.asyncio
 async def test_share_video(cms_service):
-    with patch.object(cms_service, "fetch_data", new_callable=AsyncMock) as mock_fetch:
-        mock_fetch.return_value = VideoShareList(root=[])
-        data = ShareVideoRequest(id="affiliate456")
+    with (
+        patch.object(cms_service, "_send_request", new_callable=AsyncMock) as mock_req,
+        patch.object(
+            cms_service, "_get_oauth_headers", new_callable=AsyncMock
+        ) as mock_headers,
+    ):
+        mock_headers.return_value = {"Authorization": "Bearer test"}
+        mock_req.return_value = []
+        data = [ShareVideoRequest(id="affiliate456")]
         await cms_service.share_video("account123", "video123", data)
-        call_args = mock_fetch.call_args
-        assert "video123/shares" in call_args.kwargs["endpoint"]
-        assert call_args.kwargs["method"] == "POST"
+        assert mock_req.call_args.args[0] == "POST"
+        assert "video123/shares" in mock_req.call_args.args[1]
+        assert mock_req.call_args.kwargs["json_body"] == [{"id": "affiliate456"}]
 
 
 @pytest.mark.asyncio
