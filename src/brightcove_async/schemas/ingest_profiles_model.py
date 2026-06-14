@@ -1,6 +1,6 @@
 """Pydantic models for Brightcove Ingest Profiles API."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 
 class DigitalMaster(BaseModel):
@@ -30,14 +30,20 @@ class IngestProfile(BaseModel):
 
     version: int
     name: str
-    display_name: str
-    description: str
+    display_name: str | None = None
+    description: str | None = None
     account_id: int
     brightcove_standard: bool
     date_created: int
     date_last_modified: int
-    digital_master: DigitalMaster
+    digital_master: DigitalMaster | None = None
     renditions: list[dict] = Field(default_factory=list)
     packages: list[dict] = Field(default_factory=list)
     dynamic_origin: DynamicOrigin | None = None
     id: str
+
+
+class IngestProfileList(RootModel[list[IngestProfile]]):
+    """List of Brightcove Ingest Profile models."""
+
+    root: list[IngestProfile] = []
