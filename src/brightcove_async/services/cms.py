@@ -9,6 +9,7 @@ from brightcove_async.schemas.cms_model import (
     Channel,
     ChannelAffiliateList,
     ChannelList,
+    Contract,
     ContractList,
     CreateVideoRequestBodyFields,
     CustomFields,
@@ -77,18 +78,14 @@ class CMS(Base):
         if page_size > self._page_limit:
             raise ValueError("page_size must be less than or equal to 100")
 
-        video_count_params = GetVideoCountParams(q=params.q) if params else None
-
-        count = await self.get_video_count(account_id, params=video_count_params)
-
-        if count.count is None or count.count == 0:
-            return results
-
-        total_pages = (
-            (count.count + page_size - 1) // page_size
-            if number_of_pages is None
-            else number_of_pages
-        )
+        if number_of_pages is not None:
+            total_pages = number_of_pages
+        else:
+            video_count_params = GetVideoCountParams(q=params.q) if params else None
+            count = await self.get_video_count(account_id, params=video_count_params)
+            if count.count is None or count.count == 0:
+                return results
+            total_pages = (count.count + page_size - 1) // page_size
 
         tasks = [
             self.fetch_data(
@@ -287,10 +284,10 @@ class CMS(Base):
         account_id: str,
         channel_id: str,
         contract_id: str,
-    ) -> ContractList:
+    ) -> Contract:
         return await self.fetch_data(
             endpoint=f"{self.base_url}{account_id}/channels/{channel_id}/contracts/{contract_id}",
-            model=ContractList,
+            model=Contract,
         )
 
     async def list_shares(
