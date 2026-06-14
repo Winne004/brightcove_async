@@ -1427,3 +1427,83 @@ class VideoArray(RootModel[list[Video]]):
     @classmethod
     def ensure_list(cls, v):
         return v if isinstance(v, list) else [v]
+
+
+class PlaylistArray(RootModel[list[Playlist]]):
+    root: list[Playlist] = Field(..., description="Array of playlists")
+
+
+class FolderList(RootModel[list[Folder]]):
+    root: list[Folder] = Field(..., description="List of folders")
+
+
+class SubscriptionList(RootModel[list[Subscription]]):
+    root: list[Subscription] = Field(..., description="List of subscriptions")
+
+
+class DynamicRenditionList(RootModel[list[DynamicRendition]]):
+    root: list[DynamicRendition] = Field(..., description="List of dynamic renditions")
+
+
+class ManifestList(RootModel[list[Manifest]]):
+    root: list[Manifest] = Field(..., description="List of manifests")
+
+
+class VideoAssetList(RootModel[list[VideoAsset]]):
+    root: list[VideoAsset] = Field(..., description="List of video assets")
+
+
+class UpdateVideoRequestBodyFields(BaseModel):
+    ad_keys: str | None = None
+    cue_points: list[CuePoint] | None = None
+    custom_fields: dict[str, Any] | None = None
+    description: str | None = Field(default=None, max_length=250)
+    drm_disabled: bool | None = None
+    economics: Economics | None = None
+    folder_id: str | None = None
+    geo: Geo | None = None
+    labels: list[str] | None = None
+    link: Link | None = None
+    long_description: str | None = Field(default=None, max_length=5000)
+    name: str | None = Field(default=None, max_length=250, min_length=1)
+    offline_enabled: bool | None = None
+    playback_rights_id: str | None = None
+    projection: Projection | None = None
+    reference_id: str | None = Field(default=None, max_length=150)
+    schedule: Schedule | None = None
+    state: State | None = None
+    tags: list[Tag] | None = None
+    text_tracks: list[TextTrack] | None = None
+
+
+class UpdateAudioTrackFields(BaseModel):
+    is_default: bool | None = None
+    language: str | None = None
+    variant: Variant | None = None
+
+
+class UpdateChannelFields(BaseModel):
+    enforce_custom_fields: bool | None = None
+    enforce_geo: bool | None = None
+
+
+class ApproveContractFields(BaseModel):
+    approved: bool | None = None
+    auto_accept: bool | None = None
+
+
+class SubscriptionCreateFields(BaseModel):
+    endpoint: str
+    events: list[Event]
+
+
+class FolderCreateFields(BaseModel):
+    name: str
+
+
+class FolderUpdateFields(BaseModel):
+    name: str | None = None
+
+
+class RemoteAssetBody(BaseModel):
+    remote_url: str = Field(max_length=250)

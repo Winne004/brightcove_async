@@ -187,10 +187,10 @@ class Base(ABC):
         endpoint: str,
         headers: dict,
         params: dict | None = None,
-        json_body: dict | None = None,
+        json_body: dict | list | None = None,
         data: str | None = None,
         return_json: bool | None = True,
-    ) -> dict | str | None:
+    ) -> dict | list | str | None:
         """Execute a rate-limited request and map errors.
 
         return_json=True  → parse and return JSON body
@@ -266,3 +266,8 @@ class Base(ABC):
         await self._send_request(
             "PUT", endpoint, headers, data=content, return_json=None
         )
+
+    @brightcove_retry
+    async def _put_empty(self, endpoint: str) -> None:
+        headers = await self._get_oauth_headers()
+        await self._send_request("PUT", endpoint, headers, return_json=None)
