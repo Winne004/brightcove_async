@@ -9,6 +9,7 @@ from brightcove_async.schemas.cms_model import (
     Channel,
     ChannelAffiliateList,
     ChannelList,
+    Contract,
     ContractList,
     CreateVideoRequestBodyFields,
     CustomFields,
@@ -342,9 +343,9 @@ async def test_list_contracts(cms_service):
 
 @pytest.mark.asyncio
 async def test_get_contract(cms_service):
-    """Test get_contract method."""
+    """Test get_contract method uses Contract model (not ContractList)."""
     with patch.object(cms_service, "fetch_data", new_callable=AsyncMock) as mock_fetch:
-        mock_fetch.return_value = ContractList(root=[])
+        mock_fetch.return_value = Contract()
 
         await cms_service.get_contract(
             "account123",
@@ -355,6 +356,7 @@ async def test_get_contract(cms_service):
         mock_fetch.assert_called_once()
         call_args = mock_fetch.call_args
         assert "contract123" in call_args.kwargs["endpoint"]
+        assert call_args.kwargs["model"] == Contract
 
 
 @pytest.mark.asyncio
@@ -385,7 +387,22 @@ async def test_get_video_fields(cms_service):
 async def test_get_videos_for_account_pagination(cms_service):
     """Test get_videos_for_account handles pagination correctly."""
     with patch.object(cms_service, "fetch_data", new_callable=AsyncMock) as mock_fetch:
-        # Mock count response
+        mock_fetch.return_value = VideoArray(root=[])
+
+        await cms_service.get_videos_for_account(
+            "account123",
+            page_size=25,
+            number_of_pages=2,
+        )
+
+        # Should have fetched 2 pages
+        assert mock_fetch.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_get_videos_for_account_skips_count_when_pages_provided(cms_service):
+    """Test get_videos_for_account does NOT call get_video_count when number_of_pages is given."""
+    with patch.object(cms_service, "fetch_data", new_callable=AsyncMock) as mock_fetch:
         mock_fetch.return_value = VideoArray(root=[])
 
         with patch.object(
@@ -393,15 +410,13 @@ async def test_get_videos_for_account_pagination(cms_service):
             "get_video_count",
             new_callable=AsyncMock,
         ) as mock_count:
-            mock_count.return_value = VideoCount(count=50)
-
             await cms_service.get_videos_for_account(
                 "account123",
                 page_size=25,
                 number_of_pages=2,
             )
 
-            # Should have fetched 2 pages
+            mock_count.assert_not_called()
             assert mock_fetch.call_count == 2
 
 
