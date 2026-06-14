@@ -112,7 +112,7 @@ class BrightcoveClient:
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
-        if self._session is not None and self._external_session is None: 
+        if self._session is not None and self._external_session is None:
             await self._session.close()
         self._session = None
         self._services.clear()
