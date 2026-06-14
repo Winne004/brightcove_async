@@ -146,3 +146,26 @@ async def test_http_error_response(oauth_client, mock_session):
 
     with pytest.raises(ValueError, match="access_token"):
         await oauth_client.get_access_token()
+
+
+@pytest.mark.asyncio
+async def test_concurrent_token_refresh_only_fetches_once(oauth_client, mock_session):
+    """Concurrent callers with an expired token should only trigger one refresh."""
+    import asyncio
+
+    oauth_client._access_token = "old_token"
+    oauth_client._request_time = time.time() - 300  # expired
+
+    mock_response = AsyncMock()
+    mock_response.json = AsyncMock(return_value={"access_token": "new_token"})
+    mock_response.raise_for_status = MagicMock()
+    mock_session.post.return_value.__aenter__.return_value = mock_response
+
+    # Run two concurrent token fetches
+    results = await asyncio.gather(
+        oauth_client.get_access_token(),
+        oauth_client.get_access_token(),
+    )
+
+    assert all(r == "new_token" for r in results)
+    assert mock_session.post.call_count == 1  # Only one actual OAuth call
