@@ -1,7 +1,7 @@
 import contextlib
 import logging
 from abc import ABC
-from typing import TypeVar
+from typing import TypeVar, cast
 
 import aiohttp
 from aiolimiter import AsyncLimiter
@@ -257,7 +257,7 @@ class Base(ABC):
     async def _get_text(self, endpoint: str) -> str:
         headers = await self._get_oauth_headers()
         result = await self._send_request("GET", endpoint, headers, return_json=False)
-        return result  # type: ignore[return-value]
+        return cast(str, result)
 
     @brightcove_retry
     async def _put_text(self, endpoint: str, content: str) -> None:
