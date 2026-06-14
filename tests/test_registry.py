@@ -12,13 +12,11 @@ def test_service_config_creation():
         cls=CMS,
         base_url="https://cms.api.brightcove.com/v1/accounts/",
         requests_per_second=4,
-        kwargs={"test": "value"},
     )
 
     assert config.cls == CMS
     assert config.base_url == "https://cms.api.brightcove.com/v1/accounts/"
     assert config.requests_per_second == 4
-    assert config.kwargs == {"test": "value"}
 
 
 def test_service_config_defaults():
@@ -29,7 +27,6 @@ def test_service_config_defaults():
     )
 
     assert config.requests_per_second == 10
-    assert config.kwargs is None
 
 
 def test_build_service_registry():
