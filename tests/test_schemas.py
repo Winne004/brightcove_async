@@ -300,6 +300,7 @@ class TestIngestProfile:
             id="prof123",
         )
         assert profile.name == "test-profile"
+        assert profile.digital_master is not None
         assert profile.digital_master.distribute is True
         assert profile.renditions == []
         assert profile.packages == []
