@@ -317,3 +317,40 @@ async def test_client_reentry_creates_new_session():
         assert len(sessions) == 2
         sessions[0].close.assert_awaited_once()
         sessions[1].close.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_external_session_reusable_across_context_entries():
+    """Re-entering with an external session after exit should restore the session."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.cms import CMS
+
+    services_registry = {
+        "cms": ServiceConfig(cls=CMS, base_url="cms_url", requests_per_second=4),
+    }
+    external_session = create_autospec(aiohttp.ClientSession, instance=True)
+    external_session.close = AsyncMock()
+
+    client = BrightcoveClient(
+        services_registry=services_registry,
+        client_id="id",
+        client_secret="secret",
+        oauth_cls=DummyOAuth,
+        session=external_session,
+    )
+
+    # First entry
+    async with client as c:
+        assert c._session is external_session
+
+    # Session should be None after exit
+    assert client._session is None
+
+    # Second entry — should restore the external session, not create a new one
+    with patch("aiohttp.ClientSession") as MockSession:
+        async with client as c:
+            assert c._session is external_session
+            MockSession.assert_not_called()  # No new session created
+
+    # External session should never be closed by the client
+    external_session.close.assert_not_called()

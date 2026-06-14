@@ -103,7 +103,9 @@ class BrightcoveClient:
         return self._get_service("audience", Audience)
 
     async def __aenter__(self) -> Self:
-        if self._session is None:
+        if self._external_session is not None:
+            self._session = self._external_session
+        else:
             self._session = aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(limit=100),
             )
@@ -112,6 +114,6 @@ class BrightcoveClient:
     async def __aexit__(self, exc_type, exc, tb) -> None:
         if self._session and not self._external_session:
             await self._session.close()
-            self._session = None
+        self._session = None
         self._services.clear()
         self._oauth = None
