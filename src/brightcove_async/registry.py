@@ -15,7 +15,6 @@ class ServiceConfig:
     cls: type[Base]
     base_url: str
     requests_per_second: int = 10
-    kwargs: dict | None = None
 
 
 def build_service_registry(config: BrightcoveBaseAPIConfig) -> dict[str, ServiceConfig]:
