@@ -373,7 +373,7 @@ async def test_fetch_data_handles_401_error(base_service, mock_session):
             model=DummyModel,
         )
 
-    assert mock_session.request.call_count == 5
+    assert mock_session.request.call_count == 2
 
 
 @pytest.mark.asyncio
@@ -467,3 +467,45 @@ async def test_fetch_data_excludes_none_values_from_json(base_service, mock_sess
     # Should only include id and name, not optional_field
     assert "optional_field" not in call_kwargs["json"]
     assert call_kwargs["json"] == {"id": 8, "name": "Test"}
+
+
+@pytest.mark.asyncio
+async def test_raise_for_status_429_extracts_retry_after(base_service):
+    """Test that a 429 with Retry-After header populates retry_after on the exception."""
+    from brightcove_async.exceptions import BrightcoveTooManyRequestsError
+
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=429
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_response.text = AsyncMock(return_value="rate limited")
+    mock_response.headers = {"Retry-After": "10"}
+
+    with pytest.raises(BrightcoveTooManyRequestsError) as exc_info:
+        await base_service._raise_for_status(
+            mock_response, "https://api.example.com/v1/items"
+        )
+
+    assert exc_info.value.retry_after == 10.0
+
+
+@pytest.mark.asyncio
+async def test_raise_for_status_429_no_retry_after(base_service):
+    """Test that a 429 without Retry-After sets retry_after to None."""
+    from brightcove_async.exceptions import BrightcoveTooManyRequestsError
+
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=429
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_response.text = AsyncMock(return_value="rate limited")
+    mock_response.headers = {}
+
+    with pytest.raises(BrightcoveTooManyRequestsError) as exc_info:
+        await base_service._raise_for_status(
+            mock_response, "https://api.example.com/v1/items"
+        )
+
+    assert exc_info.value.retry_after is None
