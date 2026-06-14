@@ -16,3 +16,5 @@ wheels/
 example.py
 work*.py
 
+*.DS_Store
+
