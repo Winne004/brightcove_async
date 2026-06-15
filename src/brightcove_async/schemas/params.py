@@ -42,6 +42,12 @@ class GetLivestreamAnalyticsParams(ParamsBase):
     to: str | int | None = None
 
 
+class GetLiveEventsParams(ParamsBase):
+    dimensions: str
+    metrics: str
+    where: str
+
+
 class GetLeadsParams(ParamsBase):
     limit: int | None = None
     offset: int | None = None

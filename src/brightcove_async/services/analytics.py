@@ -5,11 +5,15 @@ from brightcove_async.schemas.analytics_model import (
     GetAlltimeVideoViewsResponse,
     GetAnalyticsReportResponse,
     GetAvailableDateRangeResponse,
+    GetEventsResponse,
+    GetTimeSeriesResponse,
     Timeline,
     TimelineWithDuration,
 )
 from brightcove_async.schemas.params import (
     GetAnalyticsReportParams,
+    GetLiveEventsParams,
+    GetLivestreamAnalyticsParams,
 )
 from brightcove_async.services.base import Base
 
@@ -82,6 +86,40 @@ class Analytics(Base):
         return await self.fetch_data(
             endpoint=f"{self.base_url}/data/status",
             model=GetAvailableDateRangeResponse,
+            params=params.serialize_params(),
+        )
+
+    async def get_live_time_series(
+        self,
+        account_id: str,
+        params: GetLivestreamAnalyticsParams,
+    ) -> GetTimeSeriesResponse:
+        """Fetches live analytics time-series data for an account.
+
+        :param account_id: Brightcove account ID.
+        :param params: Query parameters including dimensions, metrics, and where filter.
+        :return: Pydantic model containing live time-series data.
+        """
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/timeseries/accounts/{account_id}",
+            model=GetTimeSeriesResponse,
+            params=params.serialize_params(),
+        )
+
+    async def get_live_events(
+        self,
+        account_id: str,
+        params: GetLiveEventsParams,
+    ) -> GetEventsResponse:
+        """Fetches a summary of live analytics event data for an account.
+
+        :param account_id: Brightcove account ID.
+        :param params: Query parameters including dimensions, metrics, and where filter.
+        :return: Pydantic model containing live events data.
+        """
+        return await self.fetch_data(
+            endpoint=f"{self.base_url}/events/accounts/{account_id}",
+            model=GetEventsResponse,
             params=params.serialize_params(),
         )
 
