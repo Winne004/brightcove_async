@@ -7,11 +7,18 @@ from brightcove_async.schemas.analytics_model import (
     GetAlltimeVideoViewsResponse,
     GetAnalyticsReportResponse,
     GetAvailableDateRangeResponse,
+    GetEventsResponse,
+    GetTimeSeriesResponse,
     Summary,
     Timeline,
     TimelineWithDuration,
+    TimeSeriesMetric,
 )
-from brightcove_async.schemas.params import GetAnalyticsReportParams
+from brightcove_async.schemas.params import (
+    GetAnalyticsReportParams,
+    GetLiveEventsParams,
+    GetLivestreamAnalyticsParams,
+)
 from brightcove_async.services.analytics import Analytics
 
 
@@ -194,6 +201,177 @@ async def test_get_alltime_video_views(analytics_service):
         assert "account123" in call_args.kwargs["endpoint"]
         assert "video456" in call_args.kwargs["endpoint"]
         assert call_args.kwargs["model"] == GetAlltimeVideoViewsResponse
+
+
+@pytest.mark.asyncio
+async def test_get_live_time_series(analytics_service):
+    """Test get_live_time_series method."""
+    with patch.object(
+        analytics_service,
+        "fetch_data",
+        new_callable=AsyncMock,
+    ) as mock_fetch:
+        from unittest.mock import MagicMock
+
+        mock_fetch.return_value = MagicMock(spec=GetTimeSeriesResponse)
+
+        params = GetLivestreamAnalyticsParams(
+            dimensions="video",
+            metrics="video_view,ccu",
+            where="video==6063969160001",
+        )
+
+        await analytics_service.get_live_time_series("account123", params)
+
+        mock_fetch.assert_called_once()
+        call_args = mock_fetch.call_args
+        assert "timeseries/accounts/account123" in call_args.kwargs["endpoint"]
+        assert call_args.kwargs["model"] == GetTimeSeriesResponse
+        assert call_args.kwargs["params"] == {
+            "dimensions": "video",
+            "metrics": "video_view,ccu",
+            "where": "video==6063969160001",
+        }
+
+
+@pytest.mark.asyncio
+async def test_get_live_time_series_with_optional_params(analytics_service):
+    """Test get_live_time_series method with bucket and time range params."""
+    with patch.object(
+        analytics_service,
+        "fetch_data",
+        new_callable=AsyncMock,
+    ) as mock_fetch:
+        from unittest.mock import MagicMock
+
+        mock_fetch.return_value = MagicMock(spec=GetTimeSeriesResponse)
+
+        params = GetLivestreamAnalyticsParams(
+            dimensions="video",
+            metrics="ccu",
+            where="video==abc",
+            bucket_limit=10,
+            bucket_duration="5m",
+            from_="2024-01-01",
+            to="2024-01-02",
+        )
+
+        await analytics_service.get_live_time_series("account456", params)
+
+        call_args = mock_fetch.call_args
+        serialized = call_args.kwargs["params"]
+        assert serialized["bucket_limit"] == 10
+        assert serialized["bucket_duration"] == "5m"
+        assert serialized["from"] == "2024-01-01"
+        assert serialized["to"] == "2024-01-02"
+        assert "from_" not in serialized
+
+
+@pytest.mark.asyncio
+async def test_get_live_events(analytics_service):
+    """Test get_live_events method."""
+    with patch.object(
+        analytics_service,
+        "fetch_data",
+        new_callable=AsyncMock,
+    ) as mock_fetch:
+        from unittest.mock import MagicMock
+
+        mock_fetch.return_value = MagicMock(spec=GetEventsResponse)
+
+        params = GetLiveEventsParams(
+            dimensions="video,country",
+            metrics="video_view,video_seconds_viewed",
+            where="video==6049313942001",
+        )
+
+        await analytics_service.get_live_events("account123", params)
+
+        mock_fetch.assert_called_once()
+        call_args = mock_fetch.call_args
+        assert "events/accounts/account123" in call_args.kwargs["endpoint"]
+        assert call_args.kwargs["model"] == GetEventsResponse
+        assert call_args.kwargs["params"] == {
+            "dimensions": "video,country",
+            "metrics": "video_view,video_seconds_viewed",
+            "where": "video==6049313942001",
+        }
+
+
+def test_get_live_events_params_serialization():
+    """Test GetLiveEventsParams serializes correctly."""
+    params = GetLiveEventsParams(
+        dimensions="video",
+        metrics="ccu",
+        where="country==US",
+    )
+    serialized = params.serialize_params()
+    assert serialized == {
+        "dimensions": "video",
+        "metrics": "ccu",
+        "where": "country==US",
+    }
+
+
+def test_get_livestream_analytics_params_serialization():
+    """Test GetLivestreamAnalyticsParams serializes from/to aliases and omits None."""
+    params = GetLivestreamAnalyticsParams(
+        dimensions="video",
+        metrics="video_view",
+        where="video==abc",
+        bucket_limit=5,
+        from_=1535654206775,
+    )
+    serialized = params.serialize_params()
+    assert serialized["from"] == 1535654206775
+    assert "from_" not in serialized
+    assert "bucket_duration" not in serialized
+    assert "to" not in serialized
+
+
+def test_get_time_series_response_model():
+    """Test GetTimeSeriesResponse parses the actual Brightcove API response shape."""
+    raw = {
+        "video_view": {
+            "data": [
+                {
+                    "dimensions": {"video": "6063969160001", "account": "57838016001"},
+                    "points": [
+                        {"timestamp": 1564075800000, "value": 11.0},
+                        {"timestamp": 1564077600000, "value": 1.0},
+                    ],
+                }
+            ]
+        },
+        "alive_ss_ad_start": {},
+        "ccu": {
+            "data": [
+                {
+                    "dimensions": {"video": "6063969160001", "account": "57838016001"},
+                    "points": [{"timestamp": 1564075800000, "value": 9.0}],
+                }
+            ]
+        },
+    }
+    response = GetTimeSeriesResponse.model_validate(raw)
+    assert "video_view" in response.root
+    assert response.root["video_view"].data is not None
+    assert len(response.root["video_view"].data) == 1
+    assert response.root["video_view"].data[0]["dimensions"]["video"] == "6063969160001"
+    assert response.root["alive_ss_ad_start"].data is None
+    assert response.root["ccu"].data is not None
+
+
+def test_get_time_series_response_model_is_class():
+    """Test TimeSeriesMetric is accessible and models the per-metric shape."""
+    metric = TimeSeriesMetric.model_validate(
+        {"data": [{"dimensions": {}, "points": []}]}
+    )
+    assert metric.data is not None
+    assert len(metric.data) == 1
+
+    empty_metric = TimeSeriesMetric.model_validate({})
+    assert empty_metric.data is None
 
 
 @pytest.mark.asyncio

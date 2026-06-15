@@ -15,9 +15,12 @@ from .analytics_model import (
     GetAlltimeVideoViewsResponse,
     GetAnalyticsReportResponse,
     GetAvailableDateRangeResponse,
+    GetEventsResponse,
+    GetTimeSeriesResponse,
     GetVideoEngagementResponse,
     Timeline,
     TimelineWithDuration,
+    TimeSeriesMetric,
 )
 
 # ── Audience models ────────────────────────────────────────────────────────────
@@ -123,6 +126,7 @@ from .ingest_profiles_model import (
 from .params import (
     GetAnalyticsReportParams,
     GetLeadsParams,
+    GetLiveEventsParams,
     GetLivestreamAnalyticsParams,
     GetVideoCountParams,
     GetVideosQueryParams,
@@ -242,6 +246,7 @@ __all__ = [
     "GetVideoCountParams",
     "GetAnalyticsReportParams",
     "GetLivestreamAnalyticsParams",
+    "GetLiveEventsParams",
     "GetLeadsParams",
     "GetViewEventsParams",
     # Analytics
@@ -251,6 +256,9 @@ __all__ = [
     "GetAnalyticsReportResponse",
     "GetAvailableDateRangeResponse",
     "GetAlltimeVideoViewsResponse",
+    "GetTimeSeriesResponse",
+    "TimeSeriesMetric",
+    "GetEventsResponse",
     # Audience
     "GetLeadsResponse",
     "GetViewEventsResponse",
