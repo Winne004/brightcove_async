@@ -20,6 +20,7 @@ from .analytics_model import (
     GetVideoEngagementResponse,
     Timeline,
     TimelineWithDuration,
+    TimeSeriesMetric,
 )
 
 # ── Audience models ────────────────────────────────────────────────────────────
@@ -256,6 +257,7 @@ __all__ = [
     "GetAvailableDateRangeResponse",
     "GetAlltimeVideoViewsResponse",
     "GetTimeSeriesResponse",
+    "TimeSeriesMetric",
     "GetEventsResponse",
     # Audience
     "GetLeadsResponse",

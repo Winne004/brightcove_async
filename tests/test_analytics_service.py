@@ -12,6 +12,7 @@ from brightcove_async.schemas.analytics_model import (
     Summary,
     Timeline,
     TimelineWithDuration,
+    TimeSeriesMetric,
 )
 from brightcove_async.schemas.params import (
     GetAnalyticsReportParams,
@@ -326,6 +327,51 @@ def test_get_livestream_analytics_params_serialization():
     assert "from_" not in serialized
     assert "bucket_duration" not in serialized
     assert "to" not in serialized
+
+
+def test_get_time_series_response_model():
+    """Test GetTimeSeriesResponse parses the actual Brightcove API response shape."""
+    raw = {
+        "video_view": {
+            "data": [
+                {
+                    "dimensions": {"video": "6063969160001", "account": "57838016001"},
+                    "points": [
+                        {"timestamp": 1564075800000, "value": 11.0},
+                        {"timestamp": 1564077600000, "value": 1.0},
+                    ],
+                }
+            ]
+        },
+        "alive_ss_ad_start": {},
+        "ccu": {
+            "data": [
+                {
+                    "dimensions": {"video": "6063969160001", "account": "57838016001"},
+                    "points": [{"timestamp": 1564075800000, "value": 9.0}],
+                }
+            ]
+        },
+    }
+    response = GetTimeSeriesResponse.model_validate(raw)
+    assert "video_view" in response.root
+    assert response.root["video_view"].data is not None
+    assert len(response.root["video_view"].data) == 1
+    assert response.root["video_view"].data[0]["dimensions"]["video"] == "6063969160001"
+    assert response.root["alive_ss_ad_start"].data is None
+    assert response.root["ccu"].data is not None
+
+
+def test_get_time_series_response_model_is_class():
+    """Test TimeSeriesMetric is accessible and models the per-metric shape."""
+    metric = TimeSeriesMetric.model_validate(
+        {"data": [{"dimensions": {}, "points": []}]}
+    )
+    assert metric.data is not None
+    assert len(metric.data) == 1
+
+    empty_metric = TimeSeriesMetric.model_validate({})
+    assert empty_metric.data is None
 
 
 @pytest.mark.asyncio

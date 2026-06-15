@@ -7,7 +7,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 
 class Summary(BaseModel):
@@ -105,19 +105,12 @@ class TimelineWithDuration(Timeline):
     video_duration: GetVideoEngagementResponse | None = None
 
 
-class GetTimeSeriesResponse(BaseModel):
-    interval: list[int] | None = Field(
-        None,
-        description="array containing the start and end points for the interval in the units specified by the `bucket_duration` parameter",
-    )
-    dimensions: dict[str, Any] | None = Field(
-        None,
-        description="A set of dimension/value pairs corresponding to the dimensions specified in the `dimensions` parameter",
-    )
-    points: list[dict[str, Any]] | None = Field(
-        None,
-        description="An array of objects containing metrics for the points in the time-series",
-    )
+class TimeSeriesMetric(BaseModel):
+    data: list[dict[str, Any]] | None = None
+
+
+class GetTimeSeriesResponse(RootModel[dict[str, TimeSeriesMetric]]):
+    """Live time-series response: a dict keyed by metric name, each with a data array."""
 
 
 class Datum(BaseModel):
