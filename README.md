@@ -10,7 +10,7 @@
 - Per-service rate limiting via `aiolimiter`.
 - Automatic retries for transient failures (connection drops, `401`, `429`) with `tenacity`, including `Retry-After` support on rate-limited responses.
 - Brightcove HTTP errors mapped to a typed exception hierarchy.
-- Coverage for the CMS, Analytics, Audience, Syndication, Dynamic Ingest, and Ingest Profiles APIs.
+- Coverage for the CMS, Analytics, Audience, Syndication, Dynamic Ingest, Ingest Profiles, and Image APIs.
 
 ## Installation
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Services are exposed as properties on the client (`bc.cms`, `bc.analytics`, `bc.audience`, `bc.syndication`, `bc.dynamic_ingest`, `bc.ingest_profiles`) and are created lazily on first access.
+Services are exposed as properties on the client (`bc.cms`, `bc.analytics`, `bc.audience`, `bc.syndication`, `bc.dynamic_ingest`, `bc.ingest_profiles`, `bc.images`) and are created lazily on first access.
 
 Schema models can be imported from the top-level `brightcove_async.schemas` namespace or directly from the submodule:
 

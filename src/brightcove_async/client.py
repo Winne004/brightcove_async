@@ -9,6 +9,7 @@ from brightcove_async.services.audience import Audience
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
+from brightcove_async.services.images import Images
 from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.syndication import Syndication
 
@@ -101,6 +102,11 @@ class BrightcoveClient:
     def audience(self) -> Audience:
         """Access the Audience API service."""
         return self._get_service("audience", Audience)
+
+    @property
+    def images(self) -> Images:
+        """Access the Image API service."""
+        return self._get_service("images", Images)
 
     async def __aenter__(self) -> Self:
         if self._external_session is not None:

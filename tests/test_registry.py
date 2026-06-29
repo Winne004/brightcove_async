@@ -2,6 +2,7 @@ from brightcove_async.registry import ServiceConfig, build_service_registry
 from brightcove_async.services.analytics import Analytics
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
+from brightcove_async.services.images import Images
 from brightcove_async.services.syndication import Syndication
 from brightcove_async.settings import BrightcoveBaseAPIConfig
 
@@ -89,6 +90,18 @@ def test_build_service_registry_dynamic_ingest_config():
     assert di_config.requests_per_second == 10
 
 
+def test_build_service_registry_images_config():
+    """Test Images service configuration in registry."""
+    config = BrightcoveBaseAPIConfig()
+    registry = build_service_registry(config)
+
+    images_config = registry["images"]
+
+    assert images_config.cls == Images
+    assert images_config.base_url == config.images_base_url
+    assert images_config.requests_per_second == 10
+
+
 def test_build_service_registry_custom_urls():
     """Test build_service_registry with custom URLs."""
     config = BrightcoveBaseAPIConfig(
@@ -123,4 +136,5 @@ def test_service_registry_returns_dict():
         "dynamic_ingest",
         "ingest_profiles",
         "audience",
+        "images",
     }
