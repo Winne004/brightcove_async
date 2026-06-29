@@ -18,3 +18,4 @@ class BrightcoveBaseAPIConfig(BaseSettings):
     dynamic_ingest_base_url: str = "https://ingest.api.brightcove.com/v1/accounts/"
     ingest_profiles_base_url: str = "https://ingestion.api.brightcove.com/v1/"
     audience_base_url: str = "https://audience.api.brightcove.com/v1"
+    images_base_url: str = "https://images.brightcovecdn.com"

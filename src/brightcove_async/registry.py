@@ -5,6 +5,7 @@ from brightcove_async.services.audience import Audience
 from brightcove_async.services.base import Base
 from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
+from brightcove_async.services.images import Images
 from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.syndication import Syndication
 from brightcove_async.settings import BrightcoveBaseAPIConfig
@@ -41,5 +42,9 @@ def build_service_registry(config: BrightcoveBaseAPIConfig) -> dict[str, Service
         "audience": ServiceConfig(
             cls=Audience,
             base_url=config.audience_base_url,
+        ),
+        "images": ServiceConfig(
+            cls=Images,
+            base_url=config.images_base_url,
         ),
     }

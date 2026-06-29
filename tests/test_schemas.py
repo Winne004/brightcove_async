@@ -606,3 +606,19 @@ class TestResponseModels:
         assert validated_response.playlists[0] == str(
             mock_get_playlists_response[0]
         )  # API returns playlist IDs as ints, model should coerce to str
+
+
+def test_params_base_serializes_bools_to_strings() -> None:
+    """ParamsBase must stringify bool query values (aiohttp/yarl reject bools)."""
+    from brightcove_async.schemas.params import GetAnalyticsReportParams
+
+    params = GetAnalyticsReportParams(
+        accounts="acct",
+        dimensions="video",
+        reconciled=True,
+    )
+
+    serialized = params.serialize_params()
+
+    assert serialized["reconciled"] == "true"
+    assert all(not isinstance(v, bool) for v in serialized.values())
