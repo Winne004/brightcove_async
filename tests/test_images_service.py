@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import aiohttp
 import pytest
 
+from brightcove_async.exceptions import BrightcoveResourceNotFoundError
 from brightcove_async.schemas.params import ImageTransformParams
 from brightcove_async.services.images import Images
 
@@ -71,6 +72,22 @@ def test_image_transform_params_omits_none():
     params = ImageTransformParams(resize="300x200")
 
     assert params.serialize_params() == {"resize": "300x200"}
+
+
+def test_nocache_alone_raises():
+    params = ImageTransformParams(nocache=True)
+
+    with pytest.raises(ValueError, match="nocache"):
+        params.serialize_params()
+
+
+def test_nocache_is_emitted_last():
+    params = ImageTransformParams(nocache=True, resize="300x200", crop="200x200")
+
+    serialized = params.serialize_params()
+
+    assert list(serialized.keys())[-1] == "nocache"
+    assert serialized["nocache"] == "true"
 
 
 @pytest.mark.asyncio
@@ -145,3 +162,27 @@ async def test_transform_image_retries_on_connection_error(
 
     assert result == b"image-bytes"
     assert mock_session.request.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_transform_image_redacts_token_in_errors(images_service, mock_session):
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=404
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_response.text = AsyncMock(return_value="not found")
+    mock_session.request.return_value.__aenter__.return_value = mock_response
+
+    with pytest.raises(BrightcoveResourceNotFoundError) as exc_info:
+        await images_service.transform_image(
+            "account123",
+            "supersecrettoken",
+            "https://example.com/image.png",
+        )
+
+    error_text = str(exc_info.value)
+    assert "supersecrettoken" not in error_text
+    assert exc_info.value.endpoint is not None
+    assert "supersecrettoken" not in exc_info.value.endpoint
+    assert "[REDACTED]" in exc_info.value.endpoint

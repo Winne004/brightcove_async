@@ -191,6 +191,7 @@ class Base(ABC):
         data: str | None = None,
         return_json: bool | None = True,
         read_bytes: bool = False,
+        error_endpoint: str | None = None,
     ) -> dict | list | str | bytes | None:
         """Execute a rate-limited request and map errors.
 
@@ -198,7 +199,12 @@ class Base(ABC):
         return_json=True  → parse and return JSON body
         return_json=False → return raw text body
         return_json=None  → no body (DELETE)
+
+        error_endpoint, when provided, is used in place of ``endpoint`` in
+        raised exceptions so secrets embedded in the URL (e.g. path tokens)
+        are not leaked into error messages or logs.
         """
+        safe_endpoint = error_endpoint or endpoint
         try:
             async with (
                 self.limiter,
@@ -211,7 +217,7 @@ class Base(ABC):
                     data=data,
                 ) as response,
             ):
-                await self._raise_for_status(response, endpoint)
+                await self._raise_for_status(response, safe_endpoint)
                 if read_bytes:
                     return await response.read()
                 if return_json is None:
@@ -221,7 +227,9 @@ class Base(ABC):
             self._oauth.invalidate_token()
             raise
         except aiohttp.ClientConnectionError as e:
-            raise BrightcoveConnectionError(message=str(e), endpoint=endpoint) from e
+            raise BrightcoveConnectionError(
+                message=str(e), endpoint=safe_endpoint
+            ) from e
 
     @brightcove_retry
     async def fetch_data(
@@ -269,14 +277,22 @@ class Base(ABC):
         endpoint: str,
         params: dict | None = None,
         headers: dict | None = None,
+        error_endpoint: str | None = None,
     ) -> bytes:
         """GET an endpoint and return the raw response body as bytes.
 
         Used for binary responses (e.g. images). ``headers`` defaults to an
         empty dict so unauthenticated endpoints are not sent OAuth headers.
+        ``error_endpoint`` lets callers supply a redacted URL for error
+        messages when the real endpoint embeds a secret.
         """
         result = await self._send_request(
-            "GET", endpoint, headers or {}, params=params, read_bytes=True
+            "GET",
+            endpoint,
+            headers or {},
+            params=params,
+            read_bytes=True,
+            error_endpoint=error_endpoint,
         )
         return cast(bytes, result)
 

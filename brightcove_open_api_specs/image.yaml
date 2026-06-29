@@ -129,7 +129,7 @@ components:
       schema:
         type: string
     Watermark:
-      name: rotate
+      name: watermark
       explode: true
       in: query
       description: Add a play button watermark
@@ -138,7 +138,7 @@ components:
       schema:
         type: boolean
 paths:
-  /image/v1/{{account_id}}/{image-token}/url/{imageURL}:
+  /image/v1/{account_id}/{image-token}/url/{imageURL}:
     parameters:
       - $ref: "#/components/parameters/AccountId"
       - $ref: "#/components/parameters/ImageToken"

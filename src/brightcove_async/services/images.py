@@ -52,5 +52,11 @@ class Images(Base):
         endpoint = (
             f"{self.base_url}/image/v1/{account_id}/{image_token}/url/{encoded_url}"
         )
+        # Keep the token out of any raised error / log message.
+        error_endpoint = (
+            f"{self.base_url}/image/v1/{account_id}/[REDACTED]/url/{encoded_url}"
+        )
         query = params.serialize_params() if params else None
-        return await self._get_bytes(endpoint, params=query)
+        return await self._get_bytes(
+            endpoint, params=query, error_endpoint=error_endpoint
+        )

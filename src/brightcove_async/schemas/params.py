@@ -3,7 +3,13 @@ from pydantic import BaseModel, Field
 
 class ParamsBase(BaseModel):
     def serialize_params(self) -> dict:
-        return self.model_dump(exclude_none=True, by_alias=True)
+        raw = self.model_dump(exclude_none=True, by_alias=True)
+        # aiohttp/yarl reject bool query values; serialize them to the
+        # lowercase string form the Brightcove APIs expect.
+        return {
+            key: ("true" if value else "false") if isinstance(value, bool) else value
+            for key, value in raw.items()
+        }
 
 
 class GetVideosQueryParams(ParamsBase):
@@ -66,8 +72,8 @@ class ImageTransformParams(ParamsBase):
     """Query parameters for the Image API transformation endpoint.
 
     Any combination of parameters may be used together. Booleans are
-    serialized to their lowercase string form (``true``/``false``) as
-    expected by the Image API.
+    serialized to their lowercase string form (``true``/``false``) by
+    :meth:`ParamsBase.serialize_params`, as expected by the Image API.
     """
 
     resize: str | None = None
@@ -78,11 +84,16 @@ class ImageTransformParams(ParamsBase):
     watermark: bool | None = None
     nocache: bool | None = None
 
-    def serialize_params(self) -> dict[str, str]:
-        raw = self.model_dump(exclude_none=True, by_alias=True)
-        return {
-            key: ("true" if value else "false")
-            if isinstance(value, bool)
-            else str(value)
-            for key, value in raw.items()
-        }
+    def serialize_params(self) -> dict:
+        params = super().serialize_params()
+        # The Image API requires `nocache` to follow another parameter, so it
+        # must never be the only param and must always be emitted last.
+        if "nocache" in params:
+            nocache = params.pop("nocache")
+            if not params:
+                raise ValueError(
+                    "`nocache` must be combined with at least one other image "
+                    "transformation parameter.",
+                )
+            params["nocache"] = nocache
+        return params
