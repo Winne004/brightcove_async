@@ -247,6 +247,7 @@ class Base(ABC):
         body = (
             payload.model_dump(
                 mode="json",
+                by_alias=True,
                 exclude_none=True,
                 exclude_unset=True,
                 exclude_defaults=True,

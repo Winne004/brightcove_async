@@ -452,3 +452,54 @@ async def test_accessing_playback_without_context_manager_raises():
     )
     with pytest.raises(RuntimeError, match="Client session not initialized"):
         _ = client.playback
+
+
+@pytest.mark.asyncio
+async def test_policy_property_lazy_loads_and_is_singleton():
+    """The policy property returns a cached Policy instance."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.policy import Policy
+
+    services_registry = {
+        "policy": ServiceConfig(
+            cls=Policy, base_url="https://policy.api.brightcove.com/v1"
+        ),
+    }
+
+    with patch("aiohttp.ClientSession") as MockSession:
+        mock_session = AsyncMock()
+        MockSession.return_value = mock_session
+
+        client = BrightcoveClient(
+            services_registry=services_registry,
+            client_id="id",
+            client_secret="secret",
+            oauth_cls=DummyOAuth,
+        )
+
+        async with client as c:
+            policy1 = c.policy
+            policy2 = c.policy
+            assert isinstance(policy1, Policy)
+            assert policy1 is policy2
+
+
+@pytest.mark.asyncio
+async def test_accessing_policy_without_context_manager_raises():
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.policy import Policy
+
+    services_registry = {
+        "policy": ServiceConfig(
+            cls=Policy, base_url="https://policy.api.brightcove.com/v1"
+        ),
+    }
+
+    client = BrightcoveClient(
+        services_registry=services_registry,
+        client_id="id",
+        client_secret="secret",
+        oauth_cls=DummyOAuth,
+    )
+    with pytest.raises(RuntimeError, match="Client session not initialized"):
+        _ = client.policy

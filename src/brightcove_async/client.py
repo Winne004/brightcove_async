@@ -13,6 +13,7 @@ from brightcove_async.services.images import Images
 from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.live import Live
 from brightcove_async.services.playback import Playback
+from brightcove_async.services.policy import Policy
 from brightcove_async.services.syndication import Syndication
 
 T = TypeVar("T", bound=Base)
@@ -119,6 +120,11 @@ class BrightcoveClient:
     def playback(self) -> Playback:
         """Access the Playback (client-facing delivery) API service."""
         return self._get_service("playback", Playback)
+
+    @property
+    def policy(self) -> Policy:
+        """Access the Policy API service."""
+        return self._get_service("policy", Policy)
 
     async def __aenter__(self) -> Self:
         if self._external_session is not None:

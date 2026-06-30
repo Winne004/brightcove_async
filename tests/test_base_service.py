@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import aiohttp
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from brightcove_async.exceptions import (
     BrightcoveAuthError,
@@ -18,6 +18,19 @@ class DummyModel(BaseModel):
 
     id: int
     name: str
+
+
+class AliasedModel(BaseModel):
+    """Test model with hyphenated serialization aliases for fetch_data tests."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    account_id: str = Field(
+        validation_alias="account-id", serialization_alias="account-id"
+    )
+    allowed_domains: list[str] = Field(
+        validation_alias="allowed-domains", serialization_alias="allowed-domains"
+    )
 
 
 class DummyOAuth:
@@ -241,6 +254,38 @@ async def test_fetch_data_post_with_json(base_service, mock_session):
 
     call_kwargs = mock_session.request.call_args.kwargs
     assert call_kwargs["json"] == {"id": 2, "name": "Created"}
+
+
+@pytest.mark.asyncio
+async def test_fetch_data_post_serializes_body_with_aliases(base_service, mock_session):
+    """POST bodies are serialized using field aliases (by_alias=True)."""
+    mock_response = AsyncMock()
+    mock_response.json = AsyncMock(
+        return_value={
+            "account-id": "acct123",
+            "allowed-domains": ["https://example.com"],
+        }
+    )
+    mock_response.raise_for_status = MagicMock()
+
+    mock_session.request.return_value.__aenter__.return_value = mock_response
+
+    request_body = AliasedModel(
+        account_id="acct123", allowed_domains=["https://example.com"]
+    )
+
+    await base_service.fetch_data(
+        endpoint="https://api.example.com/v1/items",
+        model=AliasedModel,
+        method="POST",
+        payload=request_body,
+    )
+
+    call_kwargs = mock_session.request.call_args.kwargs
+    assert call_kwargs["json"] == {
+        "account-id": "acct123",
+        "allowed-domains": ["https://example.com"],
+    }
 
 
 @pytest.mark.asyncio
