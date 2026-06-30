@@ -10,7 +10,7 @@
 - Per-service rate limiting via `aiolimiter`.
 - Automatic retries for transient failures (connection drops, `401`, `429`) with `tenacity`, including `Retry-After` support on rate-limited responses.
 - Brightcove HTTP errors mapped to a typed exception hierarchy.
-- Coverage for the CMS, Analytics, Audience, Syndication, Dynamic Ingest, Ingest Profiles, Image, and Live APIs.
+- Coverage for the CMS, Analytics, Audience, Syndication, Dynamic Ingest, Ingest Profiles, Image, Live, and Playback APIs.
 
 ## Installation
 
@@ -44,6 +44,30 @@ client = brightcove_async.initialise_brightcove_client(
 ```
 
 Tokens are fetched on first use and reused until they expire, so you don't manage them yourself.
+
+### Playback API (policy keys)
+
+The Playback API is client-facing and does **not** use OAuth. It authenticates with an account [policy key](https://apis.support.brightcove.com/policy/) sent in the `BCOV-Policy` header. Searching (the `q` parameter) requires a *search-enabled* policy key, which Brightcove recommends keeping server-side only.
+
+Supply the key per call, or set it once on the service and override it where needed:
+
+```python
+async with client as bc:
+    # Set a default policy key for this service...
+    bc.playback.policy_key = "BCpkAD..."
+    video = await bc.playback.get_video("12345", "67890")
+
+    # ...or pass one per call (e.g. a search-enabled key)
+    from brightcove_async.schemas.params import PlaybackVideosParams
+
+    results = await bc.playback.get_videos(
+        "12345",
+        policy_key="search-enabled-key",
+        params=PlaybackVideosParams(q="nature", limit=10),
+    )
+    for v in results:
+        print(v.name)
+```
 
 ## Quick start
 
@@ -327,6 +351,7 @@ Each service has its own request-per-second budget enforced by an `AsyncLimiter`
 | `dynamic_ingest` | `ingest_videos_and_assets`, `get_temporary_s3_urls` |
 | `ingest_profiles` | `get_ingest_profiles` |
 | `images` | `transform_image` |
+| `playback` | Videos: `get_video`, `get_videos`, `get_related_videos`. Playlists: `get_playlist`. Static URLs: `get_hls_manifest`, `get_dash_manifest`, `get_hls_vmap`, `get_dash_vmap`, `get_highest_mp4`, `get_lowest_mp4`. Authenticates with a policy key (see [Authentication](#authentication)), not OAuth. |
 | `live` | Jobs: `list_jobs`, `create_job`, `get_job`, `update_job`, `finish_job`, `start_job`, `stop_job`, `clip_job`, `force_failover`, `reset_origin`, `get_thumbnail`, `insert_cuepoint`, `get_job_metrics`, `get_supported_metrics`, `get_job_notifications`, `get_account_notifications`. Scheduler: `list_schedules`, `get_autostop_schedule`, `create_jobstartstop_schedule`, `get_jobstartstop_schedule`, `update_jobstartstop_schedule`, `delete_jobstartstop_schedule`, `list_scheduled_clips`, `create_scheduled_clip`, `get_scheduled_clip`, `update_scheduled_clip`, `delete_scheduled_clip`. Playback: `create_playback_token`, `generate_batch_sources`, `generate_playback_url`. Sessions: `get_session`, `get_session_events`, `get_resource_sessions`. SSAI: `list_ad_configs`, `create_ad_config`, `get_ad_config`, `update_ad_config`, `delete_ad_config`. Settings/misc: `list_cdn_tokens`, `healthcheck` |
 
 ## Development

@@ -266,9 +266,31 @@ class Base(ABC):
         await self._send_request("DELETE", endpoint, headers, return_json=None)
 
     @brightcove_retry
-    async def _get_text(self, endpoint: str) -> str:
-        headers = await self._get_oauth_headers()
-        result = await self._send_request("GET", endpoint, headers, return_json=False)
+    async def _get_text(
+        self,
+        endpoint: str,
+        params: dict | None = None,
+        headers: dict | None = None,
+        error_endpoint: str | None = None,
+    ) -> str:
+        """GET an endpoint and return the response body as text.
+
+        ``headers`` defaults to ``None``, in which case OAuth headers are
+        fetched and attached. Pass an explicit dict to authenticate with a
+        different mechanism (e.g. a Playback API policy key) and bypass OAuth.
+        ``error_endpoint`` lets callers supply a redacted URL for error
+        messages when the real endpoint embeds a secret.
+        """
+        if headers is None:
+            headers = await self._get_oauth_headers()
+        result = await self._send_request(
+            "GET",
+            endpoint,
+            headers,
+            params=params,
+            return_json=False,
+            error_endpoint=error_endpoint,
+        )
         return cast(str, result)
 
     @brightcove_retry

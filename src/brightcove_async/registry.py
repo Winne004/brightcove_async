@@ -8,6 +8,7 @@ from brightcove_async.services.dynamic_ingest import DynamicIngest
 from brightcove_async.services.images import Images
 from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.live import Live
+from brightcove_async.services.playback import Playback
 from brightcove_async.services.syndication import Syndication
 from brightcove_async.settings import BrightcoveBaseAPIConfig
 
@@ -51,5 +52,9 @@ def build_service_registry(config: BrightcoveBaseAPIConfig) -> dict[str, Service
         "live": ServiceConfig(
             cls=Live,
             base_url=config.live_base_url,
+        ),
+        "playback": ServiceConfig(
+            cls=Playback,
+            base_url=config.playback_base_url,
         ),
     }
