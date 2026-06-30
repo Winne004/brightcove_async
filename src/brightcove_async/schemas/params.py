@@ -122,6 +122,47 @@ class GeneratePlaybackURLParams(ParamsBase):
     pt: str
 
 
+class PlaybackVideosParams(ParamsBase):
+    """Query parameters for the Playback API Get Videos endpoint.
+
+    ``q`` triggers a search and requires a search-enabled policy key.
+    """
+
+    q: str | None = None
+    limit: int | None = None
+    offset: int | None = None
+    sort: str | None = None
+    ad_config_id: str | None = None
+    config_id: str | None = None
+
+
+class PlaybackListParams(ParamsBase):
+    """Query parameters shared by Related Videos and Playlist endpoints."""
+
+    limit: int | None = None
+    offset: int | None = None
+    ad_config_id: str | None = None
+    config_id: str | None = None
+
+
+class PlaybackVideoParams(ParamsBase):
+    """Query parameters for the Playback API single-video endpoint."""
+
+    ad_config_id: str | None = None
+    config_id: str | None = None
+
+
+class PlaybackManifestParams(ParamsBase):
+    """Query parameters for the Playback API static-URL (manifest) endpoints.
+
+    ``bcov_auth`` is a JWT used for static URL delivery (see Brightcove's
+    Static URL Delivery guide). ``config_id`` applies delivery rules.
+    """
+
+    bcov_auth: str | None = None
+    config_id: str | None = None
+
+
 class ImageTransformParams(ParamsBase):
     """Query parameters for the Image API transformation endpoint.
 

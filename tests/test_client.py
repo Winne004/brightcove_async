@@ -404,6 +404,57 @@ async def test_accessing_live_without_context_manager_raises():
 
 
 @pytest.mark.asyncio
+async def test_playback_property_lazy_loads_and_is_singleton():
+    """The playback property returns a cached Playback instance."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.playback import Playback
+
+    services_registry = {
+        "playback": ServiceConfig(
+            cls=Playback, base_url="https://edge.api.brightcove.com/playback/v1"
+        ),
+    }
+
+    with patch("aiohttp.ClientSession") as MockSession:
+        mock_session = AsyncMock()
+        MockSession.return_value = mock_session
+
+        client = BrightcoveClient(
+            services_registry=services_registry,
+            client_id="id",
+            client_secret="secret",
+            oauth_cls=DummyOAuth,
+        )
+
+        async with client as c:
+            playback1 = c.playback
+            playback2 = c.playback
+            assert isinstance(playback1, Playback)
+            assert playback1 is playback2
+
+
+@pytest.mark.asyncio
+async def test_accessing_playback_without_context_manager_raises():
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.playback import Playback
+
+    services_registry = {
+        "playback": ServiceConfig(
+            cls=Playback, base_url="https://edge.api.brightcove.com/playback/v1"
+        ),
+    }
+
+    client = BrightcoveClient(
+        services_registry=services_registry,
+        client_id="id",
+        client_secret="secret",
+        oauth_cls=DummyOAuth,
+    )
+    with pytest.raises(RuntimeError, match="Client session not initialized"):
+        _ = client.playback
+
+
+@pytest.mark.asyncio
 async def test_policy_property_lazy_loads_and_is_singleton():
     """The policy property returns a cached Policy instance."""
     from brightcove_async.registry import ServiceConfig

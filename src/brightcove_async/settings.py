@@ -20,4 +20,5 @@ class BrightcoveBaseAPIConfig(BaseSettings):
     audience_base_url: str = "https://audience.api.brightcove.com/v1"
     images_base_url: str = "https://images.brightcovecdn.com"
     live_base_url: str = "https://api.live.brightcove.com"
+    playback_base_url: str = "https://edge.api.brightcove.com/playback/v1"
     policy_base_url: str = "https://policy.api.brightcove.com/v1"

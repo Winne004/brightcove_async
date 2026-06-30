@@ -12,6 +12,7 @@ from brightcove_async.services.dynamic_ingest import DynamicIngest
 from brightcove_async.services.images import Images
 from brightcove_async.services.ingest_profiles import IngestProfiles
 from brightcove_async.services.live import Live
+from brightcove_async.services.playback import Playback
 from brightcove_async.services.policy import Policy
 from brightcove_async.services.syndication import Syndication
 
@@ -114,6 +115,11 @@ class BrightcoveClient:
     def live(self) -> Live:
         """Access the Live (NextGen Live) API service."""
         return self._get_service("live", Live)
+
+    @property
+    def playback(self) -> Playback:
+        """Access the Playback (client-facing delivery) API service."""
+        return self._get_service("playback", Playback)
 
     @property
     def policy(self) -> Policy:

@@ -4,6 +4,7 @@ from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
 from brightcove_async.services.images import Images
 from brightcove_async.services.live import Live
+from brightcove_async.services.playback import Playback
 from brightcove_async.services.policy import Policy
 from brightcove_async.services.syndication import Syndication
 from brightcove_async.settings import BrightcoveBaseAPIConfig
@@ -116,6 +117,18 @@ def test_build_service_registry_live_config():
     assert live_config.requests_per_second == 10
 
 
+def test_build_service_registry_playback_config():
+    """Test Playback service configuration in registry."""
+    config = BrightcoveBaseAPIConfig()
+    registry = build_service_registry(config)
+
+    playback_config = registry["playback"]
+
+    assert playback_config.cls == Playback
+    assert playback_config.base_url == config.playback_base_url
+    assert playback_config.requests_per_second == 10
+
+
 def test_build_service_registry_policy_config():
     """Test Policy service configuration in registry."""
     config = BrightcoveBaseAPIConfig()
@@ -164,5 +177,6 @@ def test_service_registry_returns_dict():
         "audience",
         "images",
         "live",
+        "playback",
         "policy",
     }

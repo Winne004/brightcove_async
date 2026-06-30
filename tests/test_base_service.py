@@ -422,6 +422,83 @@ async def test_fetch_data_handles_401_error(base_service, mock_session):
 
 
 @pytest.mark.asyncio
+async def test_oauth_request_invalidates_token_on_auth_error(
+    base_service, mock_session, dummy_oauth
+):
+    """An OAuth-authenticated request invalidates the token on a 401."""
+    from tenacity import RetryError
+
+    dummy_oauth.invalidate_token = MagicMock()
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=401
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_session.request.return_value.__aenter__.return_value = mock_response
+
+    with pytest.raises(RetryError):
+        await base_service.fetch_data(
+            endpoint="https://api.example.com/v1/items",
+            model=DummyModel,
+        )
+
+    assert dummy_oauth.invalidate_token.called
+
+
+@pytest.mark.asyncio
+async def test_non_oauth_request_does_not_invalidate_token_on_auth_error(
+    base_service, mock_session, dummy_oauth
+):
+    """A request using explicit (non-OAuth) headers must not churn the OAuth token.
+
+    Playback policy-key auth bypasses OAuth, so a 401 there must not invalidate
+    the shared OAuth token the request never used.
+    """
+    from tenacity import RetryError
+
+    dummy_oauth.invalidate_token = MagicMock()
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=401
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_session.request.return_value.__aenter__.return_value = mock_response
+
+    with pytest.raises(RetryError):
+        await base_service.fetch_data(
+            endpoint="https://api.example.com/v1/items",
+            model=DummyModel,
+            headers={"BCOV-Policy": "policy-key"},
+        )
+
+    dummy_oauth.invalidate_token.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_get_bytes_does_not_invalidate_token_on_auth_error(
+    base_service, mock_session, dummy_oauth
+):
+    """_get_bytes never uses OAuth, so an auth error must not invalidate the token."""
+    from tenacity import RetryError
+
+    dummy_oauth.invalidate_token = MagicMock()
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=401
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_session.request.return_value.__aenter__.return_value = mock_response
+
+    with pytest.raises(RetryError):
+        await base_service._get_bytes(
+            "https://api.example.com/v1/file",
+            headers={"BCOV-Policy": "policy-key"},
+        )
+
+    dummy_oauth.invalidate_token.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_fetch_data_translates_connection_error(base_service, mock_session):
     """Test that aiohttp.ClientConnectionError is translated to BrightcoveConnectionError."""
     mock_session.request.return_value.__aenter__.side_effect = (
