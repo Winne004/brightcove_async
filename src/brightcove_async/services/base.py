@@ -192,6 +192,7 @@ class Base(ABC):
         return_json: bool | None = True,
         read_bytes: bool = False,
         error_endpoint: str | None = None,
+        uses_oauth: bool = True,
     ) -> dict | list | str | bytes | None:
         """Execute a rate-limited request and map errors.
 
@@ -203,6 +204,11 @@ class Base(ABC):
         error_endpoint, when provided, is used in place of ``endpoint`` in
         raised exceptions so secrets embedded in the URL (e.g. path tokens)
         are not leaked into error messages or logs.
+
+        uses_oauth indicates whether the request was authenticated with the
+        shared OAuth token. Only then is the token invalidated on an auth
+        error; requests using a different mechanism (e.g. a Playback policy
+        key) must not churn the OAuth token they never used.
         """
         safe_endpoint = error_endpoint or endpoint
         try:
@@ -224,7 +230,8 @@ class Base(ABC):
                     return None
                 return await response.json() if return_json else await response.text()
         except BrightcoveAuthError:
-            self._oauth.invalidate_token()
+            if uses_oauth:
+                self._oauth.invalidate_token()
             raise
         except aiohttp.ClientConnectionError as e:
             raise BrightcoveConnectionError(
@@ -241,6 +248,7 @@ class Base(ABC):
         headers: dict | None = None,
         payload: BaseModel | None = None,
     ) -> T:
+        uses_oauth = headers is None
         if headers is None:
             headers = await self._get_oauth_headers()
 
@@ -257,7 +265,12 @@ class Base(ABC):
         )
 
         json_data = await self._send_request(
-            method, endpoint, headers, params=params, json_body=body
+            method,
+            endpoint,
+            headers,
+            params=params,
+            json_body=body,
+            uses_oauth=uses_oauth,
         )
         return model.model_validate(json_data, strict=False)
 
@@ -282,6 +295,7 @@ class Base(ABC):
         ``error_endpoint`` lets callers supply a redacted URL for error
         messages when the real endpoint embeds a secret.
         """
+        uses_oauth = headers is None
         if headers is None:
             headers = await self._get_oauth_headers()
         result = await self._send_request(
@@ -291,6 +305,7 @@ class Base(ABC):
             params=params,
             return_json=False,
             error_endpoint=error_endpoint,
+            uses_oauth=uses_oauth,
         )
         return cast(str, result)
 
@@ -305,7 +320,9 @@ class Base(ABC):
         """GET an endpoint and return the raw response body as bytes.
 
         Used for binary responses (e.g. images). ``headers`` defaults to an
-        empty dict so unauthenticated endpoints are not sent OAuth headers.
+        empty dict so unauthenticated endpoints are not sent OAuth headers;
+        callers pass their own auth (e.g. a Playback policy key), so an auth
+        error here never invalidates the shared OAuth token.
         ``error_endpoint`` lets callers supply a redacted URL for error
         messages when the real endpoint embeds a secret.
         """
@@ -316,6 +333,7 @@ class Base(ABC):
             params=params,
             read_bytes=True,
             error_endpoint=error_endpoint,
+            uses_oauth=False,
         )
         return cast(bytes, result)
 
