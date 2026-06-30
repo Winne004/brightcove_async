@@ -1,0 +1,4474 @@
+x-bc-implicit-head: true
+x-bc-implicit-options: true
+x-bc-upstream: https://backend_server
+components:
+  schemas:
+    cdnmanagement.CDNTokenRecord:
+      properties:
+        account_id:
+          type: string
+        expires_at:
+          type: string
+        hostname:
+          type: string
+        id:
+          type: string
+        issued_at:
+          type: string
+        ttl:
+          type: integer
+      type: object
+    endpoint.AutoStopGetResponse:
+      properties:
+        account_id:
+          type: string
+        action:
+          $ref: '#/components/schemas/workflows.AutoStopTaskInfo'
+        description:
+          type: string
+        job_id:
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.BatchGenerateSourcesResponse:
+      description: Map of label names to arrays of source objects
+      additionalProperties:
+        items:
+          properties:
+            codecs:
+              description: Supported codecs (e.g., "mp4a,avc1")
+              type: string
+            ext_x_version:
+              description: HLS version
+              type: string
+            key_systems:
+              description: DRM key systems for content protection. Present when the job has DRM encryption enabled.
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  license_url:
+                    description: URL to acquire a DRM license for playback
+                    type: string
+                  certificate_url:
+                    description: URL to retrieve the DRM certificate (FairPlay only)
+                    type: string
+                  key_request_url:
+                    description: URL to request content keys (FairPlay only)
+                    type: string
+            src:
+              description: The playback URL for the stream
+              type: string
+            type:
+              description: MIME type of the stream (e.g., "application/x-mpegURL" for HLS)
+              type: string
+            uploaded_at:
+              description: Timestamp information
+              type: string
+          type: object
+        type: array
+      type: object
+    endpoint.BatchPlaybackRequest:
+      properties:
+        playback:
+          $ref: '#/components/schemas/endpoint.CreateTokenRequest'
+      type: object
+    endpoint.ClipCreateRequest:
+      properties:
+        account_id:
+          type: string
+        clip:
+          $ref: '#/components/schemas/workflows.ClipTaskInfo'
+        description:
+          type: string
+        job_id:
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.ClipCreateResponse:
+      properties:
+        account_id:
+          type: string
+        clip:
+          $ref: '#/components/schemas/workflows.ClipTaskInfo'
+        description:
+          type: string
+        job_id:
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.ClipDeleteResponse:
+      properties:
+        account_id:
+          type: string
+        clip:
+          $ref: '#/components/schemas/workflows.ClipTaskInfo'
+        description:
+          type: string
+        job_id:
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.ClipGetResponse:
+      properties:
+        account_id:
+          type: string
+        clip:
+          $ref: '#/components/schemas/workflows.ClipTaskInfo'
+        description:
+          type: string
+        job_id:
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.ClipListAccountResponse:
+      properties:
+        next_token:
+          type: string
+        workflows:
+          items:
+            $ref: '#/components/schemas/workflows.Clip'
+          type: array
+          uniqueItems: false
+      type: object
+    endpoint.ClipOutput:
+      description: Output defines the output destination - defaults to brightcove if not provided
+      properties:
+        type:
+          description: Type of media source - defaults to "brightcove"
+          enum:
+            - brightcove
+            - s3
+          type: string
+        url:
+          description: URL for S3 source - required when Type is "s3"
+          type: string
+      required:
+        - type
+      type: object
+    endpoint.ClipRequest:
+      properties:
+        custom_fields:
+          description: Custom metadata fields to associate with the clipped video. Map of field names to string values.
+          additionalProperties:
+            type: string
+          type: object
+        description:
+          description: Description for the clipped video.
+          type: string
+        end:
+          description: End time for the clip as a Unix epoch timestamp in seconds (e.g., 1710511200). This represents the end of the clip segment within the stream window.
+          type: string
+        name:
+          description: Name/title for the clipped video.
+          type: string
+        output:
+          description: Output destination configuration for the clip. Defaults to Brightcove if not specified.
+          $ref: '#/components/schemas/endpoint.ClipOutput'
+        override_reference_id:
+          description: Whether to override the reference_id if a video with the same reference_id already exists.
+          type: boolean
+        reference_id:
+          description: Reference ID for the clipped video. Must be unique within the account if override_reference_id is false.
+          type: string
+        remove_ads:
+          description: Whether to remove ads from the clipped video when SSAI is enabled.
+          type: boolean
+        start:
+          description: Start time for the clip as a Unix epoch timestamp in seconds (e.g., 1710504000). This represents the start of the clip segment within the stream window.
+          type: string
+        ingest_profile:
+          description: Optional ingest profile to use for the clip.
+          type: string
+        video_data:
+          description: Optional video data to use for the clip.
+          $ref: '#/components/schemas/endpoint.VideoData'
+        tags:
+          description: Array of tags to associate with the clipped video.
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      required:
+        - start
+      type: object
+    endpoint.ClipResponse:
+      properties:
+        id:
+          type: string
+      type: object
+    endpoint.ClipUpdateRequest:
+      properties:
+        account_id:
+          type: string
+        clip:
+          $ref: '#/components/schemas/workflows.ClipTaskInfo'
+        description:
+          type: string
+        job_id:
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.ClipUpdateResponse:
+      properties:
+        account_id:
+          type: string
+        clip:
+          $ref: '#/components/schemas/workflows.ClipTaskInfo'
+        description:
+          type: string
+        job_id:
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.ConfigureJobRequest:
+      properties:
+        audio_only:
+          description: |-
+            When true, creates an audio-only live stream without video encoding. Useful for radio broadcasts or podcast streaming.
+            
+            Audio-only mode can be toggled after channel creation.
+          type: boolean
+        custom_fields:
+          description: Custom metadata fields to associate with the live job. Map of field names to string values. These fields will be applied to any VOD assets created from this job.
+          additionalProperties:
+            type: string
+          type: object
+        description:
+          description: Short description of the live streaming job. Maximum 250 characters.
+          type: string
+        encryption:
+          description: Encryption configuration for content protection. Supports AES-128 and CENC (Common Encryption) for DRM.
+          $ref: '#/components/schemas/external.Encryption'
+        input:
+          description: Input source configuration specifying the protocol (RTMP, RTP, SRT, etc.) and connection settings.
+          $ref: '#/components/schemas/external.Input'
+        live_to_vod:
+          description: |-
+            Enable automatic creation of Video Cloud assets from the live stream. When true, the stream will be automatically archived as a VOD asset.
+            
+            **Important:**
+            - When `live_to_vod` is set to true, a VOD asset (video clip) will be automatically generated after the live event is stopped.
+            - The job will be automatically archived after the VOD asset creation is complete. **Do not manually archive the job**—archiving while clip creation is in progress will cause the clip to fail.
+          type: boolean
+        long_description:
+          description: Extended description of the live streaming job. Maximum 5000 characters.
+          type: string
+        maintenance_preferences:
+          description: Scheduled maintenance window preferences. Allows you to specify preferred days and times for system maintenance.
+          $ref: '#/components/schemas/external.MaintenancePreferences'
+        manifest:
+          description: Manifest configuration for HLS and DASH playlists, including DVR settings, playlist groups, and segment options.
+          $ref: '#/components/schemas/external.ManifestOptions'
+        name:
+          description: Name/title of the live streaming job. This will appear in the Video Cloud Media Module if live_to_vod is enabled.
+          type: string
+        notifications:
+          description: Array of webhook URLs to receive job state change and error notifications. Supports state_change and error subscription types.
+          items:
+            $ref: '#/components/schemas/external.Notification'
+          type: array
+          uniqueItems: false
+        outputs:
+          description: Output configuration specifying video, audio, caption, and RTMP output variants with encoding settings.
+          $ref: '#/components/schemas/external.OutputVariants'
+        playback_rights_id:
+          description: Playback rights ID for DRM-protected content. Associates the job with specific playback rights and restrictions.
+          type: string
+        redundancy:
+          description: Redundancy configuration for high availability. Specifies the number of redundant input sources for automatic failover.
+          $ref: '#/components/schemas/external.RedundancyOptions'
+        reference_id:
+          description: Reference ID for the job. Must be unique within the account. Used for tracking and integration with external systems.
+          type: string
+        region:
+          description: AWS region where the live stream will be processed (e.g., "us-east-1", "eu-west-1"). Choose the region closest to your source or audience.
+          type: string
+        ssai:
+          description: Server-Side Ad Insertion (SSAI) configuration. Enables dynamic ad insertion into the live stream.
+          $ref: '#/components/schemas/external.SSAI'
+        tags:
+          description: Array of tags to categorize and organize the live job. Useful for filtering and searching jobs.
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        type:
+          description: Type of live job. "channel" for linear channels (24x7 persistent streams) and "event" for event channels (one-time events). Both types can be started, stopped, and reused multiple times, but have different billing models.
+          enum:
+            - channel
+            - event
+          type: string
+      required:
+        - input
+        - outputs
+        - region
+        - type
+      type: object
+    endpoint.CreateAdConfigRequest:
+      properties:
+        accountID:
+          type: string
+        adConfig:
+          $ref: '#/components/schemas/ssai.AdConfiguration'
+      type: object
+    endpoint.CreateAdConfigResponse:
+      properties:
+        account_id:
+          type: string
+        ad_server:
+          $ref: '#/components/schemas/ssai.AdServer'
+        custom_beacons:
+          items:
+            $ref: '#/components/schemas/ssai.CustomBeacon'
+          type: array
+          uniqueItems: false
+        description:
+          type: string
+        id:
+          type: string
+      type: object
+    endpoint.CreateTokenRequest:
+      properties:
+        ad_config_id:
+          description: The identifier of the ad configuration you want to use. This parameter is relevant only when 'ssai' is set to true. Obtain this ID from your ad configuration settings.
+          type: string
+        byocdn_id:
+          description: The ID of your Bring Your Own CDN (BYO CDN) to create playback for. Contact Technical Support to obtain this identifier after registering your BYO CDN.
+          type: string
+        cenc:
+          description: Enable Common Encryption (CENC) for DRM-protected playback. When true, the playback token will support DRM-encrypted streams.
+          type: boolean
+        dvr:
+          description: Enable DVR (Digital Video Recording) functionality on playback. When true, viewers can pause, rewind, and seek within the live stream buffer.
+          type: boolean
+          default: false
+        start_time:
+          description: |-
+            [Timeshift Playback] The start time for timeshift playback. Enables viewing of past content from live streams within the last 14 days. Must be used with end_time to define a playback window of maximum 24 hours.
+            
+            **Time Format:** Supports both Unix epoch timestamps (seconds since epoch) and ISO 8601 format (e.g., "2024-03-15T10:00:00Z"). Examples: 1710504000 (epoch) or "2024-03-15T10:00:00Z" (ISO 8601).
+            
+            **Valid Cases:**
+            - Start time must be within the last 14 days of the job
+            - Start time must be before end_time
+            - Duration between start_time and end_time must be ≤ 24 hours
+            - If only start_time is provided, playback behaves like a live stream allowing scrubbing back to the defined start_time
+          type: string
+        end_time:
+          description: |-
+            [Timeshift Playback] The end time for timeshift playback. Defines the end of the timeshift window. Must be used with start_time to create a playback window of maximum 24 hours within the last 14 days.
+            
+            **Time Format:** Supports both Unix epoch timestamps (seconds since epoch) and ISO 8601 format (e.g., "2024-03-15T12:00:00Z"). Examples: 1710511200 (epoch) or "2024-03-15T12:00:00Z" (ISO 8601).
+            
+            **Note:** If both start_time and end_time are set in the future, playback will begin when start_time becomes current, transitioning from no playback → live event → VOD playback (available for 14 days).
+          type: string
+        low_latency:
+          description: Enable low latency mode for playback. Only applicable for jobs configured with low latency support. When true, reduces the delay between live capture and viewer playback.
+          type: boolean
+          default: false
+        manifest_format:
+          description: The format of the playlist URL to generate. Choose between "hls" for HLS manifests (.m3u8) or "dash" for DASH manifests (.mpd).
+          type: string
+          enum: ["hls", "dash"]
+          example: "hls"
+        playlist_name:
+          description: The specific playlist to use for playback. Must match either one of the 'playlist_groups.name' values or the 'manifest.name' that was configured when the job was created. This allows selection of specific quality or language variants.
+          type: string
+        ssai:
+          description: Enable Server-Side Ad Insertion (SSAI) for the playback session. When true, ads will be dynamically inserted into the stream. Requires 'ad_config_id' to be specified.
+          type: boolean
+          default: false
+      type: object
+    endpoint.CreateTokenResponse:
+      properties:
+        token:
+          type: string
+      type: object
+    endpoint.DeleteAdConfigResponse:
+      properties:
+        ad_config_id:
+          type: string
+      type: object
+    endpoint.FinishJobResponse:
+      properties:
+        id:
+          type: string
+      type: object
+    endpoint.ForceFailoverResponse:
+      type: object
+    endpoint.GeneratePlaybackURLResponse:
+      properties:
+        url:
+          type: string
+      type: object
+    endpoint.GetAdConfigResponse:
+      properties:
+        account_id:
+          type: string
+        ad_server:
+          $ref: '#/components/schemas/ssai.AdServer'
+        custom_beacons:
+          items:
+            $ref: '#/components/schemas/ssai.CustomBeacon'
+          type: array
+          uniqueItems: false
+        description:
+          type: string
+        id:
+          type: string
+      type: object
+    endpoint.GetAllSupportedMetricsResponse:
+      properties:
+        metrics:
+          items:
+            $ref: '#/components/schemas/endpoint.SupportedMetrics'
+          type: array
+          uniqueItems: false
+      type: object
+    endpoint.GetBYOCDNTokensResponse:
+      properties:
+        tokens:
+          items:
+            $ref: '#/components/schemas/cdnmanagement.CDNTokenRecord'
+          type: array
+          uniqueItems: false
+      type: object
+    endpoint.GetJobMetricsResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/jobmetrics.DataValue'
+        endTime:
+          type: integer
+        isPartial:
+          type: boolean
+        period:
+          type: string
+        startTime:
+          type: integer
+        status:
+          type: string
+      type: object
+    endpoint.GetResourceSessionsResponse:
+      properties:
+        sessions:
+          items:
+            $ref: '#/components/schemas/external.Session'
+          type: array
+          uniqueItems: false
+      type: object
+    endpoint.GetSessionResponse:
+      properties:
+        account_id:
+          type: string
+        end_time:
+          type: integer
+        id:
+          type: string
+        resource_id:
+          type: string
+        start_time:
+          type: integer
+      type: object
+    endpoint.GetThumbnailResponse:
+      properties:
+        thumbnail_detail:
+          $ref: '#/components/schemas/endpoint.ThumbnailDetail'
+      type: object
+    endpoint.InsertCuePointRequest:
+      properties:
+        account_id:
+          description: The Brightcove account ID associated with the live job.
+          type: string
+        ad_server_data:
+          description: |
+            Array of integers representing SCTE-35 cue point data to be passed to the ad server. 
+            This data is used by the ad server to determine which ads to serve during the ad break.
+            The format and content depend on your ad server's requirements and the ad_server_data_format specified.
+            Typically contains SCTE-35 splice information or custom ad targeting data.
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        ad_server_data_format:
+          description: |
+            Format specification for the ad_server_data array. This indicates how the ad server should interpret 
+            the data provided in ad_server_data. Common formats include SCTE-35 binary encoding or custom formats 
+            specific to your ad server implementation. Must match the format expected by your configured ad server.
+          type: string
+        duration_in_seconds:
+          description: |
+            Duration of the ad break in seconds. This determines how long the ad insertion will last during playback.
+            Common durations include 30, 60, or 90 seconds. The duration should align with your ad pod configuration 
+            and the available ad inventory from your ad server. Viewers will see ads for this duration before the 
+            live stream resumes.
+          type: integer
+        job_id:
+          description: |
+            The ID of the live job (channel or event) where the cue point should be inserted. 
+            The job must have SSAI enabled and be in the "on" state (actively receiving input) for cue point insertion to succeed.
+          type: string
+      type: object
+    endpoint.JobResponse:
+      properties:
+        account_id:
+          type: string
+        audio_only:
+          type: boolean
+        created_at:
+          type: string
+        custom_fields:
+          additionalProperties:
+            type: string
+          type: object
+        description:
+          type: string
+        encryption:
+          $ref: '#/components/schemas/external.Encryption'
+        id:
+          type: string
+        ingest_endpoints:
+          items:
+            $ref: '#/components/schemas/external.InputIngestPoint'
+          type: array
+          uniqueItems: false
+        input:
+          $ref: '#/components/schemas/external.Input'
+        labels:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        last_started_at:
+          type: string
+        live_to_vod:
+          type: boolean
+        long_description:
+          type: string
+        maintenance_preferences:
+          $ref: '#/components/schemas/external.MaintenancePreferences'
+        manifest:
+          $ref: '#/components/schemas/external.ManifestOptions'
+        name:
+          type: string
+        notifications:
+          items:
+            $ref: '#/components/schemas/external.Notification'
+          type: array
+          uniqueItems: false
+        outputs:
+          $ref: '#/components/schemas/external.OutputVariants'
+        playback_rights_id:
+          type: string
+        redundancy:
+          $ref: '#/components/schemas/external.RedundancyOptions'
+        reference_id:
+          type: string
+        region:
+          type: string
+        ssai:
+          $ref: '#/components/schemas/external.SSAI'
+        state:
+          $ref: '#/components/schemas/external.JobState'
+        tags:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        type:
+          enum:
+            - channel
+            - event
+          type: string
+      required:
+        - input
+        - outputs
+        - region
+        - type
+      type: object
+    endpoint.JobStartStopCreateRequest:
+      properties:
+        account_id:
+          type: string
+        description:
+          type: string
+        job_id:
+          description: ID of live Job to start/stop
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        start_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        stop_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      required:
+        - start_action
+        - stop_action
+      type: object
+    endpoint.JobStartStopCreateResponse:
+      properties:
+        account_id:
+          type: string
+        description:
+          type: string
+        job_id:
+          description: ID of live Job to start/stop
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        start_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        stop_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.JobStartStopDeleteResponse:
+      properties:
+        account_id:
+          type: string
+        description:
+          type: string
+        job_id:
+          description: ID of live Job to start/stop
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        start_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        stop_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.JobStartStopGetResponse:
+      properties:
+        account_id:
+          type: string
+        description:
+          type: string
+        job_id:
+          description: ID of live Job to start/stop
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        start_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        stop_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.JobStartStopUpdateRequest:
+      properties:
+        account_id:
+          type: string
+        description:
+          type: string
+        job_id:
+          description: ID of live Job to start/stop
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        start_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        stop_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.JobStartStopUpdateResponse:
+      properties:
+        account_id:
+          type: string
+        description:
+          type: string
+        job_id:
+          description: ID of live Job to start/stop
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        start_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        stop_action:
+          $ref: '#/components/schemas/workflows.JobStartStopTaskInfo'
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    endpoint.ListAdConfigsResponse:
+      properties:
+        ad_configs:
+          items:
+            $ref: '#/components/schemas/ssai.AdConfiguration'
+          type: array
+          uniqueItems: false
+      type: object
+    endpoint.ListJobsDetails:
+      properties:
+        audio_only:
+          type: boolean
+        created_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        ingest_points:
+          items:
+            $ref: '#/components/schemas/external.InputIngestPoint'
+          type: array
+          uniqueItems: false
+        labels:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        last_updated:
+          type: string
+        name:
+          type: string
+        protocol:
+          type: string
+        region:
+          type: string
+        state:
+          $ref: '#/components/schemas/external.JobState'
+        type:
+          type: string
+      type: object
+    endpoint.ListJobsResponse:
+      properties:
+        jobs:
+          items:
+            $ref: '#/components/schemas/endpoint.ListJobsDetails'
+          type: array
+          uniqueItems: false
+      type: object
+    endpoint.NotificationsResponse:
+      properties:
+        last_key:
+          type: string
+        notifications:
+          items:
+            $ref: '#/components/schemas/github_com_brightcove_blive_notifications-agent_models.Notification'
+          type: array
+          uniqueItems: false
+      type: object
+    endpoint.ResetOriginResponse:
+      properties:
+        status:
+          type: string
+      type: object
+    endpoint.StartJobResponse:
+      properties:
+        id:
+          type: string
+      type: object
+    endpoint.StopJobResponse:
+      properties:
+        id:
+          type: string
+      type: object
+    endpoint.SupportedMetrics:
+      properties:
+        category:
+          type: string
+        label:
+          type: string
+        name:
+          type: string
+        statistics:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        unit:
+          type: string
+      type: object
+    endpoint.Thumbnail:
+      properties:
+        body:
+          description: The binary data for the latest thumbnail.
+          type: string
+        content_type:
+          description: The content type for the latest thumbnail.
+          type: string
+        thumbnail_type:
+          description: Thumbnail Type
+          type: string
+        timestamp:
+          description: Timestamp for the latest thumbnail.
+          type: string
+      type: object
+    endpoint.ThumbnailDetail:
+      properties:
+        pipeline_id:
+          description: Pipeline ID
+          type: string
+        thumbnails:
+          description: thumbnails of a single pipeline
+          items:
+            $ref: '#/components/schemas/endpoint.Thumbnail'
+          type: array
+          uniqueItems: false
+      type: object
+    endpoint.UpdateAdConfigResponse:
+      properties:
+        account_id:
+          description: Account ID associated with the ad configuration.
+          type: string
+        ad_server:
+          description: Ad server configuration including URL, response type, and custom headers.
+          $ref: '#/components/schemas/ssai.AdServer'
+        custom_beacons:
+          description: Array of custom beacon URLs for tracking ad playback events.
+          items:
+            $ref: '#/components/schemas/ssai.CustomBeacon'
+          type: array
+          uniqueItems: false
+        description:
+          description: Description of the ad configuration.
+          type: string
+        id:
+          description: Unique identifier for the ad configuration.
+          type: string
+      type: object
+    endpoint.UpdateJobResponse:
+      properties:
+        old_config:
+          $ref: '#/components/schemas/external.JobConfig'
+        updated_job:
+          $ref: '#/components/schemas/endpoint.JobResponse'
+      type: object
+    endpoint.VideoData:
+      description: Optional video data to use for the clip.
+      properties:
+        state:
+          description: State of the video data.
+          enum:
+            - ACTIVE
+            - INACTIVE
+          type: string
+      type: object
+    external.AudioCodec:
+      enum:
+        - aac
+      type: string
+      x-enum-varnames:
+        - AudioCodecAAC
+    external.BitrateRange:
+      properties:
+        max:
+          maximum: 2147483647
+          type: integer
+        min:
+          minimum: 0
+          type: integer
+      type: object
+    external.CaptionDestinationType:
+      enum:
+        - embedded_closed_caption
+      type: string
+      x-enum-varnames:
+        - EmbeddedCaption
+    external.DASHManifestOptions:
+      type: object
+    external.DVRManifestOptions:
+      properties:
+        playlist_window_seconds:
+          description: Duration of the DVR window in seconds. Defines how far back viewers can seek in the live stream. Typical values range from 30 to 3600 seconds. Maximum value is 86,400 seconds (24 hours). Longer DVR windows may impact player performance and user experience.
+          type: integer
+      type: object
+    external.Encryption:
+      properties:
+        aes_key:
+          description: AES encryption key for content protection. Required when encryption modes are specified.
+          type: string
+        check_playback_rights:
+          description: Enable playback rights checking for DRM-protected content. When true, the system will verify playback rights before allowing stream access.
+          type: boolean
+        modes:
+          description: |-
+            Array of encryption modes to apply for DRM protection. Supported values: "fairplay" (Apple FairPlay), "playready" (Microsoft PlayReady), "widevine" (Google Widevine), "aes128" (AES-128 encryption), or "all" (combines fairplay + playready + widevine). At least one mode must be specified.
+            
+            **Important Limitations:**
+            - Once DRM encryption is enabled on a job, it cannot be disabled. To remove DRM from a job, you must create a new job without DRM enabled.
+            - Streams configured with only FairPlay are not supported. You must enable at least one additional encryption mode (e.g., ["fairplay", "widevine"] or ["all"]).
+          items:
+            type: string
+          minItems: 1
+          type: array
+          uniqueItems: true
+      required:
+        - modes
+      type: object
+    external.Error:
+      properties:
+        error_code:
+          type: string
+        message:
+          type: string
+        status:
+          type: integer
+        sub_code:
+          type: string
+      type: object
+    external.HLSManifestOptions:
+      properties:
+        playlist_type:
+          $ref: '#/components/schemas/external.PlaylistType'
+      type: object
+    external.HeightRange:
+      properties:
+        max:
+          maximum: 2160
+          type: integer
+        min:
+          minimum: 1
+          type: integer
+      type: object
+    external.Input:
+      properties:
+        audio_pids:
+          description: |-
+            Array of audio PID mappings for MPEG-TS inputs. Allows you to specify which audio streams to process by their Program ID (PID). Used for multiple audio track configurations.
+            
+            **Multiple Audio Tracks:**
+            - Each entry defines an audio track with a name and PID
+            - The `name` field must match the `input_selector_name` in your audio output variants
+            - Ensure your encoder is configured with the appropriate audio PIDs matching these values
+            - If using redundancy, make sure both encoders send the desired input to the same PIDs
+            
+            **Example:** `[{"name": "english", "pid": 475}, {"name": "french", "pid": 476}]` allows you to reference these tracks in audio outputs using `input_selector_name: "english"` or `input_selector_name: "french"`.
+          items:
+            $ref: '#/components/schemas/external.InputAudioPID'
+          type: array
+          uniqueItems: true
+        fixed_ingest_ip:
+          description: When true, uses a fixed IP address for ingest endpoints. Useful for firewall whitelisting. When false, IP addresses may change.
+          type: boolean
+        input_loss_behaviour:
+          description: Behavior when input signal is lost. Options include displaying a black screen or repeating the last frame.
+          $ref: '#/components/schemas/external.InputLossBehaviour'
+        protocol:
+          description: Input protocol for the live stream. Supported protocols include RTMP, RTP, SRT, and SRT Caller.
+          $ref: '#/components/schemas/external.InputProtocol'
+        reconnect_time:
+          description: |-
+            Time in seconds to wait before stopping the job after input loss, and also determines the auto-stop timeout period. 
+          type: integer
+          example: 1800
+        srt_options:
+          description: SRT-specific configuration options including ingest port, latency settings, passphrase, and source listeners.
+          $ref: '#/components/schemas/external.SRTOptions'
+        whitelist_cidr_blocks:
+          description: Single CIDR block allowed to connect to the ingest endpoint. Used for security and access control. Only one CIDR block is permitted per job.
+          items:
+            type: string
+          maxItems: 1
+          type: array
+          uniqueItems: true
+      required:
+        - protocol
+      type: object
+    external.InputAudioPID:
+      properties:
+        name:
+          type: string
+        pid:
+          type: integer
+      required:
+        - name
+        - pid
+      type: object
+    external.InputIngestPoint:
+      properties:
+        name:
+          type: string
+        source_listener:
+          type: string
+        url:
+          type: string
+      type: object
+    external.InputLossBehaviour:
+      properties:
+        fill_type:
+          $ref: '#/components/schemas/external.InputLossBehaviourFillType'
+      type: object
+    external.InputLossBehaviourFillType:
+      enum:
+        - black_screen
+        - repeat_frame
+      type: string
+      x-enum-varnames:
+        - InputLossBehaviourFillTypeBlackScreen
+        - InputLossBehaviourFillTypeRepeatFrame
+    external.InputProtocol:
+      enum:
+        - rtmp
+        - rtp
+        - srt
+        - srt-caller
+      type: string
+      x-enum-varnames:
+        - InputProtocolRTMP
+        - InputProtocolRTP
+        - InputProtocolSRT
+        - InputProtocolSRTCaller
+    external.Job:
+      properties:
+        account_id:
+          type: string
+        audio_only:
+          type: boolean
+        created_at:
+          type: string
+        encryption:
+          $ref: '#/components/schemas/external.Encryption'
+        id:
+          type: string
+        ingest_endpoints:
+          items:
+            $ref: '#/components/schemas/external.InputIngestPoint'
+          type: array
+          uniqueItems: false
+        input:
+          $ref: '#/components/schemas/external.Input'
+        last_started_at:
+          type: string
+        live_to_vod:
+          type: boolean
+        maintenance_preferences:
+          $ref: '#/components/schemas/external.MaintenancePreferences'
+        manifest:
+          $ref: '#/components/schemas/external.ManifestOptions'
+        notifications:
+          items:
+            $ref: '#/components/schemas/external.Notification'
+          type: array
+          uniqueItems: false
+        outputs:
+          $ref: '#/components/schemas/external.OutputVariants'
+        redundancy:
+          $ref: '#/components/schemas/external.RedundancyOptions'
+        region:
+          type: string
+        ssai:
+          $ref: '#/components/schemas/external.SSAI'
+        state:
+          $ref: '#/components/schemas/external.JobState'
+        type:
+          enum:
+            - channel
+            - event
+          type: string
+      required:
+        - input
+        - outputs
+        - region
+        - type
+      type: object
+    external.JobConfig:
+      properties:
+        audio_only:
+          type: boolean
+        encryption:
+          $ref: '#/components/schemas/external.Encryption'
+        input:
+          $ref: '#/components/schemas/external.Input'
+        live_to_vod:
+          type: boolean
+        maintenance_preferences:
+          $ref: '#/components/schemas/external.MaintenancePreferences'
+        manifest:
+          $ref: '#/components/schemas/external.ManifestOptions'
+        notifications:
+          items:
+            $ref: '#/components/schemas/external.Notification'
+          type: array
+          uniqueItems: false
+        outputs:
+          $ref: '#/components/schemas/external.OutputVariants'
+        redundancy:
+          $ref: '#/components/schemas/external.RedundancyOptions'
+        region:
+          type: string
+        ssai:
+          $ref: '#/components/schemas/external.SSAI'
+        type:
+          enum:
+            - channel
+            - event
+          type: string
+      required:
+        - input
+        - outputs
+        - region
+        - type
+      type: object
+    external.JobIngestState:
+      enum:
+        - connected
+        - disconnected
+        - waiting
+      type: string
+      x-enum-varnames:
+        - JobIngestStateDisconnected
+        - JobIngestStateConnected
+        - JobIngestStateWaiting
+        - JobIngestStateNone
+    external.JobProcessingState:
+      enum:
+        - configuring
+        - error
+        - "off"
+        - starting
+        - "on"
+        - stopping
+        - finishing
+        - finished
+      type: string
+      x-enum-varnames:
+        - JobProcessingStateConfiguring
+        - JobProcessingStateError
+        - JobProcessingStateOff
+        - JobProcessingStateStarting
+        - JobProcessingStateOn
+        - JobProcessingStateStopping
+        - JobProcessingStateFinishing
+        - JobProcessingStateFinished
+    external.JobState:
+      properties:
+        ingest_state:
+          $ref: '#/components/schemas/external.JobIngestState'
+        ingest_states:
+          additionalProperties:
+            $ref: '#/components/schemas/external.JobIngestState'
+          type: object
+        processing_state:
+          $ref: '#/components/schemas/external.JobProcessingState'
+      type: object
+    external.KeyFrameRateUnits:
+      description: Seconds or frames
+      type: string
+      x-enum-varnames:
+        - KeyFrameRateUnitsFrames
+        - KeyFrameRateUnitsSeconds
+    external.LowLatencyManifestOptions:
+      type: object
+    external.MaintenancePreferences:
+      properties:
+        day:
+          description: Day of the week for the preferred maintenance window. Must be uppercase (e.g., "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY").
+          type: string
+          example: "MONDAY"
+        start_time:
+          description: Start time for the maintenance window in 24-hour format (e.g., "02:00" for 2 AM). Specified in UTC.
+          type: string
+      type: object
+    external.ManifestOptions:
+      properties:
+        dash:
+          $ref: '#/components/schemas/external.DASHManifestOptions'
+        dvr:
+          $ref: '#/components/schemas/external.DVRManifestOptions'
+        hls:
+          $ref: '#/components/schemas/external.HLSManifestOptions'
+        include_iframe_only_stream:
+          type: boolean
+        low_latency:
+          $ref: '#/components/schemas/external.LowLatencyManifestOptions'
+        name:
+          type: string
+        playlist_groups:
+          items:
+            $ref: '#/components/schemas/external.PlaylistGroup'
+          type: array
+          uniqueItems: true
+        playlist_window_seconds:
+          type: integer
+        segment_container_format:
+          $ref: '#/components/schemas/external.SegmentContainerFormat'
+        segment_duration_seconds:
+          maximum: 30
+          minimum: 1
+          type: integer
+      type: object
+    external.Notification:
+      properties:
+        subscription_type:
+          description: Type of events to receive notifications for. "state_change" for job state transitions, "error" for error events.
+          $ref: '#/components/schemas/external.SubscriptionType'
+        url:
+          description: Webhook URL to receive notifications. Must be a publicly accessible HTTPS endpoint. The API will POST notification payloads to this URL.
+          type: string
+      required:
+        - subscription_type
+        - url
+      type: object
+    external.OutputVariants:
+      description: Output configuration for different types of media streams and destinations.
+      properties:
+        audio:
+          description: Audio output variants with different encoding settings.
+          items:
+            $ref: '#/components/schemas/external.VariantAudioInfo'
+          type: array
+          uniqueItems: true
+        caption:
+          description: Caption output configurations for embedded closed captions. Maximum of 4 caption tracks can be configured.
+          items:
+            $ref: '#/components/schemas/external.VariantCaptionInfo'
+          maxItems: 4
+          type: array
+          uniqueItems: false
+        rtmp:
+          description: RTMP output destinations for streaming to external RTMP/RTMPS endpoints.
+          items:
+            $ref: '#/components/schemas/external.VariantRTMPInfo'
+          type: array
+          uniqueItems: false
+        video:
+          description: Video output variants with different encoding settings and resolutions.
+          items:
+            $ref: '#/components/schemas/external.VariantVideoInfo'
+          type: array
+          uniqueItems: true
+      type: object
+    external.PlaylistGroup:
+      properties:
+        audio_bitrate:
+          $ref: '#/components/schemas/external.BitrateRange'
+        audio_codec:
+          items:
+            enum:
+              - aac
+            type: string
+          type: array
+          uniqueItems: false
+        language_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+        video_bitrate:
+          $ref: '#/components/schemas/external.BitrateRange'
+        video_codec:
+          items:
+            enum:
+              - h264
+            type: string
+          type: array
+          uniqueItems: false
+        video_height:
+          $ref: '#/components/schemas/external.HeightRange'
+      required:
+        - name
+      type: object
+    external.PlaylistType:
+      type: string
+      x-enum-varnames:
+        - PlaylistTypeNone
+        - PlaylistTypeEvent
+    external.RateControlMode:
+      description: Bitrate control mode (CBR/VBR).
+      type: string
+      x-enum-varnames:
+        - RateControlModeVBR
+        - RateControlModeCBR
+    external.RedundancyOptions:
+      properties:
+        num_inputs:
+          description: Number of redundant input sources to configure. Typically 2 for primary/backup redundancy. Enables automatic failover if the primary source fails.
+          type: integer
+      required:
+        - num_inputs
+      type: object
+    external.SRTOptions:
+      properties:
+        ingest_port:
+          type: integer
+        min_latency:
+          type: integer
+        passphrase:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        source_listeners:
+          items:
+            $ref: '#/components/schemas/external.SourceListener'
+          type: array
+          uniqueItems: false
+      type: object
+    external.SSAI:
+      properties:
+        enabled:
+          description: Enable Server-Side Ad Insertion (SSAI) for this job. When true, ads will be dynamically inserted into the stream based on the configured ad configuration.
+          type: boolean
+        provider:
+          description: SSAI provider identifier. Specifies which ad insertion provider to use for this job.
+          type: string
+        slate_asset_id:
+          description: |-
+            Video Cloud asset ID for the slate video to display during ad breaks or when no ad is available. The slate video must be uploaded to your Video Cloud account.
+          type: string
+      type: object
+    external.SegmentContainerFormat:
+      enum:
+        - cmaf
+        - ts
+      type: string
+      x-enum-varnames:
+        - SegmentContainerFormatCMAF
+        - SegmentContainerFormatTS
+        - SegmentContainerFormatNone
+    external.Session:
+      properties:
+        account_id:
+          type: string
+        end_time:
+          type: integer
+        id:
+          type: string
+        resource_id:
+          type: string
+        start_time:
+          type: integer
+      type: object
+    external.SessionEvent:
+      properties:
+        event_type:
+          $ref: '#/components/schemas/external.SessionEventType'
+        id:
+          type: string
+        session_id:
+          type: string
+        timestamp:
+          type: integer
+      type: object
+    external.SessionEventType:
+      type: string
+      x-enum-varnames:
+        - SessionEventTypeJobStart
+        - SessionEventTypeJobEnd
+        - SessionEventTypeJobConnect
+        - SessionEventTypeJobDisconnect
+    external.SourceListener:
+      properties:
+        address:
+          description: The hostname or IP address for the SRT caller source listener endpoint.
+          type: string
+        port:
+          maximum: 65535
+          minimum: 1024
+          type: integer
+        stream_id:
+          type: string
+      type: object
+    external.SubscriptionType:
+      enum:
+        - state_change
+        - error
+      type: string
+      x-enum-varnames:
+        - SubscriptionTypeStateChange
+        - SubscriptionTypeError
+    external.VariantAudioInfo:
+      properties:
+        bitrate:
+          description: Audio bitrate in bits per second (bps). Typical values range from 32000 to 512000.
+          type: integer
+        codec:
+          description: Audio codec to use for encoding. Currently supports AAC.
+          $ref: '#/components/schemas/external.AudioCodec'
+        group_id:
+          description: Group identifier for audio tracks. Used to group related audio tracks together in playlists (e.g., "aac" for all AAC tracks). This helps players identify and switch between audio tracks.
+          type: string
+        input_selector_name:
+          description: |-
+            Name of the input audio selector to use for this output. Used when multiple audio inputs are available (e.g., "default").
+            
+            **Important:** This value must match the `name` field in one of the `audio_pids` entries defined in the job's input configuration. For example, if your input has `audio_pids: [{"name": "english", "pid": 475}]`, then the output's `input_selector_name` must be "english" to use that audio track.
+          type: string
+          example: "english"
+        label:
+          description: Unique label/identifier for this audio output variant. Used to reference this audio track in RTMP outputs and playlist groups.
+          type: string
+        language_code:
+          description: Language code for the audio track using ISO 639-2 (3-letter) or ISO 639-1 (2-letter) format (e.g., "eng", "en", "spa", "es"). Used for language selection in players.
+          type: string
+        sample_rate:
+          description: Audio sample rate in Hz. Common values are 32000, 44100, 48000, or 96000. Must match or be compatible with the input audio sample rate.
+          type: integer
+      required:
+        - bitrate
+        - codec
+        - label
+        - sample_rate
+      type: object
+    external.VariantCaptionInfo:
+      properties:
+        passthrough:
+          description: When true, captions are passed through from the input stream without re-encoding. When false, captions are processed and embedded into the output stream.
+          type: boolean
+        type:
+          description: Caption destination type. Currently supports "embedded_closed_caption" for embedded closed captions in the output stream.
+          $ref: '#/components/schemas/external.CaptionDestinationType'
+        language_code:
+          description: |-
+            Language code for caption language mapping using ISO 639-2 (3-letter) format (e.g., "eng" for English, "spa" for Spanish). 
+            
+            This field is used to map captions to their language for proper display in players and is particularly important for CMAF ingest workflows where language identification is required for proper track selection and playback.
+          type: string
+          example: "eng"
+      type: object
+    external.VariantRTMPInfo:
+      description: Configuration for RTMP output destinations. RTMP outputs allow streaming to external RTMP/RTMPS endpoints.
+      properties:
+        audio_label:
+          description: Reference to an existing audio output label. The referenced audio output must use AAC codec.
+          type: string
+          example: "english"
+        label:
+          description: A unique identifier for this RTMP output.
+          type: string
+          example: "fullhd"
+        url:
+          description: The RTMP or RTMPS destination URL where the stream will be pushed.
+          type: string
+          format: uri
+          pattern: "^rtmps?://.+"
+          example: "rtmp://example.com/application/stream_key"
+        video_label:
+          description: Reference to an existing video output label. The referenced video output must use H.264 codec.
+          type: string
+          example: "1080p"
+      required:
+        - label
+        - url
+        - video_label
+      type: object
+    external.VariantVideoInfo:
+      properties:
+        bitrate:
+          type: integer
+        codec:
+          $ref: '#/components/schemas/external.VideoCodec'
+        codec_options:
+          $ref: '#/components/schemas/external.VideoCodecOptions'
+        decoder_buffer_size:
+          type: integer
+        embed_timecode:
+          description: Embed timecode in the video stream.
+          type: boolean
+        framerate:
+          description: |-
+            fractional representation of framerate
+            example "30/1"
+          type: string
+        height:
+          type: integer
+        keyframe_rate:
+          description: Keyframe rate for video encoding. Recommended value is 0.5 (one keyframe every 2 seconds) for optimal performance and HLS segmentation. Higher values increase keyframe frequency but may impact encoding efficiency.
+          type: number
+        keyframe_rate_units:
+          $ref: '#/components/schemas/external.KeyFrameRateUnits'
+        label:
+          type: string
+        max_bitrate:
+          type: integer
+        num_b_frames:
+          description: |-
+            Number of B-frames.
+          type: integer
+        num_reference_frames:
+          description: Number of reference frames.
+          type: integer
+        rate_control_mode:
+          $ref: '#/components/schemas/external.RateControlMode'
+        sample_aspect_ratio:
+          type: string
+        width:
+          type: integer
+      required:
+        - bitrate
+        - codec
+        - framerate
+        - height
+        - label
+        - width
+      type: object
+    external.VideoCodec:
+      enum:
+        - h264
+      type: string
+      x-enum-varnames:
+        - VideoCodecH264
+    external.VideoCodecLevel:
+      enum:
+        - "3"
+        - "4"
+        - "4.2"
+        - "5"
+        - "5.1"
+        - "5.2"
+        - "6"
+        - "6.1"
+        - "6.2"
+        - auto
+      type: string
+      x-enum-varnames:
+        - VideoCodecLevel1
+        - VideoCodecLevel1b
+        - VideoCodecLevel1_1
+        - VideoCodecLevel1_2
+        - VideoCodecLevel1_3
+        - VideoCodecLevel2
+        - VideoCodecLevel2_1
+        - VideoCodecLevel2_2
+        - VideoCodecLevel3
+        - VideoCodecLevel3_1
+        - VideoCodecLevel3_2
+        - VideoCodecLevel4
+        - VideoCodecLevel4_1
+        - VideoCodecLevel4_2
+        - VideoCodecLevel5
+        - VideoCodecLevel5_1
+        - VideoCodecLevel5_2
+        - VideoCodecLevel6
+        - VideoCodecLevel6_1
+        - VideoCodecLevel6_2
+        - VideoCodecLevelAuto
+    external.VideoCodecOptions:
+      properties:
+        level:
+          $ref: '#/components/schemas/external.VideoCodecLevel'
+        profile:
+          $ref: '#/components/schemas/external.VideoCodecProfile'
+      type: object
+    external.VideoCodecProfile:
+      enum:
+        - baseline
+        - high
+        - main
+      type: string
+      x-enum-varnames:
+        - VideoCodecProfileBaseline
+        - VideoCodecProfileHigh
+        - VideoCodecProfileMain
+    github_com_brightcove_blive_notifications-agent_models.Notification:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        resource_id:
+          type: string
+        resource_type:
+          type: string
+        timestamp:
+          description: Timestamp is the time the message was generated in unix epoch milliseconds
+          type: integer
+        type:
+          type: string
+      type: object
+    jobmetrics.DataValue:
+      properties:
+        result:
+          items:
+            $ref: '#/components/schemas/jobmetrics.ResultValue'
+          type: array
+          uniqueItems: false
+      type: object
+    jobmetrics.Dimension:
+      properties:
+        inputSource:
+          type: string
+      type: object
+    jobmetrics.MetricOutput:
+      properties:
+        category:
+          type: string
+        label:
+          type: string
+        name:
+          type: string
+        statistic:
+          type: string
+        unit:
+          type: string
+      type: object
+    jobmetrics.ResultValue:
+      properties:
+        dimension:
+          $ref: '#/components/schemas/jobmetrics.Dimension'
+        metric:
+          $ref: '#/components/schemas/jobmetrics.MetricOutput'
+        values:
+          items:
+            items: {}
+            type: array
+          type: array
+          uniqueItems: false
+      type: object
+    probes.healthCheck:
+      properties:
+        build_version:
+          type: string
+        git_sha:
+          type: string
+      type: object
+    ssai.AdConfiguration:
+      description: |
+        Complete SSAI ad configuration including ad server settings, custom beacons, and metadata.
+        Used for both creating new ad configurations and updating existing ones.
+      properties:
+        account_id:
+          description: The Brightcove account ID that owns this ad configuration.
+          type: string
+        ad_server:
+          description: |
+            Ad server configuration including the ad tag URL, response type (VAST, VMAP, or DFP), 
+            and custom headers for authentication or ad targeting.
+          $ref: '#/components/schemas/ssai.AdServer'
+        custom_beacons:
+          description: |
+            Array of custom tracking beacons for ad playback events. Each beacon specifies an event 
+            (e.g., "start", "complete", "firstQuartile", "midpoint") and a URL to call when that event occurs.
+            Useful for analytics and ad performance tracking.
+          items:
+            $ref: '#/components/schemas/ssai.CustomBeacon'
+          type: array
+          uniqueItems: false
+        description:
+          description: |
+            Human-readable description of the ad configuration. Helps identify and organize multiple 
+            ad configurations within your account.
+          type: string
+        id:
+          description: |
+            Unique identifier for the ad configuration. Generated automatically when creating a new 
+            configuration. Required when updating an existing configuration.
+          type: string
+      required:
+        - description
+        - ad_server
+      type: object
+    ssai.AdServer:
+      description: |
+        Ad server settings that define how ads are requested and served. Includes the ad tag URL, 
+        response format, and optional custom headers for authentication or targeting.
+      properties:
+        headers:
+          description: |
+            Custom HTTP headers to include with ad server requests. Some ad servers (such as VideoPlaza) 
+            require custom headers for authentication or targeting. Standard headers like X-Forwarded-For 
+            and X-Device-User-Agent are handled automatically by the system.
+          additionalProperties:
+            type: string
+          type: object
+        response_type:
+          description: |
+            Format of the ad server response. Must match the format your ad server returns.
+            Valid values: "dfp" (Google DoubleClick for Publishers/SmartXML), "vast" (Video Ad Serving Template), "vmap" (Video Multiple Ad Playlist), or "playlist" (custom playlist format).
+            Values are case-insensitive (e.g., "dfp", "DFP", "Dfp" are all accepted).
+          $ref: '#/components/schemas/ssai.AdServerResponseType'
+        url:
+          description: |
+            The ad tag URL from your ad server. This is the endpoint that will be called to request ads 
+            during ad breaks. Must be a valid URL that returns ads in the specified response_type format.
+          type: string
+      required:
+        - url
+        - response_type
+      type: object
+    ssai.AdServerResponseType:
+      description: |
+        Format of the ad server response. Must match the format your ad server returns.
+        Valid values: "dfp" (or "SmartXML" for Google DoubleClick for Publishers), "vast" (Video Ad Serving Template), "vmap" (Video Multiple Ad Playlist), or "playlist" (custom playlist format).
+        Values are case-insensitive (e.g., "dfp", "DFP", "Dfp" are all accepted).
+      enum:
+        - dfp
+        - vast
+        - vmap
+        - playlist
+      type: string
+      x-enum-varnames:
+        - AdServerResponseTypeDFP
+        - AdServerResponseTypeVAST
+        - AdServerResponseTypeVMAP
+        - AdServerResponseTypePlaylist
+    ssai.CustomBeacon:
+      properties:
+        event:
+          description: VAST-compliant event name for the beacon (e.g., "start", "complete", "firstQuartile", "midpoint", "thirdQuartile"). This determines when the beacon URL will be triggered during ad playback.
+          type: string
+        url:
+          description: URL to call when the specified event occurs. This allows you to track ad playback events for analytics or reporting purposes.
+          type: string
+      type: object
+    workflows.AutoStopTaskInfo:
+      properties:
+        state:
+          type: string
+        time_utc:
+          description: UTC time to perform task. Should be a unix timestamp Seconds since epoch
+          type: integer
+      type: object
+    workflows.Clip:
+      properties:
+        account_id:
+          type: string
+        clip:
+          $ref: '#/components/schemas/workflows.ClipTaskInfo'
+        description:
+          type: string
+        job_id:
+          type: string
+        metadata_passthrough:
+          additionalProperties: {}
+          type: object
+        notification_url:
+          type: string
+        type:
+          type: string
+        workflow_id:
+          type: string
+        workflow_start_time_utc:
+          type: integer
+      type: object
+    workflows.ClipOutput:
+      properties:
+        type:
+          type: string
+        url:
+          type: string
+      type: object
+    workflows.ClipRequest:
+      description: ClipRequest is the payload forwarded to jobs-api /clip at fire time.
+      properties:
+        custom_fields:
+          additionalProperties:
+            type: string
+          type: object
+        description:
+          type: string
+        end:
+          type: string
+        ingest_profile:
+          type: string
+        name:
+          type: string
+        output:
+          $ref: '#/components/schemas/workflows.ClipOutput'
+        override_reference_id:
+          type: boolean
+        reference_id:
+          type: string
+        remove_ads:
+          type: boolean
+        start:
+          type: string
+        tags:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        video_data:
+          $ref: '#/components/schemas/workflows.ClipVideoData'
+      type: object
+    workflows.ClipTaskInfo:
+      properties:
+        clip_request:
+          $ref: '#/components/schemas/workflows.ClipRequest'
+        notification:
+          description: |-
+            Duration in seconds before TimeUTC to send a notification.
+            Zero value means no notification should be sent.
+          type: integer
+        state:
+          description: State of the clip task. Notification state is not represented here.
+          type: string
+        time_utc:
+          description: UTC time to perform the clip. Unix timestamp in seconds.
+          type: integer
+      type: object
+    workflows.ClipVideoData:
+      properties:
+        state:
+          type: string
+      type: object
+    workflows.JobStartStopTaskInfo:
+      description: Task information pertaining to Job Start/Stop
+      properties:
+        notification:
+          description: |-
+            Duration in seconds before TimeUTC to send a notification.
+            Zero value means no notification should be sent
+          type: integer
+        state:
+          description: State of the start/stop task. Notification state is not represented here
+          type: string
+        time_utc:
+          description: UTC time to perform task. Should be a unix timestamp Seconds since epoch
+          type: integer
+      type: object
+  securitySchemes:
+    BC_OAuth2:
+      flows:
+        clientCredentials:
+          scopes:
+            video-cloud/livev2/jobs/all: "\t\tgrants job admin access"
+            video-cloud/livev2/jobs/create: "\tgrants job create access"
+            video-cloud/livev2/jobs/delete: "\tgrants job delete access"
+            video-cloud/livev2/jobs/read: "\t\tgrants job read access"
+            video-cloud/livev2/jobs/update: "\tgrants job change access"
+            video-cloud/livev2/metrics/read: "\tgrants metric read access"
+            video-cloud/livev2/settings/read: "\tgrants settings read access"
+            video-cloud/livev2/ssai/read: "\t\tgrants SSAI ad config read access"
+            video-cloud/livev2/ssai/create: "\tgrants SSAI ad config create access"
+            video-cloud/livev2/ssai/update: "\tgrants SSAI ad config update access"
+            video-cloud/livev2/ssai/delete: "\tgrants SSAI ad config delete access"
+          tokenUrl: https://oauth.brightcove.com/v4/access_token
+      in: Header
+      type: oauth2
+info:
+  description: |-
+    API for interacting with the Brightcove NextGen Live platform
+
+    **Base URL**: https://api.live.brightcove.com
+  title: Brightcove NextGen Live API
+  x-bc-access: public
+openapi: 3.0.0
+paths:
+  v2/accounts/{account_id}/jobs:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: regions to query, comma separated values
+          in: query
+          name: regions
+          schema:
+            items:
+              type: string
+            type: array
+        - description: modified_at filter - format <op>:<unixmillis>
+          in: query
+          name: modified_at
+          schema:
+            type: string
+        - description: created_at filter - format <op>:<unixmillis>
+          in: query
+          name: created_at
+          schema:
+            type: string
+        - description: |-
+            Filter jobs by processing state. Supports comparison operators: eq (equals), ne (not equals), gt (greater than), lt (less than), gte (greater than or equal), lte (less than or equal). Format: '<operator>:<state>' where <state> is one of: on, off, starting, stopping, error, finishing, finished, configuring. Example: 'eq:on' or 'ne:error'.
+          in: query
+          name: processing_state
+          schema:
+            type: string
+            example: 'eq:on'
+        - description: filter by ingest state
+          in: query
+          name: ingest_state
+          schema:
+            type: string
+        - description: filter by type
+          in: query
+          name: type
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ListJobsResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: List all jobs in an account
+      description: |
+        Retrieve a comprehensive list of all live streaming jobs associated with your account, with optional filtering capabilities.
+        
+        **Listing Overview:**
+        This endpoint provides a paginated list of all jobs (both channels and events) in your account, allowing you to monitor, filter, and manage your live streaming infrastructure at scale.
+        
+        **Filtering Capabilities:**
+        - Filter by region(s) to see jobs in specific geographic locations
+        - Filter by creation or modification timestamps using comparison operators
+        - Filter by processing state (on, off, starting, stopping, error, etc.)
+        - Filter by ingest state (connected, disconnected, waiting)
+        - Filter by job type (channel or event)
+        
+        **Response Structure:**
+        Returns an array of job summary objects containing essential information like ID, name, state, region, and type. Use the job ID to retrieve full details via the Get Job endpoint.
+      tags:
+        - jobs
+    post:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoint.ConfigureJobRequest'
+            example:
+              name: "Live Stream with RTMP Output"
+              description: "Example job configuration with RTMP streaming"
+              type: "channel"
+              region: "us-east-1"
+              input:
+                protocol: "rtmp"
+              outputs:
+                video:
+                  - label: "1080p"
+                    height: 1080
+                    width: 1920
+                    bitrate: 6000000
+                    codec: "h264"
+                    framerate: "30/1"
+                    codec_options:
+                      profile: "main"
+                  - label: "720p"
+                    height: 720
+                    width: 1280
+                    bitrate: 3000000
+                    codec: "h264"
+                    framerate: "30/1"
+                    codec_options:
+                      profile: "main"
+                audio:
+                  - label: "english"
+                    codec: "aac"
+                    bitrate: 128000
+                    sample_rate: 48000
+                  - label: "spanish"
+                    codec: "aac"
+                    bitrate: 128000
+                    sample_rate: 48000
+                rtmp:
+                  - label: "primary_rtmp"
+                    url: "rtmp://primary.example.com/live/stream_key_1"
+                    video_label: "1080p"
+                    audio_label: "english"
+                  - label: "backup_rtmp"
+                    url: "rtmps://backup.example.com/live/stream_key_2"
+                    video_label: "720p"
+                    audio_label: "spanish"
+        description: Job Config
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Job'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/create
+      summary: Configure a new job
+      description: |
+        Create a new live streaming job with comprehensive configuration options for input sources, output variants, manifest settings, and optional features like SSAI, DVR, and redundancy.
+        
+        **Input Restrictions:**
+        - **Maximum input bitrate:** 50 Mbps (30 Mbps for input limit spikes)
+        - **Maximum output bitrate:** 20 Mbps (25 Mbps in some configurations)
+        - **Maximum resolution:** 4K (3840x2160) is supported
+        - **Frame rate:** Recommended 30 fps, Maximum 60 fps. Higher frame rates require proportionally higher input bitrates
+        - **Video codecs:** H.264 required
+        - **Audio codec:** AAC required
+        
+        **Key Configuration Areas:**
+        - **Input Protocol**: Supports RTMP, RTP, SRT, and SRT Caller protocols
+        - **Output Variants**: Configure multiple video/audio renditions with different bitrates, resolutions, and codecs
+        - **Manifest Options**: Set up HLS/DASH playlists with DVR, low-latency, and playlist group filtering
+        - **RTMP Outputs**: Simulcast to external platforms (Facebook, YouTube, etc.)
+        - **SSAI**: Enable server-side ad insertion with custom ad configurations
+        - **Redundancy**: Configure in-region redundancy for high availability (requires num_inputs: 2)
+        - **Live-to-VOD**: Automatically archive streams as Video Cloud assets
+        
+        **Response:**
+        Returns the created job object with assigned job ID, ingest endpoints, and current state.
+      tags:
+        - jobs
+  v2/accounts/{account_id}/jobs/{job_id}:
+    delete:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Job ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.FinishJobResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/delete
+      summary: Finish a job
+      description: |
+        Permanently archive a live streaming job. This is an irreversible action that cannot be undone.
+        
+        **Finishing a Job Overview:**
+        Unlike the Stop endpoint which halts the stream but preserves the job configuration, Finish permanently archives the job and all associated resources. This action is final and cannot be reversed.
+        
+        **How It Works:**
+        1. If the job is running, it must be stopped first using the Stop endpoint
+        2. Job is permanently deleted from the system
+        3. All job configuration is removed
+        4. Ingest endpoints become invalid
+        5. If live_to_vod was enabled, the VOD asset remains in Video Cloud
+        
+        **Common Use Cases:**
+        - Clean up completed event channels
+        - Remove test or temporary jobs
+        - Archive old channels that are no longer needed
+        - Free up account resources
+        
+        **Response:**
+        Returns the job ID confirming the deletion.
+      tags:
+        - jobs
+    get:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Job'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: Get a job
+      description: |
+        Retrieve complete details and current state of a specific live streaming job.
+        
+        **Job Details Overview:**
+        This endpoint returns the full configuration and runtime state of a live job, including ingest endpoints, output configurations, manifest settings, and current processing/ingest states.
+        
+        **Information Returned:**
+        - Complete job configuration (input, outputs, manifest, SSAI, etc.)
+        - Current job state (processing_state, ingest_state)
+        - Ingest endpoint URLs for encoder configuration
+        - Creation and last started timestamps
+        
+        **Common Use Cases:**
+        - Retrieve ingest endpoints after starting a job
+        - Monitor job state transitions (starting → on → stopping → off)
+        - Verify job configuration before starting
+        - Get job details for integration with external systems
+        - Check if a job is ready to accept input streams
+        
+      tags:
+        - jobs
+    put:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/external.JobConfig'
+            example:
+              type: "channel"
+              region: "us-east-1"
+              input:
+                protocol: "rtmp"
+              outputs:
+                video:
+                  - label: "1080p"
+                    height: 1080
+                    width: 1920
+                    bitrate: 6000000
+                    codec: "h264"
+                    framerate: "30/1"
+                    codec_options:
+                      profile: "main"
+                audio:
+                  - label: "english"
+                    codec: "aac"
+                    bitrate: 128000
+                    sample_rate: 48000
+                rtmp:
+                  - label: "updated_rtmp"
+                    url: "rtmp://updated.example.com/live/new_stream_key"
+                    video_label: "1080p"
+                    audio_label: "english"
+        description: Job Config
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.UpdateJobResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/update
+      summary: Update a given job
+      description: |
+        Modify the configuration of an existing live streaming job. Updates can only be performed when the job is in the "off" state.
+        
+        **Update Overview:**
+        This endpoint allows you to modify job settings such as output variants, notifications, and other configurable attributes. Some fields (like region, type, and manifest configuration) are immutable and cannot be changed after creation.
+        
+        **What Can Be Updated:**
+        - Output variants (video, audio, RTMP outputs)
+        - Notification endpoints
+        - Maintenance preferences
+        - Input protocol settings
+        - Live-to-VOD settings
+        - Audio-only mode
+        - IP whitelist (CIDR blocks for input restriction)
+
+        **What Cannot Be Updated:**
+        - Region (immutable - create new job if region change needed)
+        - DRM settings (cannot disable DRM once enabled - must create new job without DRM)
+        - Redundancy configuration (cannot add/remove redundancy after creation)
+        - Manifest configuration (immutable after creation — includes playlist groups, segment options, DVR settings, and low latency settings)
+        - Segment duration and container format (immutable after creation)
+        - SSAI configuration (immutable after creation)
+        - Input protocol (cannot be changed if fixed IP is enabled)
+        - Video codec for existing outputs (cannot change codec, but can add new outputs)
+        - Audio codec for existing outputs (cannot change codec, but can add new outputs)
+        
+        **Best Practices:**
+        - Always retrieve the current job configuration first using GET
+        - Include all required fields in the update request
+        - Ensure the job is stopped (state: "off") before updating
+        - Test configuration changes on a test job before applying to production
+        
+        **Response:**
+        Returns the updated job object, allowing you to verify changes were applied correctly.
+      tags:
+        - jobs
+  v2/accounts/{account_id}/jobs/{job_id}/clip:
+    post:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoint.ClipRequest'
+        description: Clip Config
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ClipResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/create
+      summary: Clip a given job
+      description: |
+        Create a Video-on-Demand (VOD) clip from a live stream by specifying a time range.
+        
+        **Live Clipping Overview:**
+        This endpoint allows you to extract a specific segment from a live stream and create a standalone VOD asset. The clip is created from content up to 14 days after the stream ends.
+        
+        **How It Works:**
+        1. Specify the start and end times for the clip segment
+        2. Set metadata like name, description, tags, and custom fields
+        3. The system processes the clip asynchronously
+        4. A new VOD asset is created in Video Cloud
+        
+        **Important Notes:**
+        - The job must be running or have been running recently (within 14 days after the stream ends)
+        - Start and end times must be within the available window
+        
+        **Response:**
+        Returns the clip object.
+      tags:
+        - jobs
+  v2/accounts/{account_id}/jobs/{job_id}/failover:
+    put:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pipeline_name:
+                  description: Pipeline name to fail over from
+                  type: string
+              required:
+                - pipeline_name
+        description: Pipeline failover request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ForceFailoverResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/update
+      summary: Force Failover to a different pipeline
+      description: |
+        Manually trigger a failover to a different encoding pipeline when using redundancy configurations.
+        
+        **Failover Overview:**
+        When a job is configured with redundancy (num_inputs: 2), multiple encoding pipelines process the stream simultaneously. This endpoint allows you to manually switch from one pipeline to another, useful for testing or when you detect quality issues.
+        
+        **How It Works:**
+        1. Specify the pipeline ID to fail over from
+        2. The system switches to the backup/redundant pipeline
+        3. Playback continues seamlessly without interruption
+        4. The previously active pipeline becomes the backup
+        
+        **Important Notes:**
+        - Only available for jobs with redundancy enabled (num_inputs: 2)
+        - The job must be in the "on" state
+        - Failover happens automatically if a pipeline fails - this is for manual control
+        - Playback should continue without interruption during failover
+      tags:
+        - jobs
+  v2/accounts/{account_id}/jobs/{job_id}/reset_origin:
+    post:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ResetOriginResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/update
+      summary: Reset Origin Endpoint
+      description: |
+        Flushes the DVR and timeshift/startover buffer content for the specified job, effectively resetting both the DVR window and timeshift playback buffer.
+        
+        **Important:** After performing this operation:
+        - All buffered DVR content will be permanently removed
+        - All timeshift/startover buffer content will be permanently removed
+        - Timeshift playback functionality will no longer work for previously recorded content
+        - Live-to-VOD clipping features will be unavailable for the flushed content
+        - Only new content streamed after the reset will be available for DVR, timeshift, and clipping
+        
+        This operation is useful when you need to clear the buffer for compliance or content refresh purposes.
+      tags:
+        - reset_origin
+  v2/accounts/{account_id}/jobs/{job_id}/scheduler:
+    get:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: max number of schedules to return
+          in: query
+          name: page_size
+          schema:
+            type: integer
+        - description: next_token from last API response to get next batch of schedules
+          in: query
+          name: start_token
+          schema:
+            type: string
+        - description: filter by state
+          in: query
+          name: state
+          schema:
+            type: string
+        - description: filter by start time
+          in: query
+          name: start
+          schema:
+            type: integer
+        - description: filter by end time
+          in: query
+          name: end
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.JobStartStopCreateResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: List all schedules of a job
+      description: |
+        Retrieve all scheduled start/stop workflows configured for a live streaming job.
+        
+        **Schedule Listing Overview:**
+        This endpoint returns all active and completed schedules for a job, allowing you to monitor scheduled operations and their execution status.
+        
+        **How It Works:**
+        - Returns list of schedules
+        - Each schedule includes start/stop actions, timestamps, and state
+        - Supports filtering by state, start time, and end time
+
+        **Response Structure:**
+        Returns schedule objects with start_action, stop_action, workflow_id, and execution state.
+      tags:
+        - scheduler
+  v2/accounts/{account_id}/jobs/{job_id}/scheduler/autostop:
+    get:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.AutoStopGetResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: Get AutoStop Schedule
+      description: |
+        Retrieve the automatic start/stop schedule configured for a live streaming job.
+        
+        **AutoStop Schedule Overview:**
+        AutoStop schedules automatically starts/stops a job at a specified time.
+        
+        **How It Works:**
+        - Returns the auto-stop configuration for a live streaming job
+        - Includes the scheduled start/stop time and current state
+        - Shows notification settings if configured
+        
+        **Response Structure:**
+        Returns auto-stop schedule object with job_id, workflow_id, action (stop task info), notification_url, and workflow_start_time_utc.
+      tags:
+        - scheduler
+  v2/accounts/{account_id}/jobs/{job_id}/scheduler/jobstartstop:
+    post:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoint.JobStartStopCreateRequest'
+        description: Workflow Config
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.JobStartStopCreateResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/create
+      summary: Create JobStartStop Schedule
+      description: |
+        Schedule automatic start/stop times for a live streaming job.
+        
+        **Job Scheduling Overview:**
+        This endpoint allows you to configure a job to automatically start and stop at specified times, perfect for scheduled live events that don't require manual intervention.
+        
+        **How It Works:**
+        1. Define start action with UTC timestamp and optional notification
+        2. Define stop action with UTC timestamp and optional notification
+        3. Optionally configure notification URL for schedule events
+        4. System executes actions at the specified times
+        5. Notifications are sent before actions (if configured)
+        
+        **Important Notes:**
+        - Times are specified as Unix timestamps (seconds since epoch)
+        - Notification delay is specified in seconds before the action time
+        - Both start_action and stop_action are required
+        - The job must exist and be in the "off" state when the schedule is created
+        - Schedules can be updated or deleted before execution
+        
+        **Response:**
+        Returns the created schedule with workflow_id.
+      tags:
+        - scheduler
+  v2/accounts/{account_id}/jobs/{job_id}/scheduler/jobstartstop/{workflow_id}:
+    delete:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Workflow ID
+          in: path
+          name: workflow_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.JobStartStopDeleteResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/delete
+      summary: Delete JobStartStop Schedule
+      description: |
+        Remove a scheduled start/stop workflow for a live streaming job, canceling the automatic start/stop operations.
+        
+        **Delete Schedule Overview:**
+        This endpoint permanently removes a scheduled workflow, preventing the automatic start/stop actions from executing. This is useful when events are canceled or rescheduled.
+        
+        **How It Works:**
+        1. Provide the workflow ID to delete
+        2. System removes the schedule
+        3. Automatic start/stop will not occur
+        4. Job remains in its current state
+        
+        **Response:**
+        Returns the deleted schedule configuration object.
+      tags:
+        - scheduler
+    get:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Workflow ID
+          in: path
+          name: workflow_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.JobStartStopGetResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: Get JobStartStop Schedule
+      description: |
+        Retrieve a specific start/stop schedule workflow for a live streaming job.
+        
+        **Get Schedule Overview:**
+        This endpoint returns the complete configuration of a scheduled start/stop workflow, including both start and stop actions, notification settings, and execution state.
+        
+        **How It Works:**
+        - Provide the workflow ID (returned when creating the schedule)
+        - System returns complete schedule configuration
+        - Includes start_action, stop_action, timestamps, and state
+        
+        **Response Structure:**
+        Returns schedule object with job_id, workflow_id, start_action, stop_action, notification_url, and workflow_start_time_utc.
+      tags:
+        - scheduler
+    put:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Workflow ID
+          in: path
+          name: workflow_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoint.JobStartStopUpdateRequest'
+        description: Workflow Config
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.JobStartStopUpdateResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/update
+      summary: Update JobStartStop Schedule
+      description: |
+        Modify an existing start/stop schedule for a live streaming job, updating start/stop times or notification settings.
+        
+        **Update Schedule Overview:**
+        This endpoint allows you to modify a scheduled workflow before it executes, updating timestamps, notification settings, or other configuration.
+        
+        **How It Works:**
+        1. Provide the workflow ID to update
+        2. Include updated fields in the request
+        3. System validates and applies changes
+        4. Updated schedule is returned
+        
+        **What Can Be Updated:**
+        - Start action time and notification settings
+        - Stop action time and notification settings
+        - Notification URL
+        - Metadata passthrough data
+        
+        **Response:**
+        Returns the updated schedule configuration confirming changes were applied.
+      tags:
+        - scheduler
+  v2/accounts/{account_id}/jobs/{job_id}/scheduler/clips:
+    get:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Page size
+          in: query
+          name: page_size
+          schema:
+            type: integer
+        - description: Pagination token
+          in: query
+          name: start_token
+          schema:
+            type: string
+        - description: Filter by clip state
+          in: query
+          name: state
+          schema:
+            type: string
+        - description: Filter by start time (unix sec)
+          in: query
+          name: start
+          schema:
+            type: integer
+        - description: Filter by end time (unix sec)
+          in: query
+          name: end
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ClipListAccountResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+            - BC_JOBS_READ
+      summary: List scheduled clips for a job
+      tags:
+        - scheduler
+    post:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoint.ClipCreateRequest'
+        description: Clip schedule
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ClipCreateResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/create
+            - BC_JOBS_WRITE
+      summary: Create scheduled clip
+      tags:
+        - scheduler
+  v2/accounts/{account_id}/jobs/{job_id}/scheduler/clips/{workflow_id}:
+    delete:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Workflow ID
+          in: path
+          name: workflow_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ClipDeleteResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/delete
+            - BC_JOBS_WRITE
+      summary: Cancel scheduled clip
+      tags:
+        - scheduler
+    get:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Workflow ID
+          in: path
+          name: workflow_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ClipGetResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+            - BC_JOBS_READ
+      summary: Get scheduled clip
+      tags:
+        - scheduler
+    patch:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Workflow ID
+          in: path
+          name: workflow_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoint.ClipUpdateRequest'
+        description: Clip schedule update
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ClipUpdateResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/update
+            - BC_JOBS_WRITE
+      summary: Update scheduled clip
+      tags:
+        - scheduler
+  v2/accounts/{account_id}/jobs/{job_id}/start:
+    put:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.StartJobResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/update
+      summary: Start a given job
+      description: |
+        Initiate a previously configured live streaming job, beginning the encoding and distribution processes.
+        
+        **Starting a Job Overview:**
+        This endpoint transitions a job from the "off" state to "starting", then to "on" once ready to accept input streams. The job will begin processing and distributing the stream according to its configuration.
+        
+        **How It Works:**
+        1. Job state transitions: "off" → "starting" → "on"
+        2. Ingest endpoints are generated and made available
+        3. Encoding pipelines are initialized based on output configuration
+        4. Manifest playlists become available for playback (after input is received)
+        
+        **Important Notes:**
+        - Poll the Get Job endpoint to confirm `state.processing_state` is "on" and `state.ingest_state` has moved to "waiting" before connecting your encoder
+        - Ingest endpoints are only available when the job is in the "on" state
+        - The job will remain in "starting" state until encoding pipelines are ready
+        
+        **Response:**
+        Returns the job ID and initiates the start process asynchronously. Use the Get Job endpoint or subscribe to notifications to track state transitions.
+      tags:
+        - jobs
+  v2/accounts/{account_id}/jobs/{job_id}/stop:
+    put:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.StopJobResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/update
+      summary: Stop a job
+      description: |
+        Gracefully stop a running live streaming job, disconnecting from input sources and halting encoding and distribution processes.
+        
+        **Stopping a Job Overview:**
+        This endpoint transitions a job from "on" to "stopping", then to "off" once all processes have been terminated. The job can be restarted later if needed.
+        
+        **How It Works:**
+        1. Job state transitions: "on" → "stopping" → "off"
+        2. Input connections are gracefully closed
+        3. Encoding pipelines are shut down
+        4. Manifest playlists stop updating (existing segments remain available for 14 days)
+        5. If live_to_vod is enabled, final VOD asset is created
+        
+        **Important Notes:**
+        - A job cannot be stopped while in a transition state (starting, stopping)
+        - Stopped jobs can be restarted without losing configuration
+        - If live_to_vod is enabled, the VOD asset is finalized when the job stops
+        
+        **Response:**
+        Returns the job ID and initiates the stop process asynchronously. Use the Get Job endpoint or subscribe to notifications to confirm the job has reached the "off" state.
+      tags:
+        - jobs
+  v2/accounts/{account_id}/jobs/{job_id}/thumbnail:
+    get:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Optional pipeline ID to filter thumbnails for a specific encoding pipeline. If not provided, thumbnails from all pipelines are returned.
+          in: query
+          name: pipeline_id
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.GetThumbnailResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: Get thumbnail images from a processing job
+      description: |
+        Retrieve thumbnail images generated from a live streaming job for use in previews, thumbnails, or monitoring.
+        
+        **Thumbnail Overview:**
+        This endpoint provides access to thumbnail images captured from the live stream, useful for creating preview images or generating poster frames.
+        
+        **How It Works:**
+        - Returns thumbnails from all encoding pipelines
+        - Each thumbnail includes binary data, content type, timestamp, and type
+        
+        **Response Structure:**
+        Returns thumbnail details organized by pipeline, with each thumbnail containing binary data (base64 encoded), content type, timestamp, and thumbnail type.
+      tags:
+        - jobs
+  v2/accounts/{account_id}/jobs/{job_id}/cuepoint:
+    post:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoint.InsertCuePointRequest'
+        description: Cuepoint Config
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Job'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/update
+      summary: Inserts Cuepoint into running stream
+      description: |
+        Insert a cue point (ad break trigger) into a live stream that has SSAI enabled, allowing dynamic ad insertion at specific moments.
+        
+        **Cue Point Overview:**
+        Cue points signal the ad server to insert ads at specific times during live playback. This endpoint allows you to programmatically trigger ad breaks in real-time, providing precise control over ad placement.
+        
+        **How It Works:**
+        1. Specify the duration for the ad break
+        2. Optionally provide ad server data in various formats
+        3. The cue point is inserted into the stream
+        4. Viewers see ads during playback at the specified time
+        
+        **Important Notes:**
+        - The job must have SSAI enabled
+        - The job must be in the "on" state and receiving input
+        - Cue points are inserted in real-time and affect current and future viewers
+        - Ad server data format must match your ad configuration
+        - Duration should align with your ad pod configuration
+        - **Timing:** Ads will be inserted at the end of a segment. It can take 35-40 seconds for ads to appear in the player after inserting a cue point. The first ad break insertion may not show ads immediately because ads need to be transcoded before insertion.
+        
+        **Response:**
+        Returns the updated job object confirming the cue point was inserted. The ad break will appear in the stream for viewers who join after the cue point.
+      tags:
+        - ssai
+  v2/accounts/{account_id}/jobs/{job_id}/metrics:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: comma separated metric names to query
+          in: query
+          name: name
+          required: true
+          schema:
+            type: string
+        - description: 'period filter in seconds (ex: 30s, 60s)'
+          in: query
+          name: period
+          schema:
+            type: string
+        - description: 'range filter in hours (ex: 1h, 3h)'
+          in: query
+          name: range
+          schema:
+            type: string
+        - description: 'start time in epoch timestamp seconds(ex: 1740067180)'
+          in: query
+          name: start
+          schema:
+            type: string
+        - description: 'end time in epoch timestamp seconds(ex: 1740067180)'
+          in: query
+          name: end
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.GetJobMetricsResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/metrics/read
+      summary: Get Job metrics
+      description: |
+        Retrieve detailed performance metrics for a specific live streaming job, providing real-time data on key performance indicators.
+        
+        **Metrics Overview:**
+        This endpoint provides comprehensive monitoring data for live streaming jobs, including encoding performance, input quality, output distribution, and system health metrics. Metrics are aggregated over specified time periods and can be filtered by time range.
+        
+        **How It Works:**
+        1. Specify comma-separated metric names to query
+        2. Define time period (granularity) and range (time window)
+        3. Optionally specify exact start and end times
+        4. System returns aggregated metric data points
+        
+        **Important Notes:**
+        - The range value must be compatible with the selected period
+        - Metrics are only available while the job is running and for a limited time after
+        - Use Get All Supported Metrics to see available metric names
+        
+        **Response Structure:**
+        Returns metric data organized by dimension (e.g., input source) with time-series values. Each data point includes timestamp and metric value.
+      tags:
+        - metricsapi
+  v2/accounts/{account_id}/jobs/{job_id}/notifications:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Pagination token for fetching next page of results
+          in: query
+          name: last_key
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.NotificationsResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: List notifications for a job
+      description: |
+        Retrieve all notifications generated for a specific live streaming job, including state changes and error events.
+        
+        **Job Notifications Overview:**
+        This endpoint provides access to the notification history for a job, allowing you to track state transitions, errors, and other events that occurred during the job's lifecycle.
+        
+        **How It Works:**
+        - Returns paginated list of notifications
+        - Notifications include event type, timestamp, message, and resource details
+        - Supports pagination using last_key parameter
+        - Notifications are ordered by timestamp
+        
+        **Response Structure:**
+        Returns an array of notification objects with code, message, resource_id, resource_type, timestamp, and type. Use last_key for pagination to retrieve older notifications.
+      tags:
+        - jobs
+  v2/accounts/{account_id}/jobs/{job_id}/supported-metrics:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.GetAllSupportedMetricsResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/metrics/read
+      summary: Get all supported metrics
+      description: |
+        Retrieve a comprehensive list of all metrics available for monitoring live streaming jobs.
+        
+        **Supported Metrics Overview:**
+        This endpoint provides metadata about all available metrics, including their names, categories, labels, units, and supported statistics (e.g., average, sum, min, max).
+        
+        **How It Works:**
+        - Returns a list of metric definitions for the specified job
+        - Each metric includes category, label, name, unit, and available statistics
+        - Use metric names from this list in the Get Job Metrics endpoint
+        
+        **Response Structure:**
+        Returns an array of metric objects, each containing:
+        - `category`: Metric category (e.g., "encoding", "input", "output")
+        - `label`: Human-readable label
+        - `name`: Metric identifier (use in Get Job Metrics queries)
+        - `statistics`: Available aggregation methods (e.g., ["average", "sum"])
+        - `unit`: Unit of measurement (e.g., "kbps", "ms", "count")
+      tags:
+        - metricsapi
+  v2/accounts/{account_id}/notifications:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Pagination token for fetching next page of results
+          in: query
+          name: last_key
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.NotificationsResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: List notifications for an account
+      description: |
+        Retrieve all notifications across all jobs in your account, providing a centralized view of system events and job status changes.
+        
+        **Account Notifications Overview:**
+        This endpoint aggregates notifications from all jobs in your account, giving you a high-level view of system activity, errors, and state changes across your entire live streaming infrastructure.
+        
+        **How It Works:**
+        - Returns paginated list of notifications from all jobs
+        - Notifications include job ID, event type, timestamp, and details
+        - Supports pagination using last_key parameter
+        - Useful for account-wide monitoring and alerting
+        
+        **Response Structure:**
+        Returns an array of notification objects with code, message, resource_id (job ID), resource_type, timestamp, and type. Use last_key for pagination.
+      tags:
+        - jobs
+  v2/accounts/{account_id}/playback/{job_id}/token:
+    post:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/endpoint.CreateTokenRequest'
+        description: Token Config
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.CreateTokenResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/create
+      summary: Create a playback token for a job
+      description: |
+        Generate a playback token that allows selective modification of the viewer's playback experience for a live streaming job.
+        
+        **Playback Token Overview:**
+        The playback token provides granular control over how viewers experience your live stream. By configuring various parameters, you can customize features such as ad insertion, DVR capabilities, CDN routing, and timeshift playback - all on a per-session basis without modifying the underlying job configuration.
+        
+        **Timeshift Playback:**
+        This powerful feature enables viewers to watch previously broadcast content from your live streams. Timeshift playback supports:
+        - Viewing any portion of a live stream from the last 14 days
+        - Creating playback windows of up to 24 hours in duration
+        - Seamless navigation within the specified time range using start_time and end_time parameters
+        
+        This is particularly useful for catching up on missed content, creating highlight reels, or providing on-demand access to recent live events.
+        
+        **Use Cases:**
+        - Enable different ad configurations for different viewer segments
+        - Provide DVR controls for premium subscribers
+        - Route specific viewers through custom CDN configurations
+        - Allow replay of recent broadcast segments through timeshift
+        - Control latency settings based on viewer requirements
+      tags:
+        - playback
+  v2/accounts/{account_id}/playback/{job_id}/sources/batch:
+    post:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                $ref: '#/components/schemas/endpoint.BatchPlaybackRequest'
+              type: object
+            example:
+              dvr:
+                playback:
+                  manifest_format: "hls"
+                  dvr: true
+              non-dvr:
+                playback:
+                  manifest_format: "hls"
+        description: Batch Sources Config
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.BatchGenerateSourcesResponse'
+              example:
+                dvr:
+                  - codecs: "mp4a,avc1"
+                    ext_x_version: "6"
+                    key_systems:
+                      com.apple.fps.1_0:
+                        certificate_url: "https://license.live.brightcove.com/cert/fp?token=<jwt>"
+                        key_request_url: "https://license.live.brightcove.com/lic/fp?token=<jwt>"
+                      com.widevine.alpha:
+                        license_url: "https://license.live.brightcove.com/lic/wv?token=<jwt>"
+                      com.microsoft.playready:
+                        license_url: "https://license.live.brightcove.com/lic/pr?token=<jwt>"
+                    src: "https://fastly.live.brightcove.com/<job_id>/<region>/<account_id>/<token>/playlist-hls.m3u8"
+                    type: "application/x-mpegURL"
+                    uploaded_at: ""
+                non-dvr:
+                  - codecs: "mp4a,avc1"
+                    ext_x_version: "6"
+                    key_systems:
+                      com.apple.fps.1_0:
+                        certificate_url: "https://license.live.brightcove.com/cert/fp?token=<jwt>"
+                        key_request_url: "https://license.live.brightcove.com/lic/fp?token=<jwt>"
+                      com.widevine.alpha:
+                        license_url: "https://license.live.brightcove.com/lic/wv?token=<jwt>"
+                      com.microsoft.playready:
+                        license_url: "https://license.live.brightcove.com/lic/pr?token=<jwt>"
+                    src: "https://fastly.live.brightcove.com/<job_id>/<region>/<account_id>/<token>/playlist-hls.m3u8"
+                    type: "application/x-mpegURL"
+                    uploaded_at: ""
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: Generate batch sources for a job
+      description: |
+        Generate multiple playback source configurations in a single request with different playback parameters.
+        
+        **Batch Playback Overview:**
+        This endpoint allows you to create multiple playback configurations simultaneously, each with different parameters. This is particularly useful when you need to provide multiple viewing experiences (e.g., with DVR and without DVR, different ad configurations, or different CDN routes) in a single API call.
+        
+        **How It Works:**
+        - The request body accepts a map/object where each key is an arbitrary label you define
+        - Each label maps to a playback configuration with specific parameters (similar to the single token endpoint)
+        - The response returns sources for each labeled configuration, using the same labels you provided
+        - You can use any meaningful labels (e.g., "dvr", "non-dvr", "premium", "free-tier", "ads-enabled", etc.)
+        
+        **Common Use Cases:**
+        - Generate both DVR-enabled and non-DVR playlists simultaneously
+        - Create multiple playlists with different ad configurations for A/B testing
+        - Provide different quality tiers or CDN routes for various viewer segments
+        - Generate playlists with different manifest formats (HLS and DASH) in one call
+        
+        **Response Structure:**
+        The response mirrors your request structure, returning an array of source objects for each label.
+
+        **DRM Support:**
+        For jobs with DRM encryption enabled, each source object includes a `key_systems` field containing the DRM configuration for all enabled systems. Depending on the encryption modes configured on the job, `key_systems` may include `com.apple.fps.1_0` (FairPlay), `com.widevine.alpha` (Widevine), and/or `com.microsoft.playready` (PlayReady). Each key system provides the necessary license URLs for the player to acquire decryption keys.
+      tags:
+        - playback
+  v2/accounts/{account_id}/sessions/{id}:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Session ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.GetSessionResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: Get a session from a session id
+      description: |
+        Retrieve details about a specific playback session.
+        
+        **Session Overview:**
+        This endpoint allows you to retrieve information about a specific session.
+        
+        **How It Works:**
+        - Provide a session ID
+        - System returns session details including timestamps and resource association
+        
+        **Response Structure:**
+        Returns session object with account_id, resource_id (job ID), id (session ID), start_time, and end_time.
+      tags:
+        - session
+  v2/accounts/{account_id}/sessions/{id}/events:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Session ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/external.SessionEvent'
+                type: array
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: Get events from a session
+      description: |    
+        Retrieve all events associated with a specific playback session.
+        
+        **Session Events Overview:**
+        This endpoint provides an event log for a playback session.
+        
+        **How It Works:**
+        - Provide a session ID
+        - System returns all events related to that session
+        - Events are ordered by timestamp
+        
+        **Response Structure:**
+        Returns an array of session event objects, each containing event_type, session_id, id, and timestamp.
+      tags:
+        - session
+  v2/accounts/{account_id}/sessions/resource/{id}:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Resource ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - description: Return sessions that started after start time
+          in: query
+          name: start
+          schema:
+            type: number
+        - description: Return sessions that started before end time
+          in: query
+          name: end
+          schema:
+            type: number
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.GetResourceSessionsResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/jobs/read
+      summary: Get sessions for a resource
+      description: |
+        Retrieve all playback sessions associated with a specific job (resource).
+        
+        **Resource Sessions Overview:**
+        This endpoint aggregates all playback sessions for a job, providing insights into sessions for a specific live stream.
+        
+        **How It Works:**
+        - Specify the resource ID (job ID)
+        - Optionally filter by start and end time ranges
+        - System returns all sessions that occurred during the specified period
+        - Sessions are ordered by start time
+        
+        **Response Structure:**
+        Returns an array of session objects, each containing account_id, resource_id, session id, start_time, and end_time. Use start/end query parameters to filter by time range.
+      tags:
+        - session
+  v2/accounts/{account_id}/settings/cdns/tokens:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.GetBYOCDNTokensResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/settings/read
+      summary: List CDN Tokens registered to an account
+      description: |
+        Retrieve all CDN tokens registered to your account for Bring Your Own CDN (BYO CDN) configurations.
+        
+        **CDN Tokens Overview:**
+        This endpoint returns a list of all CDN tokens associated with your account. CDN tokens are used to authenticate and authorize playback requests when using your own CDN infrastructure with Brightcove Live streams.
+        
+        **How It Works:**
+        - Returns all CDN tokens for the account
+        - Each token includes hostname, expiration details, and metadata
+        - Tokens are used in playback token requests via the `byocdn_id` parameter
+        
+        **Response Structure:**
+        Returns an array of CDN token objects, each containing account_id, id, hostname, issued_at, expires_at, and ttl (time-to-live) information.
+      tags:
+        - settings
+  v2/accounts/{account_id}/ssai/ad-configs:
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.ListAdConfigsResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/ssai/read
+      summary: Lists Ad Configs
+      description: |
+        Retrieve all Server-Side Ad Insertion (SSAI) ad configurations associated with your account.
+        
+        **Ad Configs Overview:**
+        This endpoint returns a list of all ad configurations that can be used to insert ads into live streaming jobs. Each configuration includes ad server settings, custom beacons, and metadata.
+        
+        **How It Works:**
+        - Returns all ad configurations for the account
+        - Each config includes ad server URL, response type, headers, and custom beacons
+        - Use the config ID when creating jobs with SSAI enabled
+        
+        **Response Structure:**
+        Returns an array of ad configuration objects, each containing the configuration ID, description, ad server settings, and custom beacon URLs.
+      tags:
+        - ssai
+    post:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ssai.AdConfiguration'
+        description: |
+          Ad configuration object. Required fields:
+          - **description**: Human-readable description of the ad configuration
+          - **ad_server.url**: Ad tag URL from your ad server
+          - **ad_server.response_type**: Response format (dfp, vast, or vmap - case-insensitive)
+          
+          Optional fields:
+          - **ad_server.headers**: Custom HTTP headers for ad server authentication or targeting
+          - **custom_beacons**: Array of tracking beacons with event names and URLs
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ssai.AdConfiguration'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/ssai/create
+      summary: Creates an Ad Config
+      description: |
+        Create a new Server-Side Ad Insertion (SSAI) ad configuration that can be used to enable dynamic ad insertion in live streams.
+        
+        **Ad Config Creation Overview:**
+        This endpoint creates a reusable ad configuration that defines how ads are fetched, inserted, and tracked in your live streams. Once created, the configuration can be referenced by multiple jobs.
+        
+        **How It Works:**
+        1. Define ad server URL and response type (VAST, VMAP, SmartXML, Playlist)
+        2. Configure custom headers for ad server authentication
+        3. Set up custom beacons for ad event tracking
+        4. System validates and stores the configuration
+        5. Configuration ID is returned for use in job creation
+        
+        **Key Configuration Elements:**
+        - **Ad Server**: URL and response type for your ad decisioning server
+        - **Headers**: Custom HTTP headers for authentication or targeting
+        - **Custom Beacons**: URLs to track ad playback events (start, complete, quartiles)
+        - **Description**: Human-readable name for the configuration
+        
+        **Response:**
+        Returns the created ad configuration with assigned ID. Use this ID in the `ad_config_id` field when creating jobs with SSAI enabled, or in playback token requests.
+      tags:
+        - ssai
+  v2/accounts/{account_id}/ssai/ad-configs/{ad_config_id}:
+    delete:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Ad Config ID
+          in: path
+          name: ad_config_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.DeleteAdConfigResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/ssai/delete
+      summary: Deletes an Ad Config
+      description: |
+        Permanently delete an SSAI ad configuration. This action cannot be undone.
+        
+        **Delete Ad Config Overview:**
+        This endpoint removes an ad configuration from your account. Once deleted, the configuration cannot be used in new jobs or playback tokens.
+        
+        **How It Works:**
+        1. Provide the ad configuration ID
+        2. System validates the config is not in use
+        3. Configuration is permanently deleted
+        4. Config ID becomes invalid for future use
+        
+        **Response:**
+        Returns the deleted ad configuration ID confirming the deletion.
+      tags:
+        - ssai
+    get:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Ad Config ID
+          in: path
+          name: ad_config_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.GetAdConfigResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/ssai/read
+      summary: Gets an Ad Config
+      description: |
+        Retrieve the complete configuration of a specific SSAI ad configuration, including ad server settings, custom beacons, and metadata.
+        
+        **Get Ad Config Overview:**
+        This endpoint returns the full details of an ad configuration, allowing you to review settings, verify configuration.
+        
+        **How It Works:**
+        - Provide the ad configuration ID
+        - System returns complete configuration including ad server URL, response type, headers, custom beacons, and description
+        
+        **Response Structure:**
+        Returns ad configuration object with account_id, id, description, ad_server (URL, response_type, headers), and custom_beacons array.
+      tags:
+        - ssai
+    put:
+      parameters:
+        - description: Account ID
+          in: path
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Ad Config ID
+          in: path
+          name: ad_config_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ssai.AdConfiguration'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.UpdateAdConfigResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      security:
+        - BC_OAuth2:
+            - video-cloud/livev2/ssai/update
+      summary: Updates existing ad config
+      description: |
+        Modify an existing SSAI ad configuration, updating ad server settings, custom beacons, or description.
+      
+        **How It Works:**
+        1. Provide the ad configuration ID in the path
+        2. Include the updated ad configuration object in the request body with the fields you want to modify
+        3. System validates the changes and updates the configuration
+        4. Updated configuration is returned with all current settings
+        
+        **Response:**
+        Returns the complete updated ad configuration object with account_id, id, description, ad_server settings, and custom_beacons array.
+      tags:
+        - ssai
+  v2/healthcheck:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/probes.healthCheck'
+          description: OK
+        "500":
+          description: Internal Server Error
+      summary: Healthcheck
+      description: |
+        Check the health and availability of the Live API service.
+        
+        **Healthcheck Overview:**
+        This endpoint provides a simple way to verify that the Live API is operational and responding to requests. Useful for monitoring service status.
+        
+        **How It Works:**
+        - Returns service health status
+        - Includes build version and git SHA for version identification
+        - No authentication required
+        
+        **Response Structure:**
+        Returns health check object with build_version and git_sha fields indicating the current API version.
+      tags:
+        - misc
+  v2/playback/{job_id}:
+    get:
+      parameters:
+        - description: Job ID
+          in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+        - description: Account ID
+          in: query
+          name: account_id
+          required: true
+          schema:
+            type: string
+        - description: Playback Token
+          in: query
+          name: pt
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/endpoint.GeneratePlaybackURLResponse'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/external.Error'
+          description: Internal Server Error
+      summary: Generate a playback url for a job
+      description: |
+        Generate a playback URL for a live stream using a previously created playback token.
+        
+        **Playback URL Overview:**
+        This endpoint converts a playback token into a direct playback URL that can be used in video players. The URL incorporates all the settings specified when the token was created (DVR, SSAI, timeshift, etc.).
+        
+        **How It Works:**
+        1. Provide the job ID and playback token (created via Create Token endpoint)
+        2. The system generates a playback URL with token parameters embedded
+        3. The URL points to the appropriate manifest (HLS or DASH)
+          
+        **Important Notes:**
+        - The job must be running and receiving input for playback to work
+        - URL format depends on manifest type (HLS .m3u8 or DASH .mpd)
+        - The token's settings (DVR, SSAI, etc.) are applied to the generated URL
+        
+        **Response:**
+        Returns a JSON object with a single "url" field containing the playback URL. This URL can be used directly in Brightcove Player.
+      tags:
+        - playback
+servers:
+  - url: https://api.live.brightcove.com
