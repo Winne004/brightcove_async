@@ -76,6 +76,19 @@ async def test_create_policy_key(policy_service):
 
 
 @pytest.mark.asyncio
+async def test_create_policy_key_rejects_account_id_mismatch(policy_service):
+    with patch.object(
+        policy_service, "fetch_data", new_callable=AsyncMock
+    ) as mock_fetch:
+        key_data = PolicyKeyData(account_id="other")
+
+        with pytest.raises(ValueError, match="must match the account_id"):
+            await policy_service.create_policy_key("account123", key_data)
+
+        mock_fetch.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_get_policy_key(policy_service):
     with patch.object(
         policy_service, "fetch_data", new_callable=AsyncMock

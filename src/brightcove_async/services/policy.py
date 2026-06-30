@@ -34,6 +34,9 @@ class Policy(Base):
     ) -> PolicyKey:
         """Create a new policy key to access the Playback API.
 
+        The account id in ``key_data`` must match the ``account_id`` path
+        argument; a ``ValueError`` is raised if they differ.
+
         Args:
             account_id: Video Cloud account ID.
             key_data: The data prescribing the policy key (account id, permitted
@@ -42,6 +45,12 @@ class Policy(Base):
         Returns:
             The created policy key, including its key string.
         """
+        if key_data.account_id != account_id:
+            raise ValueError(
+                "key_data.account_id "
+                f"({key_data.account_id!r}) must match the account_id path "
+                f"argument ({account_id!r})."
+            )
         return await self.fetch_data(
             endpoint=f"{self.base_url}/accounts/{account_id}/policy_keys",
             model=PolicyKey,
