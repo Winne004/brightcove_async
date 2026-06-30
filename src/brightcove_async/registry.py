@@ -7,6 +7,7 @@ from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
 from brightcove_async.services.images import Images
 from brightcove_async.services.ingest_profiles import IngestProfiles
+from brightcove_async.services.live import Live
 from brightcove_async.services.syndication import Syndication
 from brightcove_async.settings import BrightcoveBaseAPIConfig
 
@@ -46,5 +47,9 @@ def build_service_registry(config: BrightcoveBaseAPIConfig) -> dict[str, Service
         "images": ServiceConfig(
             cls=Images,
             base_url=config.images_base_url,
+        ),
+        "live": ServiceConfig(
+            cls=Live,
+            base_url=config.live_base_url,
         ),
     }

@@ -68,6 +68,60 @@ class GetViewEventsParams(GetLeadsParams):
     pass
 
 
+class ListLiveJobsParams(ParamsBase):
+    """Query parameters for listing Live jobs.
+
+    ``regions`` accepts a comma-separated string of region names. The timestamp
+    filters (``modified_at``/``created_at``) use the API's ``<op>:<unixmillis>``
+    format, and ``processing_state`` uses ``<op>:<state>`` (e.g. ``eq:on``).
+    """
+
+    regions: str | None = None
+    modified_at: str | None = None
+    created_at: str | None = None
+    processing_state: str | None = None
+    ingest_state: str | None = None
+    type: str | None = None
+
+
+class LiveSchedulerListParams(ParamsBase):
+    """Query parameters for listing job schedules or scheduled clips."""
+
+    page_size: int | None = None
+    start_token: str | None = None
+    state: str | None = None
+    start: int | None = None
+    end: int | None = None
+
+
+class GetLiveJobMetricsParams(ParamsBase):
+    """Query parameters for the Live job metrics endpoint.
+
+    ``name`` is a comma-separated list of metric names (required). ``period``
+    and ``range`` use the API's unit suffixes (e.g. ``30s``, ``1h``).
+    """
+
+    name: str
+    period: str | None = None
+    range_: str | None = Field(default=None, serialization_alias="range")
+    start: str | None = None
+    end: str | None = None
+
+
+class LiveResourceSessionsParams(ParamsBase):
+    """Query parameters for listing sessions for a resource (job)."""
+
+    start: float | None = None
+    end: float | None = None
+
+
+class GeneratePlaybackURLParams(ParamsBase):
+    """Query parameters for generating a playback URL from a token."""
+
+    account_id: str
+    pt: str
+
+
 class ImageTransformParams(ParamsBase):
     """Query parameters for the Image API transformation endpoint.
 
