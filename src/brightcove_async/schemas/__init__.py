@@ -202,6 +202,14 @@ from .params import (
     LiveSchedulerListParams,
 )
 
+# ── Policy models ──────────────────────────────────────────────────────────────
+from .policy_model import (
+    CreatePolicyKeyBody,
+    PolicyGeo,
+    PolicyKey,
+    PolicyKeyData,
+)
+
 # ── Syndication models ─────────────────────────────────────────────────────────
 from .syndication_model import (
     Syndication,
@@ -403,4 +411,9 @@ __all__ = [
     "ListAdConfigsResponse",
     "DeleteAdConfigResponse",
     "HealthCheck",
+    # Policy
+    "CreatePolicyKeyBody",
+    "PolicyGeo",
+    "PolicyKey",
+    "PolicyKeyData",
 ]

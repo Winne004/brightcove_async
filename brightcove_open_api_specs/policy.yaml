@@ -1,0 +1,326 @@
+openapi: 3.0.3
+x-bc-implicit-head: true
+x-bc-implicit-options: true
+x-bc-upstream: 'https://backend_server'
+info:
+  title: Policy API Reference
+  description: |-
+    Reference for the Brightcove Policy API, used to create policy keys to
+    access the Playback API. This API is used to generate keys to access the
+    Playback API outside the context of a Brightcove Player.
+    <br><br><strong>Notes:</strong><ul><li>Policy keys are generated
+    automatically for Brightcove Players.</li><li>To test API requests, you can
+    use our <a href="/getting-started/concepts-testing-tools-brightcove-apis.html"
+    target="_blank">API Testing Tools</a></li></ul>
+
+    For additional in-depth guides to features of the API, see the **[general documentation](/policy/index.html)**.
+
+     **Base URL**: https://policy.api.brightcove.com/v1
+  version: 1.0.0
+  x-bc-access: public
+servers:
+  - url: 'https://policy.api.brightcove.com/v1'
+    variables: {}
+tags:
+  - name: Policy
+    description: Operations for creating and retrieving policy keys for Brightcove Players.
+paths:
+  '/accounts/{{account_id}}/policy_keys':
+    post:
+      tags:
+        - Policy
+      summary: Create a Policy Key
+      description: |-
+        'Create a new policy key to access the Playback API '
+      operationId: CreateAPolicyKey
+      security:
+        - BC_OAuth2:
+          - video-cloud/player/all
+      parameters:
+        - name: account_id
+          in: path
+          description: Video Cloud account ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          description: 'Content-Type: application/json'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: 'Authorization: Bearer access_token (see [Getting Access Tokens](/oauth/guides/getting-access-tokens.html))'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: Create a new policy key to access the Playback API
+        content:
+          application/json:
+            schema:
+              description: Create a new policy key to access the Playback API
+              $ref: '#/components/schemas/CreateAPolicyKeybody'
+        required: true
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePolicyKeyResponse'
+        '400':
+          description: >-
+            NOT_AVAILABLE: The resource you are requesting is temporarily unavailable
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your policy
+            key is correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '500':
+          description: |-
+            UNKNOWN: Issue in Brightcove system; try again later.
+            TIMEOUT: Server likely too busy; try again later.
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+  '/accounts/{{account_id}}/policy_keys/{key_string}':
+    get:
+      tags:
+        - Policy
+      summary: Get Policy
+      description: 'Get a policy key associated with a policy key string '
+      operationId: GetPolicy
+      security:
+        - BC_OAuth2:
+          - video-cloud/player/read
+      parameters:
+        - name: account_id
+          in: path
+          description: Video Cloud account ID
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: key_string
+          in: path
+          description: the key string for the policy
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          description: 'Content-Type: application/json'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: 'Authorization: Bearer access_token (see [Getting Access Tokens](/oauth/guides/getting-access-tokens.html))'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPolicy200'
+        '400':
+          description: >-
+            NOT_AVAILABLE: The resource you are requesting is temporarily unavailable
+        '401':
+          description: >-
+            UNAUTHORIZED: Authentication failed; check to make sure your policy
+            key is correct
+        '404':
+          description: >-
+            RESOURCE_NOT_FOUND: The api could not find the resource you requested
+        '500':
+          description: |-
+            UNKNOWN: Issue in Brightcove system; try again later.
+            TIMEOUT: Server likely too busy; try again later.
+      deprecated: false
+      x-operation-settings:
+        CollectParameters: false
+        AllowDynamicQueryParameters: false
+        AllowDynamicFormParameters: false
+        IsMultiContentStreaming: false
+components:
+  schemas:
+    CreateAPolicyKeybody:
+      title: Create_a_Policy_KeyBody
+      required:
+        - key-data
+      type: object
+      properties:
+        key-data:
+          description: Data for the policy key
+          $ref: '#/components/schemas/CreateAPolicyKeybody.key-data'
+    CreateAPolicyKeybody.key-data:
+      title: Create_a_Policy_KeyBody.key-data
+      required:
+        - account-id
+      type: object
+      properties:
+        account-id:
+          type: string
+          description: Video Cloud account id
+        apis:
+          type: array
+          items:
+            type: string
+          description: >-
+            Array of APIs that are permitted for this key (currently
+            &quot;search&quot; is the only one available - this must be included
+            to use the search functionality for the Playback API)
+        allowed-domains:
+          type: array
+          items:
+            type: string
+          description: 'For domain restriction, the domains this key will work on'
+        require-ad-config:
+          type: boolean
+          description: >-
+            Whether Playback API requests require an ad-config-id URL parameter
+            for server-side ad insertion
+        geo:
+          description: Map of geo-filtering properties
+          $ref: '#/components/schemas/CreateAPolicyKeybody.key-data.geo'
+    CreateAPolicyKeybody.key-data.geo:
+      title: Create_a_Policy_KeyBody.key-data.geo
+      type: object
+      properties:
+        countries:
+          type: array
+          items:
+            type: string
+          description: >-
+            Array of ISO 3166 list of 2- or 4-letter codes in lower-case (search
+            for &quot;country codes&quot;)
+        exclude_countries:
+          type: boolean
+          description: >-
+            If true, country array is treated as a list of countries excluded
+            from viewing. If false, the country array is a list of countries
+            included for viewing.
+    CreatePolicyKeyResponse:
+      title:  Create Policy Key Response
+      required:
+        - key_string
+        - key-data
+      type: object
+      properties:
+        key_string:
+          type: string
+          description: The policy key string
+        key-data:
+          description: Map of key data prescribing the policy
+          $ref: '#/components/schemas/KeyData'
+      example: {
+          "key-string": "BCpkADawqM1IftwCYR6HsNBjvIoCgGZdeSz6f1zJYW4mGg7YFiCIejFI1np9eYIsweJ_RynK7mXlB1vYCN8BCRbgp9MrXPRzGlLiShLBd5HGnRjYsLsb6p02eDpFKuNu_jwKLzlvdRjJR5fQPpCxUFlpPL_55HXWZtwfWeyolAuxK7q2V2Nc6p1J-cu",
+          "key-data": {
+            "account-id": "2728142649001",
+            "apis": [
+              "search"
+            ],
+            "allowed-domains": [
+              "https://54.210.55.162"
+            ]
+          }
+        }
+    KeyData:
+      title: key-data
+      required:
+        - account-id
+        - apis
+        - allowed-domains
+        - require-ad-config
+        - geo
+      type: object
+      properties:
+        account-id:
+          type: string
+          description: The Video Cloud account id
+        apis:
+          type: array
+          items:
+            type: string
+          description: Array of apis permitted for the key
+        allowed-domains:
+          type: array
+          items:
+            type: string
+          description: Array of domains allowed to use this key
+        require-ad-config:
+          type: boolean
+          description: >-
+            Whether Playback API requests require an ad-config-id URL parameter
+            for server-side ad insertion
+        geo:
+          description: Map of geo-filtering properties
+          $ref: '#/components/schemas/KeyData.geo'
+    KeyData.geo:
+      title: key-data.geo
+      required:
+        - countries
+        - exclude_countries
+      type: object
+      properties:
+        countries:
+          type: array
+          items:
+            type: string
+          description: >-
+            Array of ISO 3166 list of 2- or 4-letter codes in lower-case (search
+            for &quot;country codes&quot;)
+        exclude_countries:
+          type: boolean
+          description: >-
+            If true, country array is treated as a list of countries excluded
+            from viewing. If false, the country array is a list of countries
+            included for viewing.
+    GetPolicy200:
+      title: Get_Policy200
+      required:
+        - key_string
+        - key-data
+      type: object
+      properties:
+        key_string:
+          type: string
+          description: The policy key string
+        key-data:
+          description: Map of key data prescribing the policy
+          $ref: '#/components/schemas/KeyData'
+  securitySchemes:
+    BC_OAuth2:
+      type: oauth2
+      description: >-
+        Brightcove OAuth API. See the [support documentation](/oauth/index.html) or [Getting Access Tokens](/oauth/code-samples/oauth-api-sample-get-access-token.html) to learn more
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://oauth.brightcove.com/v4/access_token'
+          scopes:
+            video-cloud/player/read: Read player data
+            video-cloud/player/all: Read/write player data

@@ -10,7 +10,7 @@
 - Per-service rate limiting via `aiolimiter`.
 - Automatic retries for transient failures (connection drops, `401`, `429`) with `tenacity`, including `Retry-After` support on rate-limited responses.
 - Brightcove HTTP errors mapped to a typed exception hierarchy.
-- Coverage for the CMS, Analytics, Audience, Syndication, Dynamic Ingest, Ingest Profiles, Image, and Live APIs.
+- Coverage for the CMS, Analytics, Audience, Syndication, Dynamic Ingest, Ingest Profiles, Image, Live, and Policy APIs.
 
 ## Installation
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Services are exposed as properties on the client (`bc.cms`, `bc.analytics`, `bc.audience`, `bc.syndication`, `bc.dynamic_ingest`, `bc.ingest_profiles`, `bc.images`, `bc.live`) and are created lazily on first access.
+Services are exposed as properties on the client (`bc.cms`, `bc.analytics`, `bc.audience`, `bc.syndication`, `bc.dynamic_ingest`, `bc.ingest_profiles`, `bc.images`, `bc.live`, `bc.policy`) and are created lazily on first access.
 
 Schema models can be imported from the top-level `brightcove_async.schemas` namespace or directly from the submodule:
 
@@ -328,6 +328,7 @@ Each service has its own request-per-second budget enforced by an `AsyncLimiter`
 | `ingest_profiles` | `get_ingest_profiles` |
 | `images` | `transform_image` |
 | `live` | Jobs: `list_jobs`, `create_job`, `get_job`, `update_job`, `finish_job`, `start_job`, `stop_job`, `clip_job`, `force_failover`, `reset_origin`, `get_thumbnail`, `insert_cuepoint`, `get_job_metrics`, `get_supported_metrics`, `get_job_notifications`, `get_account_notifications`. Scheduler: `list_schedules`, `get_autostop_schedule`, `create_jobstartstop_schedule`, `get_jobstartstop_schedule`, `update_jobstartstop_schedule`, `delete_jobstartstop_schedule`, `list_scheduled_clips`, `create_scheduled_clip`, `get_scheduled_clip`, `update_scheduled_clip`, `delete_scheduled_clip`. Playback: `create_playback_token`, `generate_batch_sources`, `generate_playback_url`. Sessions: `get_session`, `get_session_events`, `get_resource_sessions`. SSAI: `list_ad_configs`, `create_ad_config`, `get_ad_config`, `update_ad_config`, `delete_ad_config`. Settings/misc: `list_cdn_tokens`, `healthcheck` |
+| `policy` | `create_policy_key`, `get_policy_key` |
 
 ## Development
 

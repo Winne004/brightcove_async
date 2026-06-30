@@ -4,6 +4,7 @@ from brightcove_async.services.cms import CMS
 from brightcove_async.services.dynamic_ingest import DynamicIngest
 from brightcove_async.services.images import Images
 from brightcove_async.services.live import Live
+from brightcove_async.services.policy import Policy
 from brightcove_async.services.syndication import Syndication
 from brightcove_async.settings import BrightcoveBaseAPIConfig
 
@@ -115,6 +116,18 @@ def test_build_service_registry_live_config():
     assert live_config.requests_per_second == 10
 
 
+def test_build_service_registry_policy_config():
+    """Test Policy service configuration in registry."""
+    config = BrightcoveBaseAPIConfig()
+    registry = build_service_registry(config)
+
+    policy_config = registry["policy"]
+
+    assert policy_config.cls == Policy
+    assert policy_config.base_url == config.policy_base_url
+    assert policy_config.requests_per_second == 10
+
+
 def test_build_service_registry_custom_urls():
     """Test build_service_registry with custom URLs."""
     config = BrightcoveBaseAPIConfig(
@@ -151,4 +164,5 @@ def test_service_registry_returns_dict():
         "audience",
         "images",
         "live",
+        "policy",
     }
