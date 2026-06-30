@@ -296,24 +296,28 @@ class JobState(BaseModel):
 
 
 class Job(BaseModel):
+    # Response-only model: every field is optional so a response that omits a
+    # field (the API may do so for partially-configured or audio-only jobs)
+    # parses instead of raising. Request bodies use the strict ConfigureJobRequest
+    # / JobConfig models, which keep input/outputs/region/type required.
     account_id: str | None = None
     audio_only: bool | None = None
     created_at: str | None = None
     encryption: Encryption | None = None
     id: str | None = None
     ingest_endpoints: list[InputIngestPoint] | None = None
-    input: Input
+    input: Input | None = None
     last_started_at: str | None = None
     live_to_vod: bool | None = None
     maintenance_preferences: MaintenancePreferences | None = None
     manifest: ManifestOptions | None = None
     notifications: list[Notification] | None = None
-    outputs: OutputVariants
+    outputs: OutputVariants | None = None
     redundancy: RedundancyOptions | None = None
-    region: str
+    region: str | None = None
     ssai: SSAI | None = None
     state: JobState | None = None
-    type: JobType
+    type: JobType | None = None
 
 
 class JobConfig(BaseModel):
