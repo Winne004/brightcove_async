@@ -354,3 +354,50 @@ async def test_external_session_reusable_across_context_entries():
 
     # External session should never be closed by the client
     external_session.close.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_live_property_lazy_loads_and_is_singleton():
+    """The live property returns a cached Live instance."""
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.live import Live
+
+    services_registry = {
+        "live": ServiceConfig(cls=Live, base_url="https://api.live.brightcove.com"),
+    }
+
+    with patch("aiohttp.ClientSession") as MockSession:
+        mock_session = AsyncMock()
+        MockSession.return_value = mock_session
+
+        client = BrightcoveClient(
+            services_registry=services_registry,
+            client_id="id",
+            client_secret="secret",
+            oauth_cls=DummyOAuth,
+        )
+
+        async with client as c:
+            live1 = c.live
+            live2 = c.live
+            assert isinstance(live1, Live)
+            assert live1 is live2
+
+
+@pytest.mark.asyncio
+async def test_accessing_live_without_context_manager_raises():
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.live import Live
+
+    services_registry = {
+        "live": ServiceConfig(cls=Live, base_url="https://api.live.brightcove.com"),
+    }
+
+    client = BrightcoveClient(
+        services_registry=services_registry,
+        client_id="id",
+        client_secret="secret",
+        oauth_cls=DummyOAuth,
+    )
+    with pytest.raises(RuntimeError, match="Client session not initialized"):
+        _ = client.live
