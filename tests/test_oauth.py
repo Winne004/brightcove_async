@@ -3,7 +3,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import aiohttp
 import pytest
-from aiohttp import BasicAuth
 
 from brightcove_async.oauth.oauth import OAuthClient
 
@@ -52,7 +51,8 @@ async def test_get_access_token_first_request(oauth_client, mock_session):
     mock_session.post.assert_called_once()
     call_kwargs = mock_session.post.call_args.kwargs
     assert call_kwargs["url"] == "https://oauth.brightcove.com/v4/access_token"
-    assert isinstance(call_kwargs["auth"], BasicAuth)
+    expected_auth = aiohttp.encode_basic_auth("test_client_id", "test_secret")
+    assert call_kwargs["headers"]["Authorization"] == expected_auth
 
 
 @pytest.mark.asyncio

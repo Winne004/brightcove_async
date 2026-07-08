@@ -101,16 +101,23 @@ def test_map_status_code_internal_server_error():
     assert exc_class == BrightcoveUnknownError
 
 
-def test_map_status_code_unknown():
-    """Test mapping unknown status code defaults to BrightcoveUnknownError."""
+def test_map_status_code_unmapped_falls_back_by_range():
+    """Statuses without a dedicated exception fall back by 4xx/5xx range."""
     exc_class = map_status_code_to_exception(418)  # I'm a teapot
-    assert exc_class == BrightcoveUnknownError
+    assert exc_class == BrightcoveClientError
+
+    exc_class = map_status_code_to_exception(422)  # Unprocessable Entity
+    assert exc_class == BrightcoveClientError
 
     exc_class = map_status_code_to_exception(502)  # Bad Gateway
-    assert exc_class == BrightcoveUnknownError
+    assert exc_class == BrightcoveServerError
 
-    # Note: 999 is not a valid HTTPStatus, so we skip testing it
-    # The function expects valid HTTP status codes
+    exc_class = map_status_code_to_exception(503)  # Service Unavailable
+    assert exc_class == BrightcoveServerError
+
+    # Outside any known range
+    exc_class = map_status_code_to_exception(999)
+    assert exc_class == BrightcoveUnknownError
 
 
 def test_exceptions_can_be_raised():
