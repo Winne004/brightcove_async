@@ -537,6 +537,26 @@ async def test_fetch_data_translates_timeout_error(base_service, mock_session):
 
 
 @pytest.mark.asyncio
+async def test_fetch_data_bare_connection_error_message(base_service, mock_session):
+    """A message-less ClientConnectionError must not be reported as a timeout."""
+    mock_session.request.return_value.__aenter__.side_effect = (
+        aiohttp.ClientConnectionError()
+    )
+
+    from tenacity import RetryError
+
+    with pytest.raises(RetryError) as exc_info:
+        await base_service.fetch_data(
+            endpoint="https://api.example.com/v1/items",
+            model=DummyModel,
+        )
+
+    exc = exc_info.value.last_attempt.exception()
+    assert isinstance(exc, BrightcoveConnectionError)
+    assert exc.message == "Connection error"
+
+
+@pytest.mark.asyncio
 async def test_fetch_data_retries_on_connection_error(base_service, mock_session):
     """Test that connection errors trigger retry mechanism."""
     mock_response = AsyncMock()

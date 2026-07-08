@@ -237,8 +237,15 @@ class Base(ABC):
             # TimeoutError covers aiohttp's total-timeout expiry
             # (asyncio.TimeoutError), which does not subclass
             # ClientConnectionError but is equally a transport failure.
+            message = str(e)
+            if not message:
+                message = (
+                    "Request timed out"
+                    if isinstance(e, TimeoutError)
+                    else "Connection error"
+                )
             raise BrightcoveConnectionError(
-                message=str(e) or "Request timed out", endpoint=safe_endpoint
+                message=message, endpoint=safe_endpoint
             ) from e
 
     @brightcove_retry
