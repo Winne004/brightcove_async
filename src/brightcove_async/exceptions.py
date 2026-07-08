@@ -103,7 +103,11 @@ class BrightcoveUnknownError(BrightcoveServerError):
 
 
 def map_status_code_to_exception(status_code: int) -> type[BrightcoveError]:
-    """Map HTTP status codes to Brightcove exception classes using HTTPStatus."""
+    """Map HTTP status codes to Brightcove exception classes.
+
+    Statuses without a dedicated exception fall back by range so callers can
+    still distinguish client errors (4xx) from server errors (5xx).
+    """
     mapping = {
         HTTPStatus.UNAUTHORIZED: BrightcoveAuthError,
         HTTPStatus.FORBIDDEN: BrightcoveForbiddenError,
@@ -115,13 +119,11 @@ def map_status_code_to_exception(status_code: int) -> type[BrightcoveError]:
         HTTPStatus.INTERNAL_SERVER_ERROR: BrightcoveUnknownError,
     }
 
-    try:
-        status = (
-            status_code
-            if isinstance(status_code, HTTPStatus)
-            else HTTPStatus(status_code)
-        )
-    except ValueError:
-        return BrightcoveUnknownError
-
-    return mapping.get(status, BrightcoveUnknownError)
+    exc_class = mapping.get(status_code)  # HTTPStatus keys compare equal to ints
+    if exc_class is not None:
+        return exc_class
+    if 400 <= status_code < 500:
+        return BrightcoveClientError
+    if 500 <= status_code < 600:
+        return BrightcoveServerError
+    return BrightcoveUnknownError

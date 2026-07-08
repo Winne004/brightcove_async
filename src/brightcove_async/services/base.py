@@ -233,9 +233,19 @@ class Base(ABC):
             if uses_oauth:
                 self._oauth.invalidate_token()
             raise
-        except aiohttp.ClientConnectionError as e:
+        except (aiohttp.ClientConnectionError, TimeoutError) as e:
+            # TimeoutError covers aiohttp's total-timeout expiry
+            # (asyncio.TimeoutError), which does not subclass
+            # ClientConnectionError but is equally a transport failure.
+            message = str(e)
+            if not message:
+                message = (
+                    "Request timed out"
+                    if isinstance(e, TimeoutError)
+                    else "Connection error"
+                )
             raise BrightcoveConnectionError(
-                message=str(e), endpoint=safe_endpoint
+                message=message, endpoint=safe_endpoint
             ) from e
 
     @brightcove_retry

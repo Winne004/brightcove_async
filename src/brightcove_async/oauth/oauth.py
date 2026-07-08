@@ -2,7 +2,6 @@ import asyncio
 import time
 
 import aiohttp
-from aiohttp import BasicAuth
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -37,7 +36,12 @@ class OAuthClient:
         reraise=True,
     )
     async def _get_access_token(self) -> None:
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": aiohttp.encode_basic_auth(
+                self.client_id, self.client_secret
+            ),
+        }
         data = {"grant_type": "client_credentials"}
 
         async with (
@@ -45,7 +49,6 @@ class OAuthClient:
                 url=self.base_url,
                 headers=headers,
                 data=data,
-                auth=BasicAuth(self.client_id, self.client_secret),
                 timeout=aiohttp.ClientTimeout(total=10),
             ) as response,
         ):
