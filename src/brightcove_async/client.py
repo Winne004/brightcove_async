@@ -130,8 +130,18 @@ class BrightcoveClient:
         if self._external_session is not None:
             self._session = self._external_session
         else:
+            from importlib.metadata import PackageNotFoundError, version
+
+            try:
+                client_version = version("brightcove_async")
+            except PackageNotFoundError:
+                client_version = "unknown"
+
             self._session = aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(limit=100),
+                # Akamai (fronting Brightcove APIs) blocks the default aiohttp
+                # User-Agent as bot traffic, returning an errors.edgesuite.net page.
+                headers={"User-Agent": f"brightcove_async/{client_version}"},
             )
         return self
 
