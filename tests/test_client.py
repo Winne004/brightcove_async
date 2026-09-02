@@ -48,6 +48,92 @@ async def test_context_manager_initializes_and_closes_session():
         assert client._session is None
 
 
+def _make_client(**kwargs):
+    from brightcove_async.registry import ServiceConfig
+    from brightcove_async.services.cms import CMS
+
+    services_registry = {
+        "cms": ServiceConfig(cls=CMS, base_url="cms_url", requests_per_second=4),
+    }
+    return BrightcoveClient(
+        services_registry=services_registry,
+        client_id="id",
+        client_secret="secret",
+        oauth_cls=DummyOAuth,
+        **kwargs,
+    )
+
+
+def test_default_user_agent_is_versioned():
+    """With no override, the User-Agent is brightcove_async/<version>."""
+    client = _make_client()
+    headers = client._build_default_headers()
+    assert headers["User-Agent"].startswith("brightcove_async/")
+
+
+def test_custom_user_agent_overrides_default():
+    client = _make_client(user_agent="my-app/1.0")
+    headers = client._build_default_headers()
+    assert headers["User-Agent"] == "my-app/1.0"
+
+
+def test_default_headers_are_merged_and_can_override_user_agent():
+    client = _make_client(
+        user_agent="my-app/1.0",
+        default_headers={"X-Custom": "abc", "User-Agent": "override/9"},
+    )
+    headers = client._build_default_headers()
+    # default_headers take precedence over the user_agent argument
+    assert headers["User-Agent"] == "override/9"
+    assert headers["X-Custom"] == "abc"
+
+
+@pytest.mark.asyncio
+async def test_session_created_with_custom_headers_and_connection_limit():
+    """__aenter__ builds the aiohttp session with the resolved headers/limit."""
+    captured = {}
+
+    def fake_session(*args, **kwargs):
+        captured.update(kwargs)
+        session = AsyncMock()
+        session.close = AsyncMock()
+        return session
+
+    with (
+        patch("aiohttp.ClientSession", side_effect=fake_session),
+        patch("aiohttp.TCPConnector") as MockConnector,
+    ):
+        client = _make_client(
+            user_agent="my-app/1.0",
+            default_headers={"X-Edge": "pass"},
+            connection_limit=50,
+        )
+        async with client:
+            pass
+
+    assert captured["headers"]["User-Agent"] == "my-app/1.0"
+    assert captured["headers"]["X-Edge"] == "pass"
+    MockConnector.assert_called_once_with(limit=50)
+
+
+@pytest.mark.asyncio
+async def test_external_session_ignores_custom_headers():
+    """A caller-supplied session is used as-is; the client does not build one."""
+    external_session = create_autospec(aiohttp.ClientSession, instance=True)
+    external_session.close = AsyncMock()
+
+    client = _make_client(
+        session=external_session,
+        user_agent="my-app/1.0",
+        default_headers={"X-Edge": "pass"},
+    )
+
+    with patch("aiohttp.ClientSession") as MockSession:
+        async with client as c:
+            assert c._session is external_session
+            MockSession.assert_not_called()
+
+
 @pytest.mark.asyncio
 async def test_oauth_property_lazy_instantiates():
     from brightcove_async.registry import ServiceConfig

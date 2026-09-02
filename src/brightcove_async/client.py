@@ -27,7 +27,23 @@ class BrightcoveClient:
         client_secret: str,
         oauth_cls: type[OAuthClientProtocol],
         session: aiohttp.ClientSession | None = None,
+        user_agent: str | None = None,
+        default_headers: dict[str, str] | None = None,
+        connection_limit: int = 100,
     ) -> None:
+        """Args:.
+
+        user_agent: Overrides the default ``brightcove_async/<version>``
+            User-Agent sent on every request. Useful when Akamai's edge suite
+            blocks a request as bot traffic.
+        default_headers: Extra headers applied to every request on the session
+            (merged over the User-Agent). Also handy for getting past Akamai
+            edge blocks. These are ignored when an external ``session`` is
+            supplied, since that session's headers are owned by the caller.
+        connection_limit: Max simultaneous connections for the underlying
+            aiohttp TCP connector. Ignored when an external ``session`` is
+            supplied.
+        """
         self._oauth_cls = oauth_cls
         self._service_classes = services_registry
         self._session: aiohttp.ClientSession | None = session
@@ -35,6 +51,9 @@ class BrightcoveClient:
         self._oauth: OAuthClientProtocol | None = None
         self._client_id = client_id
         self._client_secret = client_secret
+        self._user_agent = user_agent
+        self._default_headers = default_headers
+        self._connection_limit = connection_limit
         self._services: dict[str, Base] = {}
 
     @property
@@ -126,22 +145,37 @@ class BrightcoveClient:
         """Access the Policy API service."""
         return self._get_service("policy", Policy)
 
+    def _build_default_headers(self) -> dict[str, str]:
+        """Build the default headers applied to every request on the session.
+
+        Starts from the built-in ``brightcove_async/<version>`` User-Agent,
+        applies a caller-supplied ``user_agent`` override, then merges any
+        ``default_headers`` on top (so callers can override the User-Agent and
+        add arbitrary headers to get past Akamai edge blocks).
+        """
+        from importlib.metadata import PackageNotFoundError, version
+
+        try:
+            client_version = version("brightcove_async")
+        except PackageNotFoundError:
+            client_version = "unknown"
+
+        # Akamai (fronting Brightcove APIs) blocks the default aiohttp
+        # User-Agent as bot traffic, returning an errors.edgesuite.net page.
+        headers: dict[str, str] = {
+            "User-Agent": self._user_agent or f"brightcove_async/{client_version}",
+        }
+        if self._default_headers:
+            headers.update(self._default_headers)
+        return headers
+
     async def __aenter__(self) -> Self:
         if self._external_session is not None:
             self._session = self._external_session
         else:
-            from importlib.metadata import PackageNotFoundError, version
-
-            try:
-                client_version = version("brightcove_async")
-            except PackageNotFoundError:
-                client_version = "unknown"
-
             self._session = aiohttp.ClientSession(
-                connector=aiohttp.TCPConnector(limit=100),
-                # Akamai (fronting Brightcove APIs) blocks the default aiohttp
-                # User-Agent as bot traffic, returning an errors.edgesuite.net page.
-                headers={"User-Agent": f"brightcove_async/{client_version}"},
+                connector=aiohttp.TCPConnector(limit=self._connection_limit),
+                headers=self._build_default_headers(),
             )
         return self
 

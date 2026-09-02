@@ -3,7 +3,23 @@ from unittest.mock import MagicMock, patch
 from brightcove_async.client import BrightcoveClient
 from brightcove_async.initialise import initialise_brightcove_client
 from brightcove_async.oauth.oauth import OAuthClient
-from brightcove_async.settings import BrightcoveBaseAPIConfig, BrightcoveOAuthCreds
+from brightcove_async.settings import (
+    BrightcoveBaseAPIConfig,
+    BrightcoveClientConfig,
+    BrightcoveOAuthCreds,
+)
+
+
+def _patch_creds():
+    """Return a patch context for BrightcoveOAuthCreds with dummy credentials."""
+    patcher = patch("brightcove_async.initialise.BrightcoveOAuthCreds")
+    mock_cls = patcher.start()
+    mock_creds = MagicMock()
+    mock_creds.client_id = "test_id"
+    mock_creds.client_secret = MagicMock()
+    mock_creds.client_secret.get_secret_value.return_value = "test_secret"
+    mock_cls.return_value = mock_creds
+    return patcher
 
 
 def test_initialise_brightcove_client_with_defaults():
@@ -118,3 +134,63 @@ def test_initialise_brightcove_client_builds_service_registry():
         mock_registry.assert_called_once_with(mock_config)
         assert "cms" in client._service_classes
         assert client._service_classes["cms"] is mock_service_config
+
+
+def test_initialise_passes_user_agent_and_default_headers():
+    """Explicit user_agent/default_headers are forwarded to the client."""
+    patcher = _patch_creds()
+    try:
+        with patch(
+            "brightcove_async.initialise.build_service_registry"
+        ) as mock_registry:
+            mock_registry.return_value = {}
+
+            client = initialise_brightcove_client(
+                user_agent="my-app/2.0",
+                default_headers={"X-Edge": "pass"},
+            )
+
+            assert client._user_agent == "my-app/2.0"
+            assert client._default_headers == {"X-Edge": "pass"}
+    finally:
+        patcher.stop()
+
+
+def test_initialise_user_agent_param_overrides_http_config():
+    """The user_agent argument takes precedence over http_config.user_agent."""
+    patcher = _patch_creds()
+    try:
+        with patch(
+            "brightcove_async.initialise.build_service_registry"
+        ) as mock_registry:
+            mock_registry.return_value = {}
+
+            client = initialise_brightcove_client(
+                http_config=BrightcoveClientConfig(
+                    user_agent="from-config/1.0", connection_limit=25
+                ),
+                user_agent="explicit/3.0",
+            )
+
+            assert client._user_agent == "explicit/3.0"
+            assert client._connection_limit == 25
+    finally:
+        patcher.stop()
+
+
+def test_initialise_falls_back_to_http_config_user_agent():
+    """When no user_agent argument is given, http_config.user_agent is used."""
+    patcher = _patch_creds()
+    try:
+        with patch(
+            "brightcove_async.initialise.build_service_registry"
+        ) as mock_registry:
+            mock_registry.return_value = {}
+
+            client = initialise_brightcove_client(
+                http_config=BrightcoveClientConfig(user_agent="from-config/1.0"),
+            )
+
+            assert client._user_agent == "from-config/1.0"
+    finally:
+        patcher.stop()
