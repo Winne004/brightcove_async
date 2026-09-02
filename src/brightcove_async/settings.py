@@ -1,5 +1,5 @@
 from pydantic import SecretStr
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class BrightcoveOAuthCreds(BaseSettings):
@@ -7,6 +7,26 @@ class BrightcoveOAuthCreds(BaseSettings):
 
     client_secret: SecretStr
     client_id: str
+
+
+class BrightcoveClientConfig(BaseSettings):
+    """HTTP transport configuration for the client.
+
+    These knobs exist mainly to work around Akamai's edge suite, which fronts
+    the Brightcove APIs and blocks requests it treats as bot traffic (returning
+    an ``errors.edgesuite.net`` page). Overriding the ``User-Agent`` and/or
+    sending extra default headers is the usual fix.
+
+    Values can be supplied programmatically or via ``BRIGHTCOVE_``-prefixed
+    environment variables, e.g. ``BRIGHTCOVE_USER_AGENT``.
+    """
+
+    model_config = SettingsConfigDict(env_prefix="BRIGHTCOVE_")
+
+    # None => fall back to the built-in "brightcove_async/<version>" UA.
+    user_agent: str | None = None
+    # Max simultaneous connections for the underlying aiohttp connector.
+    connection_limit: int = 100
 
 
 class BrightcoveBaseAPIConfig(BaseSettings):

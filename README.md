@@ -69,6 +69,48 @@ async with client as bc:
         print(v.name)
 ```
 
+### Customising the User-Agent and headers (Akamai edge blocks)
+
+The Brightcove APIs are fronted by Akamai's edge suite, which can block requests
+it treats as bot traffic and return an `errors.edgesuite.net` page instead of the
+API response. By default the client sends a `brightcove_async/<version>`
+User-Agent to avoid this, but some accounts or edge configurations require a
+different User-Agent or additional headers.
+
+Override the User-Agent and/or add default headers (sent on every request) when
+initialising the client:
+
+```python
+import brightcove_async
+
+client = brightcove_async.initialise_brightcove_client(
+    user_agent="MyCompanyApp/1.2 (+https://example.com)",
+    default_headers={"X-Custom-Header": "value"},
+)
+```
+
+You can also configure the User-Agent (and the connection pool limit) through
+`BRIGHTCOVE_`-prefixed environment variables, or a `BrightcoveClientConfig`:
+
+```bash
+export BRIGHTCOVE_USER_AGENT="MyCompanyApp/1.2"
+export BRIGHTCOVE_CONNECTION_LIMIT="50"
+```
+
+```python
+from brightcove_async.settings import BrightcoveClientConfig
+
+client = brightcove_async.initialise_brightcove_client(
+    http_config=BrightcoveClientConfig(user_agent="MyCompanyApp/1.2"),
+)
+```
+
+The `user_agent` argument takes precedence over `http_config.user_agent`, which in
+turn overrides the built-in default. Entries in `default_headers` are merged last,
+so they can override any header (including the User-Agent). When you supply your
+own `aiohttp` session, these settings are ignored — that session's headers are
+yours to manage.
+
 ## Quick start
 
 Always use the client as an async context manager. The HTTP session and OAuth client are created on entry and cleaned up on exit.
