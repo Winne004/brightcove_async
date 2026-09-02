@@ -132,6 +132,9 @@ class BrightcoveClient:
         else:
             self._session = aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(limit=100),
+                # Akamai (fronting Brightcove APIs) blocks the default aiohttp
+                # User-Agent as bot traffic, returning an errors.edgesuite.net page.
+                headers={"User-Agent": "brightcove-async-python/0.12.0"},
             )
         return self
 
