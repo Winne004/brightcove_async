@@ -1,3 +1,4 @@
+from importlib.metadata import PackageNotFoundError, version
 from typing import Self, TypeVar, cast
 
 import aiohttp
@@ -18,6 +19,15 @@ from brightcove_async.services.syndication import Syndication
 
 T = TypeVar("T", bound=Base)
 
+try:
+    _CLIENT_VERSION = version("brightcove_async")
+except PackageNotFoundError:
+    _CLIENT_VERSION = "unknown"
+
+# Akamai (fronting Brightcove APIs) blocks the default aiohttp User-Agent as bot
+# traffic, returning an errors.edgesuite.net page.
+_USER_AGENT = f"brightcove_async/{_CLIENT_VERSION}"
+
 
 class BrightcoveClient:
     def __init__(
@@ -36,6 +46,7 @@ class BrightcoveClient:
         self._client_id = client_id
         self._client_secret = client_secret
         self._services: dict[str, Base] = {}
+        self._entry_count = 0
 
     @property
     def oauth(self) -> OAuthClientProtocol:
@@ -127,27 +138,34 @@ class BrightcoveClient:
         return self._get_service("policy", Policy)
 
     async def __aenter__(self) -> Self:
+        # Nested or concurrent entries share the open session; the outermost
+        # exit is the one that tears it down.
+        if self._entry_count > 0:
+            self._entry_count += 1
+            return self
+
         if self._external_session is not None:
             self._session = self._external_session
+            # Keep any User-Agent the caller configured on their own session.
+            self._session.headers.setdefault("User-Agent", _USER_AGENT)
         else:
-            from importlib.metadata import PackageNotFoundError, version
-
-            try:
-                client_version = version("brightcove_async")
-            except PackageNotFoundError:
-                client_version = "unknown"
-
             self._session = aiohttp.ClientSession(
                 connector=aiohttp.TCPConnector(limit=100),
-                # Akamai (fronting Brightcove APIs) blocks the default aiohttp
-                # User-Agent as bot traffic, returning an errors.edgesuite.net page.
-                headers={"User-Agent": f"brightcove_async/{client_version}"},
+                headers={"User-Agent": _USER_AGENT},
             )
+        self._entry_count = 1
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
-        if self._session is not None and self._external_session is None:
-            await self._session.close()
+        self._entry_count = max(self._entry_count - 1, 0)
+        if self._entry_count > 0:
+            return
+
+        # Detach before awaiting close so an entry made during the close starts
+        # clean and its new session isn't cleared when the close finishes.
+        session = self._session
         self._session = None
         self._services.clear()
         self._oauth = None
+        if session is not None and self._external_session is None:
+            await session.close()
