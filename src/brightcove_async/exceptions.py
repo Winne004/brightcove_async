@@ -91,7 +91,25 @@ class BrightcoveTooManyRequestsError(BrightcoveClientError):
 
 
 class BrightcoveConnectionError(BrightcoveError):
-    """Raised when a connection to the Brightcove API cannot be established."""
+    """Raised when a connection to the Brightcove API fails or times out.
+
+    ``retryable`` is ``False`` when a non-idempotent request (``POST``/``PATCH``)
+    may already have reached the server. The request was not resent, and its
+    outcome is unknown, so check the resource's state before trying again.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        status_code: int | None = None,
+        endpoint: str | None = None,
+        details: dict | None = None,
+        retryable: bool = True,
+    ):
+        super().__init__(
+            message=message, status_code=status_code, endpoint=endpoint, details=details
+        )
+        self.retryable = retryable
 
 
 class BrightcoveServerError(BrightcoveError):

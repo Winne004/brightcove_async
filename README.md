@@ -8,7 +8,7 @@
 - OAuth2 client-credentials auth with automatic token caching and refresh.
 - Pydantic models for request bodies, query parameters, and responses, giving you validation and editor autocompletion.
 - Per-service rate limiting via `aiolimiter`.
-- Automatic retries for transient failures (connection drops, `401`, `429`) with `tenacity`, including `Retry-After` support on rate-limited responses.
+- Automatic retries for transient failures (`401`, `429`, and connection drops on requests that are safe to resend) with `tenacity`, including `Retry-After` support on rate-limited responses.
 - Brightcove HTTP errors mapped to a typed exception hierarchy.
 - Coverage for the CMS, Analytics, Audience, Syndication, Dynamic Ingest, Ingest Profiles, Image, Live, Playback, and Policy APIs.
 
@@ -304,7 +304,20 @@ Status codes map to exceptions as follows:
 | 429 | `BrightcoveTooManyRequestsError` |
 | 5xx / unknown | `BrightcoveUnknownError` |
 
-Connection failures raise `BrightcoveConnectionError`. Transient errors (`BrightcoveConnectionError`, `BrightcoveAuthError`, `BrightcoveTooManyRequestsError`) are retried automatically before propagating.
+Connection failures and timeouts raise `BrightcoveConnectionError`. Transient errors (`BrightcoveConnectionError`, `BrightcoveAuthError`, `BrightcoveTooManyRequestsError`) are retried once automatically, then the original exception propagates.
+
+Connection failures are only retried when resending is safe: on `GET`, `HEAD`, `OPTIONS`, `PUT` and `DELETE` requests, or when no connection was made. A dropped `POST` or `PATCH` may already have been processed, so it isn't resent and `exc.retryable` is `False`. Check the resource's state before trying it again.
+
+## Request payloads
+
+Request bodies contain exactly the fields you set on the model. Fields you leave unset are omitted, a value equal to the model's default is still sent, and an explicit `None` is sent as `null`:
+
+```python
+UpdateVideoRequestBodyFields(name="New name")                  # {"name": "New name"}
+UpdateVideoRequestBodyFields(name="New name", description=None)  # also sends "description": null
+```
+
+Avoid passing `None` as a placeholder for "no change". Build the model with only the fields you want to send.
 
 ## Rate limiting
 

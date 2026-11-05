@@ -9,6 +9,12 @@ from brightcove_async.exceptions import (
     BrightcoveBadValueError,
     BrightcoveConnectionError,
     BrightcoveResourceNotFoundError,
+    BrightcoveTooManyRequestsError,
+)
+from brightcove_async.schemas.cms_model import (
+    CustomFieldUpdate,
+    PlaylistInputFields,
+    UpdateVideoRequestBodyFields,
 )
 from brightcove_async.services.base import Base
 
@@ -399,8 +405,6 @@ async def test_fetch_data_handles_401_error(base_service, mock_session):
     """Test that 401 errors are mapped to correct exception and retried."""
     from unittest.mock import MagicMock
 
-    from tenacity import RetryError
-
     error = aiohttp.ClientResponseError(
         request_info=AsyncMock(),
         history=(),
@@ -412,7 +416,7 @@ async def test_fetch_data_handles_401_error(base_service, mock_session):
     mock_response.raise_for_status = MagicMock(side_effect=error)
     mock_session.request.return_value.__aenter__.return_value = mock_response
 
-    with pytest.raises(RetryError):
+    with pytest.raises(BrightcoveAuthError):
         await base_service.fetch_data(
             endpoint="https://api.example.com/v1/items",
             model=DummyModel,
@@ -426,8 +430,6 @@ async def test_oauth_request_invalidates_token_on_auth_error(
     base_service, mock_session, dummy_oauth
 ):
     """An OAuth-authenticated request invalidates the token on a 401."""
-    from tenacity import RetryError
-
     dummy_oauth.invalidate_token = MagicMock()
     error = aiohttp.ClientResponseError(
         request_info=AsyncMock(), history=(), status=401
@@ -436,7 +438,7 @@ async def test_oauth_request_invalidates_token_on_auth_error(
     mock_response.raise_for_status = MagicMock(side_effect=error)
     mock_session.request.return_value.__aenter__.return_value = mock_response
 
-    with pytest.raises(RetryError):
+    with pytest.raises(BrightcoveAuthError):
         await base_service.fetch_data(
             endpoint="https://api.example.com/v1/items",
             model=DummyModel,
@@ -454,8 +456,6 @@ async def test_non_oauth_request_does_not_invalidate_token_on_auth_error(
     Playback policy-key auth bypasses OAuth, so a 401 there must not invalidate
     the shared OAuth token the request never used.
     """
-    from tenacity import RetryError
-
     dummy_oauth.invalidate_token = MagicMock()
     error = aiohttp.ClientResponseError(
         request_info=AsyncMock(), history=(), status=401
@@ -464,7 +464,7 @@ async def test_non_oauth_request_does_not_invalidate_token_on_auth_error(
     mock_response.raise_for_status = MagicMock(side_effect=error)
     mock_session.request.return_value.__aenter__.return_value = mock_response
 
-    with pytest.raises(RetryError):
+    with pytest.raises(BrightcoveAuthError):
         await base_service.fetch_data(
             endpoint="https://api.example.com/v1/items",
             model=DummyModel,
@@ -479,8 +479,6 @@ async def test_get_bytes_does_not_invalidate_token_on_auth_error(
     base_service, mock_session, dummy_oauth
 ):
     """_get_bytes never uses OAuth, so an auth error must not invalidate the token."""
-    from tenacity import RetryError
-
     dummy_oauth.invalidate_token = MagicMock()
     error = aiohttp.ClientResponseError(
         request_info=AsyncMock(), history=(), status=401
@@ -489,7 +487,7 @@ async def test_get_bytes_does_not_invalidate_token_on_auth_error(
     mock_response.raise_for_status = MagicMock(side_effect=error)
     mock_session.request.return_value.__aenter__.return_value = mock_response
 
-    with pytest.raises(RetryError):
+    with pytest.raises(BrightcoveAuthError):
         await base_service._get_bytes(
             "https://api.example.com/v1/file",
             headers={"BCOV-Policy": "policy-key"},
@@ -505,17 +503,11 @@ async def test_fetch_data_translates_connection_error(base_service, mock_session
         aiohttp.ClientConnectionError("Connection failed")
     )
 
-    from tenacity import RetryError
-
-    with pytest.raises(RetryError) as exc_info:
+    with pytest.raises(BrightcoveConnectionError):
         await base_service.fetch_data(
             endpoint="https://api.example.com/v1/items",
             model=DummyModel,
         )
-
-    assert isinstance(
-        exc_info.value.last_attempt.exception(), BrightcoveConnectionError
-    )
 
 
 @pytest.mark.asyncio
@@ -523,17 +515,13 @@ async def test_fetch_data_translates_timeout_error(base_service, mock_session):
     """Test that a request timeout is translated to BrightcoveConnectionError."""
     mock_session.request.return_value.__aenter__.side_effect = TimeoutError()
 
-    from tenacity import RetryError
-
-    with pytest.raises(RetryError) as exc_info:
+    with pytest.raises(BrightcoveConnectionError) as exc_info:
         await base_service.fetch_data(
             endpoint="https://api.example.com/v1/items",
             model=DummyModel,
         )
 
-    exc = exc_info.value.last_attempt.exception()
-    assert isinstance(exc, BrightcoveConnectionError)
-    assert exc.message == "Request timed out"
+    assert exc_info.value.message == "Request timed out"
 
 
 @pytest.mark.asyncio
@@ -543,17 +531,13 @@ async def test_fetch_data_bare_connection_error_message(base_service, mock_sessi
         aiohttp.ClientConnectionError()
     )
 
-    from tenacity import RetryError
-
-    with pytest.raises(RetryError) as exc_info:
+    with pytest.raises(BrightcoveConnectionError) as exc_info:
         await base_service.fetch_data(
             endpoint="https://api.example.com/v1/items",
             model=DummyModel,
         )
 
-    exc = exc_info.value.last_attempt.exception()
-    assert isinstance(exc, BrightcoveConnectionError)
-    assert exc.message == "Connection error"
+    assert exc_info.value.message == "Connection error"
 
 
 @pytest.mark.asyncio
@@ -627,6 +611,194 @@ async def test_fetch_data_excludes_none_values_from_json(base_service, mock_sess
     # Should only include id and name, not optional_field
     assert "optional_field" not in call_kwargs["json"]
     assert call_kwargs["json"] == {"id": 8, "name": "Test"}
+
+
+def _ok_response() -> AsyncMock:
+    mock_response = AsyncMock()
+    mock_response.json = AsyncMock(return_value={"id": 1, "name": "ok"})
+    mock_response.raise_for_status = MagicMock()
+    return mock_response
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("payload", "expected"),
+    [
+        (CustomFieldUpdate(required=False), {"required": False}),
+        (PlaylistInputFields(favorite=False), {"favorite": False}),
+    ],
+)
+async def test_fetch_data_sends_explicit_value_equal_to_default(
+    base_service, mock_session, payload, expected
+):
+    """Setting a field to its model default is a real change and must be sent."""
+    mock_session.request.return_value.__aenter__.return_value = _ok_response()
+
+    await base_service.fetch_data(
+        endpoint="https://api.example.com/v1/items",
+        model=DummyModel,
+        method="PATCH",
+        payload=payload,
+    )
+
+    assert mock_session.request.call_args.kwargs["json"] == expected
+
+
+@pytest.mark.asyncio
+async def test_fetch_data_sends_explicit_none_as_null(base_service, mock_session):
+    """An explicit None is sent as null so a PATCH can clear a field."""
+    mock_session.request.return_value.__aenter__.return_value = _ok_response()
+
+    await base_service.fetch_data(
+        endpoint="https://api.example.com/v1/items",
+        model=DummyModel,
+        method="PATCH",
+        payload=UpdateVideoRequestBodyFields(name="x", description=None),
+    )
+
+    assert mock_session.request.call_args.kwargs["json"] == {
+        "name": "x",
+        "description": None,
+    }
+
+
+@pytest.mark.asyncio
+async def test_exhausted_429_raises_typed_error_with_retry_after(
+    base_service, mock_session
+):
+    """After retries run out the caller gets the 429 error, not a tenacity wrapper."""
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=429
+    )
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock(side_effect=error)
+    mock_response.text = AsyncMock(return_value="rate limited")
+    mock_response.headers = {"Retry-After": "0.01"}
+    mock_session.request.return_value.__aenter__.return_value = mock_response
+
+    with pytest.raises(BrightcoveTooManyRequestsError) as exc_info:
+        await base_service.fetch_data(
+            endpoint="https://api.example.com/v1/items",
+            model=DummyModel,
+        )
+
+    assert exc_info.value.retry_after == 0.01
+    assert mock_session.request.call_count == 2
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["POST", "PATCH", "post"])
+@pytest.mark.parametrize(
+    "error",
+    [aiohttp.ServerDisconnectedError(), TimeoutError()],
+    ids=["disconnected", "timeout"],
+)
+async def test_non_idempotent_request_not_resent_when_outcome_unknown(
+    base_service, mock_session, method, error
+):
+    """A POST or PATCH that may have reached the server must not be sent twice."""
+    mock_session.request.return_value.__aenter__.side_effect = error
+
+    with pytest.raises(BrightcoveConnectionError) as exc_info:
+        await base_service.fetch_data(
+            endpoint="https://api.example.com/v1/items",
+            model=DummyModel,
+            method=method,
+        )
+
+    assert exc_info.value.retryable is False
+    assert mock_session.request.call_count == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["GET", "HEAD", "OPTIONS", "PUT", "DELETE"])
+async def test_idempotent_request_resent_after_connection_error(
+    base_service, mock_session, method
+):
+    """Idempotent methods are safe to resend after a dropped connection."""
+    mock_session.request.return_value.__aenter__.side_effect = [
+        aiohttp.ServerDisconnectedError(),
+        _ok_response(),
+    ]
+
+    await base_service.fetch_data(
+        endpoint="https://api.example.com/v1/items",
+        model=DummyModel,
+        method=method,
+    )
+
+    assert mock_session.request.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_post_resent_when_connection_was_never_made(base_service, mock_session):
+    """A failure to connect means the POST was never sent, so resending is safe."""
+    mock_session.request.return_value.__aenter__.side_effect = [
+        aiohttp.ClientConnectorError(MagicMock(), OSError(61, "Connection refused")),
+        _ok_response(),
+    ]
+
+    await base_service.fetch_data(
+        endpoint="https://api.example.com/v1/items",
+        model=DummyModel,
+        method="POST",
+    )
+
+    assert mock_session.request.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_post_resent_after_401(base_service, mock_session):
+    """A 401 means the server rejected the POST, so resending is safe."""
+    error = aiohttp.ClientResponseError(
+        request_info=AsyncMock(), history=(), status=401
+    )
+    rejected = AsyncMock()
+    rejected.raise_for_status = MagicMock(side_effect=error)
+    mock_session.request.return_value.__aenter__.side_effect = [
+        rejected,
+        _ok_response(),
+    ]
+
+    await base_service.fetch_data(
+        endpoint="https://api.example.com/v1/items",
+        model=DummyModel,
+        method="POST",
+    )
+
+    assert mock_session.request.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_post_retried_when_oauth_connection_fails(mock_session):
+    """An OAuth connection failure happens before the POST is sent, so retry it."""
+
+    class FlakyOAuth(DummyOAuth):
+        attempts = 0
+
+        @property
+        async def headers(self):
+            self.attempts += 1
+            if self.attempts == 1:
+                raise aiohttp.ClientConnectionError("OAuth unreachable")
+            return {"Authorization": "Bearer test_token"}
+
+    oauth = FlakyOAuth()
+    service = DummyService(
+        session=mock_session,
+        oauth=oauth,
+        base_url="https://api.example.com/v1",
+    )
+    mock_session.request.return_value.__aenter__.return_value = _ok_response()
+
+    await service.fetch_data(
+        endpoint="https://api.example.com/v1/items",
+        model=DummyModel,
+        method="POST",
+    )
+
+    assert oauth.attempts == 2
+    assert mock_session.request.call_count == 1
 
 
 @pytest.mark.asyncio
