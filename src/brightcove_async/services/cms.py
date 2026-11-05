@@ -684,10 +684,7 @@ class CMS(Base):
         share_data: list[ShareVideoRequest],
     ) -> VideoShareList:
         headers = await self._get_oauth_headers()
-        body = [
-            item.model_dump(mode="json", exclude_none=True, exclude_unset=True)
-            for item in share_data
-        ]
+        body = [item.model_dump(mode="json", exclude_unset=True) for item in share_data]
         json_data = await self._send_request(
             "POST",
             f"{self.base_url}{account_id}/videos/{video_id}/shares",

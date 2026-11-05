@@ -8,7 +8,7 @@ from aiolimiter import AsyncLimiter
 from pydantic import BaseModel
 from tenacity import (
     retry,
-    retry_if_exception_type,
+    retry_if_exception,
     stop_after_attempt,
     wait_exponential,
 )
@@ -35,6 +35,21 @@ _OAUTH_FETCH_ERRORS = (
     ValueError,
 )
 
+# Methods that are safe to resend when the outcome of a request is unknown.
+_IDEMPOTENT_METHODS = frozenset({"GET", "HEAD", "OPTIONS", "PUT", "DELETE"})
+
+
+def _is_retryable(exc: BaseException) -> bool:
+    """Decide whether a failed attempt may be sent again.
+
+    401 and 429 responses mean the server rejected the request, so resending is
+    safe for any method. Connection failures depend on whether the request may
+    already have been processed, which ``BrightcoveConnectionError`` records.
+    """
+    if isinstance(exc, BrightcoveConnectionError):
+        return exc.retryable
+    return isinstance(exc, BrightcoveAuthError | BrightcoveTooManyRequestsError)
+
 
 def _compute_wait(retry_state) -> float:
     """Use Retry-After from 429 responses; fall back to exponential backoff."""
@@ -45,15 +60,10 @@ def _compute_wait(retry_state) -> float:
 
 
 brightcove_retry = retry(
-    retry=retry_if_exception_type(
-        (
-            BrightcoveConnectionError,
-            BrightcoveAuthError,
-            BrightcoveTooManyRequestsError,
-        ),
-    ),
+    retry=retry_if_exception(_is_retryable),
     wait=_compute_wait,
     stop=stop_after_attempt(2),
+    reraise=True,
 )
 
 
@@ -244,8 +254,13 @@ class Base(ABC):
                     if isinstance(e, TimeoutError)
                     else "Connection error"
                 )
+            # ClientConnectorError means no connection was made, so the request
+            # was never sent. Any other failure may have reached the server.
+            retryable = method.upper() in _IDEMPOTENT_METHODS or isinstance(
+                e, aiohttp.ClientConnectorError
+            )
             raise BrightcoveConnectionError(
-                message=message, endpoint=safe_endpoint
+                message=message, endpoint=safe_endpoint, retryable=retryable
             ) from e
 
     @brightcove_retry
@@ -262,14 +277,10 @@ class Base(ABC):
         if headers is None:
             headers = await self._get_oauth_headers()
 
+        # Send exactly the fields the caller set: a value equal to the model's
+        # default is still a real change, and an explicit None sends null.
         body = (
-            payload.model_dump(
-                mode="json",
-                by_alias=True,
-                exclude_none=True,
-                exclude_unset=True,
-                exclude_defaults=True,
-            )
+            payload.model_dump(mode="json", by_alias=True, exclude_unset=True)
             if payload
             else None
         )
