@@ -1,9 +1,10 @@
+import asyncio
 from unittest.mock import AsyncMock, create_autospec, patch
 
 import aiohttp
 import pytest
 
-from brightcove_async.client import BrightcoveClient
+from brightcove_async.client import _USER_AGENT, BrightcoveClient
 
 
 class DummyOAuth:
@@ -46,6 +47,138 @@ async def test_context_manager_initializes_and_closes_session():
 
         mock_session.close.assert_awaited_once()
         assert client._session is None
+
+
+def _client(session: aiohttp.ClientSession | None = None) -> BrightcoveClient:
+    return BrightcoveClient(
+        services_registry={},
+        client_id="id",
+        client_secret="secret",
+        oauth_cls=DummyOAuth,
+        session=session,
+    )
+
+
+@pytest.mark.asyncio
+async def test_owned_session_sets_user_agent():
+    async with _client() as c:
+        assert c._session is not None
+        assert c._session.headers["User-Agent"] == _USER_AGENT
+
+
+@pytest.mark.asyncio
+async def test_external_session_gets_default_user_agent():
+    async with aiohttp.ClientSession() as session:
+        async with _client(session):
+            assert session.headers["User-Agent"] == _USER_AGENT
+
+
+@pytest.mark.asyncio
+async def test_external_session_keeps_configured_user_agent():
+    async with aiohttp.ClientSession(headers={"User-Agent": "custom/1.0"}) as session:
+        async with _client(session):
+            assert session.headers["User-Agent"] == "custom/1.0"
+
+
+@pytest.mark.asyncio
+async def test_nested_entry_reuses_owned_session_until_outermost_exit():
+    client = _client()
+
+    async with client as outer:
+        session = outer._session
+        assert session is not None
+
+        async with client as inner:
+            assert inner._session is session
+
+        # The inner exit must leave the session usable for the outer block.
+        assert client._session is session
+        assert not session.closed
+
+    assert session.closed
+    assert client._session is None
+
+
+@pytest.mark.asyncio
+async def test_concurrent_entries_share_session_until_last_exit():
+    client = _client()
+    first_exited = asyncio.Event()
+    sessions: list[aiohttp.ClientSession | None] = []
+
+    async def exits_first() -> None:
+        async with client as c:
+            sessions.append(c._session)
+        first_exited.set()
+
+    async def exits_last() -> None:
+        async with client as c:
+            sessions.append(c._session)
+            await first_exited.wait()
+            assert c._session is sessions[0]
+            assert c._session is not None
+            assert not c._session.closed
+
+    await asyncio.gather(exits_last(), exits_first())
+
+    assert sessions[0] is sessions[1]
+    assert sessions[0] is not None
+    assert sessions[0].closed
+    assert client._session is None
+
+
+@pytest.mark.asyncio
+async def test_entry_during_close_keeps_its_new_session():
+    closing = asyncio.Event()
+    finish_close = asyncio.Event()
+
+    async def slow_close() -> None:
+        closing.set()
+        await finish_close.wait()
+
+    closing_session = create_autospec(aiohttp.ClientSession, instance=True)
+    closing_session.close = AsyncMock(side_effect=slow_close)
+    new_session = create_autospec(aiohttp.ClientSession, instance=True)
+    new_session.close = AsyncMock()
+
+    with patch("aiohttp.ClientSession", side_effect=[closing_session, new_session]):
+        client = _client()
+        await client.__aenter__()
+        exiting = asyncio.create_task(client.__aexit__(None, None, None))
+        await closing.wait()
+
+        async with client as c:
+            assert c._session is new_session
+            finish_close.set()
+            await exiting
+            assert c._session is new_session
+
+
+@pytest.mark.asyncio
+async def test_client_can_be_reentered_after_full_exit():
+    client = _client()
+
+    async with client as c:
+        first = c._session
+
+    async with client as c:
+        second = c._session
+        assert second is not first
+        assert second is not None
+        assert not second.closed
+
+
+@pytest.mark.asyncio
+async def test_nested_entry_leaves_external_session_open():
+    async with aiohttp.ClientSession() as session:
+        client = _client(session)
+
+        async with client:
+            async with client as inner:
+                assert inner._session is session
+            assert client._session is session
+
+        assert client._session is None
+        assert not session.closed
 
 
 @pytest.mark.asyncio

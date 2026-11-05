@@ -248,7 +248,7 @@ async with client as bc:
 
 ### Bringing your own session
 
-By default the client opens and closes its own `aiohttp.ClientSession`. To share a session you manage elsewhere, pass it to `BrightcoveClient` directly; in that case the client leaves the session open when the context manager exits.
+By default the client opens and closes its own `aiohttp.ClientSession`. To share a session you manage elsewhere, pass it to `BrightcoveClient` directly; in that case the client leaves the session open when the context manager exits. If your session has no `User-Agent` default, the client sets `brightcove_async/<version>` on it, because Akamai blocks aiohttp's default; this also applies to anything else sent through that session. A `User-Agent` you configured is left as is.
 
 ```python
 import aiohttp
